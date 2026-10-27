@@ -1336,19 +1336,24 @@ button {
   0%, 100% { transform: translateX(0); }
   50% { transform: translateX(var(--nudge)); }
 }
-  50% { transform: translateX(3px); }
-}
 
 .modem-note {
   width: 327px;
-  margin-top: 20px;
-  padding: 14px 18px;
+  margin-top: 22px;
+  padding: 13px 16px;
+  border: 1.5px solid rgba(0, 108, 225, .45);
   border-radius: 14px;
-  background: #eef5fd;
+  background: rgba(0, 108, 225, .08);
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-size: 16px;
   font-weight: 500;
+  line-height: 21px;
   color: var(--brand);
 }
+
+.modem-note svg { flex-shrink: 0; }
 
 /* ── 1_034 / 1_037 未偵測到 WAN：等待數據機（倒數，DEMO 加速） ── */
 .guide-illust.wait-illust { align-items: flex-start; }

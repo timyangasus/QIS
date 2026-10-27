@@ -607,7 +607,7 @@
           </div>
           <h2 class="guide-title">Unplug the modem’s power.</h2>
           <p class="guide-desc">Wait until all lights are off.</p>
-          <p class="modem-note">Do not press the Reset button.</p>
+          <p class="modem-note"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="currentColor"/><rect x="11" y="10" width="2" height="7" rx="1" fill="#fff"/><circle cx="12" cy="7" r="1.3" fill="#fff"/></svg>Do not press the Reset button.</p>
           <button class="btn-brand" data-go="${MODEM_FLOW === 'wan' ? 'modem-wait-off' : 'modem-plug'}" data-label="All modem lights are off">All modem lights are off</button>
         </div>
       `,

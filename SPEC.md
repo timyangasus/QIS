@@ -178,7 +178,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 - 來源：使用者提供的參考圖（不是 Figma）。文字和內容照參考圖，版型沿用 1_080–1_110 Setup Guide。
 - 導覽列同 Setup Guide：‹ 返回、標題「Setup Guide」、右邊 ? 說明（→ `help`，待提供）。
 - 插圖用 SVG 直接畫（`modemIllust()`，沒有圖檔），動畫用 SVG SMIL，讓電線形狀可以跟著插頭變：黑色數據機（POWER / DS / US / ONLINE 四顆燈）、淺藍光暈、灰色電源線、牆上插座。
-- **1_033**：上方小字 Unplug the power cable only；動畫只播一次：插頭疊在插座上，看起來是插著的（燈全綠）→ 出現往左的粗箭頭（實心藍色）並往左推 3 下，提示要往左拔 → 插頭往左拔出約 90 pt（電線跟著動），箭頭消失 → 出現藍色閃動線，四顆燈連同綠色光暈快速依序熄滅變灰（每顆 0.2 秒），停在拔掉的畫面；下方標籤 ALL LIGHTS OFF / POWER PLUG。標題 Unplug the modem’s power.，說明 Wait until all lights are off.，淺藍提示框 Do not press the Reset button.，按鈕 All modem lights are off → 1_036（WAN 流程 → 1_034）。
+- **1_033**：上方小字 Unplug the power cable only；動畫只播一次：插頭疊在插座上，看起來是插著的（燈全綠）→ 出現往左的粗箭頭（實心藍色）並往左推 3 下，提示要往左拔 → 插頭往左拔出約 90 pt（電線跟著動），箭頭消失 → 出現藍色閃動線，四顆燈連同綠色光暈快速依序熄滅變灰（每顆 0.2 秒），停在拔掉的畫面；下方標籤 ALL LIGHTS OFF / POWER PLUG。標題 Unplug the modem’s power.，說明 Wait until all lights are off.，藍色提示框 Do not press the Reset button.（藍色外框 rgba(0,108,225,.45)＋半透明藍底 rgba(0,108,225,.08)，左邊實心藍色 ⓘ 圖示，文字 `--brand`），按鈕 All modem lights are off → 1_036（WAN 流程 → 1_034）。
 - **1_036**：上方小字 Reconnect the power cable；動畫只播一次：插頭在插座外（燈全灰）→ 出現往右的粗箭頭（實心藍色）並往右推 3 下，提示要往右插 → 插頭推進插座並疊在插座上（電線跟著動），箭頭消失 → 四顆燈快速依序亮綠燈並出現綠色光暈（每顆 0.2 秒），停在插好的畫面；下方標籤 CABLE MODEM / POWER（參考圖的 ONLINE 是灰的，依需求改成四顆全亮）。標題 Plug the modem back in.，按鈕 Modem is plugged in → `led-check` 1_040（WAN 流程 → 1_037）。
 - **兩條流程共用這兩頁**（`MODEM_FLOW`）：進到 1_030 時是「設定」流程（1_030 → 1_033 → 1_036 → 1_040）；進到 1_120 時是「WAN」流程（見 5.3b）。按鈕去向和沒有瀏覽紀錄時的返回目標會跟著流程變。
 
