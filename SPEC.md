@@ -184,13 +184,18 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 ### 5.3b 未偵測到 WAN：`1_034` / `1_037` 等待數據機 `modem-wait-off` / `modem-wait-start`
 - 來源：使用者提供的參考圖。版型沿用 Setup Guide（導覽列 ‹ 返回、Setup Guide、?）。
-- 流程：1_120 Get Started → DEMO 判斷 WAN 選 **No** → 1_033 拔電 → **1_034 等 3 分鐘** → 1_036 插回 → **1_037 等 3½ 分鐘** → 1_130 重新偵測 WAN → 1_140。
+- 流程：1_120 Get Started → DEMO 判斷 WAN 選 **No** → 1_033 拔電 → **1_034 等 3 分鐘** → 1_036 插回 → **1_037 等 3½ 分鐘** → **1_038 設定節點** → **1_039 重新嘗試**（DEMO 判斷「重試 WAN」：Yes → 1_130 偵測 WAN → 1_140；No → 回到 1_033 拔電重來）。
 - 插圖區放一張淺灰圓角卡片：上方藍色小字（WAIT 3 MINUTES / WAIT AT LEAST 3½ MINUTES）、68 pt 藍色粗體倒數（3:00 / 3:30）、藍色進度條、灰色提示（Continue unlocks when the timer ends. / Blinking lights? Keep waiting.）、小數據機圖。
   - 1_034：燈全滅、插頭拔在旁邊，標籤 POWER OFF。
   - 1_037：電源線插著，燈號綠色閃爍，標籤 STARTING UP / LIGHTS MAY BLINK。
 - 標題 Keep the modem unplugged. / Wait for the modem to start.
 - **Continue 一開始是灰色不能按，倒數到 0:00 才亮起**（倒數數字和進度條同時變綠）。
 - **DEMO 加速**：畫面上照真實時間從 3:00／3:30 倒數，但實際只跑約 5 秒／5.5 秒，讓展示時馬上知道「要等待」。正式 App 改成真實時間。
+
+### 5.3c `1_038` 設定節點 `node-setup` / `1_039` 重新嘗試 `wan-retry`
+- Figma node：`1726:309`、`1726:310`（原稿是截圖）。文字照 Figma（中文），版型沿用 Setup Guide。
+- **1_038**：導覽列 ‹ 返回 + 「設定指南」；裝置圖（`zenwifi-device.png`，166 × 202，置中加柔和陰影）；標題「設定節點」（`--brand`，下方分隔線）；兩點說明（17 pt 灰色）：在同一房室且至少相距 1 公尺、確認所有裝置正常上電；「參考 LED 說明」連結（→ `led-not-match`，待提供）；「下一步」→ 1_039。
+- **1_039**：導覽列 ‹ 返回 + 「系統設定」；裝置圖；「ZenWiFi BT8」（28 pt `--brand`）；「重新嘗試」按鈕 → 跳出 **DEMO 流程判斷：重試 WAN**；「進階設定」連結（→ `advanced-settings`，待提供）。
 
 ### 5.4 `1_040` 燈號顯示頁 `led-check`
 - Figma node：`1867:1962`
@@ -446,6 +451,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | # | 名稱 | 在哪一頁觸發 | 問題 | 選項 → 頁面 |
 |---|---|---|---|---|
 | 0 | `wan` | 1_120 按 Get Started | 是否偵測到 WAN（網路線已接上）？ | Yes → `wan-detecting` 1_130；No → `modem-unplug` 1_033（WAN 流程，見 5.3b） |
+| 1 | `wanRetry` | 1_039 按 重新嘗試 | 重新嘗試：這次有偵測到 WAN 嗎？ | Yes → `wan-detecting` 1_130；No → `modem-unplug` 1_033（拔電重來） |
 
 - 正式 App 會自動偵測，不會有這個面板；它只是讓展示時可以切換不同情況。
 
@@ -459,7 +465,9 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_033 | 拔掉數據機電源 `modem-unplug` | 重新啟動數據機（1/2）：只拔數據機的電源線，等所有燈都熄滅，不要按 Reset |
 | 1_034 | 等待 3 分鐘（拔電）`modem-wait-off` | 未偵測到 WAN：數據機保持拔電 3 分鐘，倒數結束 Continue 才能按（DEMO 加速） |
 | 1_036 | 插回數據機電源 `modem-plug` | 重新啟動數據機（2/2）：把電源線插回數據機，燈號重新亮起後再繼續 |
-| 1_037 | 等待數據機啟動 3½ 分鐘 `modem-wait-start` | 未偵測到 WAN：插回電源後等 3½ 分鐘，倒數結束 Continue 才能按（DEMO 加速），之後重新偵測 WAN |
+| 1_037 | 等待數據機啟動 3½ 分鐘 `modem-wait-start` | 未偵測到 WAN：插回電源後等 3½ 分鐘，倒數結束 Continue 才能按（DEMO 加速），之後接 1_038 |
+| 1_038 | 設定節點 `node-setup` | 未偵測到 WAN：數據機重啟後，提醒把路由器和節點放在同一房間、都接上電源 |
+| 1_039 | 重新嘗試偵測 WAN `wan-retry` | 再判斷一次 WAN：偵測到就繼續設定，偵測不到就回到拔電重來 |
 | 1_040 | 燈號顯示頁 `led-check` | 請使用者看路由器的燈，從呼吸綠燈變成恆亮藍燈才能開始設定 |
 | 1_050 | QR Code 找裝置 `qr-intro` | 說明路由器上的 QR Code 在哪裡，選擇用相機掃描或手動連 WiFi |
 | 1_060 | 啟用相機掃描 `qr-scan` | 把相機對準路由器上的 QR Code，掃到後系統詢問是否加入路由器的 Wi-Fi |

@@ -666,9 +666,63 @@
         totalSec: 210,
         hint: 'Blinking lights? Keep waiting.',
         mode: 'starting',
-        next: 'wan-detecting',
+        next: 'node-setup',
       }),
       mount: el => { MODEM_FLOW = 'wan'; return startCountdown(el, 210, 5500); },
+    },
+    {
+      id: 'node-setup',
+      back: 'modem-wait-start',
+      code: '1_038',
+      name: '設定節點',
+      description: '未偵測到 WAN：數據機重啟後，提醒把路由器和節點放在同一房間、都接上電源，節點會自動連到路由器',
+      figmaNode: '1726:309',
+      theme: 'light',
+      render: () => `
+        <header class="navbar navbar-guide">
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
+          <h1 class="navbar-title">設定指南</h1>
+        </header>
+
+        <div class="guide-body">
+          <div class="guide-illust node-illust">
+            <img class="node-device" src="assets/zenwifi-device.png" alt="ZenWiFi BT8" width="166" height="202">
+          </div>
+          <h2 class="guide-title">設定節點</h2>
+          <ol class="node-steps">
+            <li>在安裝過程中，請將您的 ZenWiFi BT8 路由器和節點放在同一房室且至少相距 1 公尺。</li>
+            <li>請確認所有裝置皆為正常上電狀態，並且待機可用於系統設定。您的節點將會自動連線到路由器。</li>
+          </ol>
+          <button class="guide-link" data-go="led-not-match" data-label="參考 LED 說明">參考 LED 說明</button>
+          <button class="btn-brand" data-go="wan-retry" data-label="下一步">下一步</button>
+        </div>
+      `,
+      mount: () => { MODEM_FLOW = 'wan'; },
+    },
+    {
+      id: 'wan-retry',
+      back: 'node-setup',
+      code: '1_039',
+      name: '重新嘗試偵測 WAN',
+      description: '仍未偵測到 WAN：按「重新嘗試」再判斷一次；偵測到就繼續設定，偵測不到就回到拔掉數據機電源重來',
+      figmaNode: '1726:310',
+      theme: 'light',
+      render: () => `
+        <header class="navbar navbar-guide">
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
+          <h1 class="navbar-title">系統設定</h1>
+        </header>
+
+        <div class="guide-body">
+          <div class="guide-illust node-illust">
+            <img class="node-device" src="assets/zenwifi-device.png" alt="ZenWiFi BT8" width="166" height="202">
+          </div>
+          <h2 class="guide-title guide-title-plain retry-model">ZenWiFi BT8</h2>
+          <button class="btn-brand retry-btn" data-decide="wanRetry">重新嘗試</button>
+          <button class="guide-link retry-advanced" data-go="advanced-settings">進階設定</button>
+        </div>
+      `,
+      mount: () => { MODEM_FLOW = 'wan'; },
     },
     {
       id: 'led-check',
@@ -1279,6 +1333,15 @@
       options: [
         { label: 'Yes · WAN Detected', short: 'Yes', value: 'yes', to: 'wan-detecting' },
         { label: 'No · WAN 未偵測到', short: 'No', value: 'no', to: 'modem-unplug' },
+      ],
+    },
+    wanRetry: {
+      index: 1,
+      label: '重試 WAN',
+      title: '重新嘗試：這次有偵測到 WAN 嗎？',
+      options: [
+        { label: 'Yes · WAN Detected', short: 'Yes', value: 'yes', to: 'wan-detecting' },
+        { label: 'No · 仍未偵測到（回到拔電重來）', short: 'No', value: 'no', to: 'modem-unplug' },
       ],
     },
   };
