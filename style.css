@@ -1203,6 +1203,100 @@ button {
 
 .btn-brand:active { background: var(--brand-pressed); }
 
+/* ── 1_033 / 1_036 重新啟動數據機（沿用 Setup Guide 版型） ── */
+.guide-illust.modem-illust {
+  flex-direction: column;
+  align-items: center;
+}
+
+.modem-hint {
+  margin-top: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #5b6573;
+}
+
+.modem-svg {
+  display: block;
+  margin-top: 4px;
+  width: 352px;
+  max-width: 100%;
+  height: auto;
+}
+
+.modem-name {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  fill: #5b6573;
+}
+
+.modem-led-label {
+  font-size: 8px;
+  fill: #8a93a0;
+}
+
+.modem-caption {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  fill: #8a93a0;
+}
+
+.modem-caption-brand { fill: var(--brand); }
+
+/* Lights: 1_033 fade from green to off, 1_036 come on one by one */
+.modem-led { fill: #c9ced5; }
+.modem-led.is-off { animation: modem-led-off 0.5s ease-in calc(0.6s + var(--i) * 0.25s) both; }
+.modem-led.is-lit { animation: modem-led-on 0.4s ease-out calc(0.8s + var(--i) * 0.45s) both; }
+
+@keyframes modem-led-off {
+  from { fill: #3ec46d; }
+  to { fill: #c9ced5; }
+}
+
+@keyframes modem-led-on {
+  from { fill: #c9ced5; }
+  to { fill: #3ec46d; }
+}
+
+.modem-plug-out { animation: modem-plug-out 0.7s ease-out 0.2s both; }
+.modem-plug-in { animation: modem-plug-in 0.7s ease-out 0.2s both; }
+
+@keyframes modem-plug-out {
+  from { transform: translateX(36px); }
+  to { transform: none; }
+}
+
+@keyframes modem-plug-in {
+  from { transform: translateX(-22px); }
+  to { transform: none; }
+}
+
+.modem-spark { animation: modem-blink 1.6s ease-in-out 0.9s infinite both; }
+.modem-arrow { animation: modem-nudge 1.6s ease-in-out infinite; }
+
+@keyframes modem-blink {
+  0%, 100% { opacity: 0; }
+  30%, 70% { opacity: 1; }
+}
+
+@keyframes modem-nudge {
+  0%, 100% { transform: translateX(-4px); opacity: 0.6; }
+  50% { transform: translateX(3px); opacity: 1; }
+}
+
+.modem-note {
+  width: 327px;
+  margin-top: 20px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: #eef5fd;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--brand);
+}
+
 /* ── 1_120 安裝歡迎頁 ── */
 .navbar-guide .navbar-title-bold { font-weight: 600; }
 

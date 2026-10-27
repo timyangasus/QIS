@@ -270,6 +270,67 @@
     ? `${(kbps / 1000).toFixed(kbps >= 10000 ? 1 : 2)}<small>Mbps</small>`
     : `${kbps >= 100 ? kbps.toFixed(0) : kbps >= 10 ? kbps.toFixed(1) : kbps.toFixed(2)}<small>Kbps</small>`;
 
+
+  // 1_033 / 1_036 modem power-cycle illustration, drawn in the Setup Guide style
+  function modemIllust(state) {
+    const on = state === 'on';
+    const leds = ['POWER', 'DS', 'US', 'ONLINE'].map((name, i) => {
+      const y = 156 + i * 24;
+      const lit = on && i < 3;
+      return `
+        <text x="112" y="${y + 3}" text-anchor="end" class="modem-led-label">${name}</text>
+        <circle cx="126" cy="${y}" r="4.2" class="modem-led ${on ? (lit ? 'is-lit' : '') : 'is-off'}" style="--i:${i}"/>`;
+    }).join('');
+    const plugX = on ? 296 : 252, plugY = on ? 168 : 178;
+    const cable = on
+      ? 'M150 280 C170 334 240 330 236 244 C233 192 238 168 260 168'
+      : 'M150 280 C170 334 214 326 210 254 C207 206 200 180 216 178';
+    return `
+      <svg class="modem-svg" viewBox="0 0 400 330" width="400" height="330" aria-hidden="true">
+        <defs>
+          <radialGradient id="modem-halo-${state}">
+            <stop offset="0" stop-color="#d6e6fb"/>
+            <stop offset="0.65" stop-color="#e9f1fc"/>
+            <stop offset="1" stop-color="#f4f8fe" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <circle cx="120" cy="196" r="118" fill="url(#modem-halo-${state})"/>
+        <ellipse cx="120" cy="290" rx="100" ry="9" fill="#eceef2"/>
+
+        <rect x="78" y="90" width="84" height="198" rx="16" fill="#fff" stroke="#d5dae1" stroke-width="2"/>
+        <rect x="90" y="102" width="60" height="174" rx="10" fill="#f5f7fa"/>
+        <text x="120" y="128" text-anchor="middle" class="modem-name">MODEM</text>
+        ${leds}
+
+        <rect x="292" y="118" width="88" height="100" rx="14" fill="#fff" stroke="#d5dae1" stroke-width="2"/>
+        <circle cx="336" cy="168" r="30" fill="#f0f3f7"/>
+        <rect x="326" y="155" width="4" height="17" rx="2" fill="#5b6573"/>
+        <rect x="342" y="155" width="4" height="17" rx="2" fill="#5b6573"/>
+        <circle cx="336" cy="183" r="2.6" fill="#5b6573"/>
+
+        <path d="${cable}" fill="none" stroke="#6f7780" stroke-width="6" stroke-linecap="round"/>
+        <g transform="translate(${plugX} ${plugY})${on ? '' : ' rotate(-8)'}">
+          <g class="${on ? 'modem-plug-in' : 'modem-plug-out'}">
+            <rect x="-36" y="-11" width="30" height="22" rx="5" fill="#3a4452"/>
+            <rect x="-8" y="-8" width="8" height="16" rx="2" fill="#5b6573"/>
+            <rect x="0" y="-6" width="14" height="3.2" rx="1.2" fill="#a3abb5"/>
+            <rect x="0" y="2.8" width="14" height="3.2" rx="1.2" fill="#a3abb5"/>
+          </g>
+        </g>
+        ${on ? `
+          <path class="modem-arrow" d="M268 194 H312 M302 184 L313 194 L302 204" fill="none" stroke="var(--brand)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        ` : `
+          <g class="modem-spark" stroke="var(--brand)" stroke-width="3.5" stroke-linecap="round">
+            <path d="M276 112 L279 132"/><path d="M286 146 L300 132"/><path d="M294 160 L312 155"/>
+          </g>
+        `}
+        <circle cx="${on ? 300 : 268}" cy="${on ? 170 : 176}" r="42" fill="none" stroke="var(--brand)" stroke-width="3"/>
+
+        <text x="120" y="322" text-anchor="middle" class="modem-caption">${on ? 'CABLE MODEM' : 'ALL LIGHTS OFF'}</text>
+        <text x="336" y="322" text-anchor="middle" class="modem-caption modem-caption-brand">${on ? 'POWER' : 'POWER PLUG'}</text>
+      </svg>`;
+  }
+
   window.QIS_SCREENS = [
     {
       id: 'opening',
@@ -382,12 +443,60 @@
               ['Pro ET12', 'tower-black'],
               ['Pro XT12', 'tower-black'],
             ].map(([model, type]) => `
-              <button class="model-tile" data-go="led-check" data-label="${model}">
+              <button class="model-tile" data-go="modem-unplug" data-label="${model}">
                 <span class="model-img">${device(type)}</span>
                 <span class="model-name">${model}</span>
               </button>
             `).join('')}
           </div>
+        </div>
+      `,
+    },
+    {
+      id: 'modem-unplug',
+      code: '1_033',
+      name: '拔掉數據機電源',
+      description: '重新啟動數據機（1/2）：只拔數據機的電源線，等所有燈都熄滅，不要按 Reset',
+      theme: 'light',
+      render: () => `
+        <header class="navbar navbar-guide">
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
+          <h1 class="navbar-title">Setup Guide</h1>
+          <button class="navbar-btn navbar-btn-right" data-go="help" data-label="說明" aria-label="說明">${ICON.helpOutline}</button>
+        </header>
+
+        <div class="guide-body">
+          <div class="guide-illust modem-illust">
+            <p class="modem-hint">Unplug the power cable only</p>
+            ${modemIllust('off')}
+          </div>
+          <h2 class="guide-title">Unplug the modem’s power.</h2>
+          <p class="guide-desc">Wait until all lights are off.</p>
+          <p class="modem-note">Do not press the Reset button.</p>
+          <button class="btn-brand" data-go="modem-plug" data-label="All modem lights are off">All modem lights are off</button>
+        </div>
+      `,
+    },
+    {
+      id: 'modem-plug',
+      code: '1_036',
+      name: '插回數據機電源',
+      description: '重新啟動數據機（2/2）：把電源線插回數據機，燈號重新亮起後再繼續',
+      theme: 'light',
+      render: () => `
+        <header class="navbar navbar-guide">
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
+          <h1 class="navbar-title">Setup Guide</h1>
+          <button class="navbar-btn navbar-btn-right" data-go="help" data-label="說明" aria-label="說明">${ICON.helpOutline}</button>
+        </header>
+
+        <div class="guide-body">
+          <div class="guide-illust modem-illust">
+            <p class="modem-hint">Reconnect the power cable</p>
+            ${modemIllust('on')}
+          </div>
+          <h2 class="guide-title">Plug the modem back in.</h2>
+          <button class="btn-brand" data-go="led-check" data-label="Modem is plugged in">Modem is plugged in</button>
         </div>
       `,
     },

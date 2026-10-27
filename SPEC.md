@@ -170,8 +170,15 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | BE14000、BT8P、BT6/BT8、BT10、BQ16 Pro/BE30000、BQ16 | 白色直立 |
 | Pro ET12、Pro XT12 | 黑色直立 |
 
-- 點任一型號 → `led-check` 1_040。所有型號都接到同一頁。
+- 點任一型號 → `modem-unplug` 1_033（先重新啟動數據機）。所有型號都接到同一頁。
 - **待確認**：Figma 截圖最下面還有第 6 排，被畫面切掉了，看不到型號名稱。
+
+### 5.3a `1_033` / `1_036` 重新啟動數據機 `modem-unplug` / `modem-plug`
+- 來源：使用者提供的參考圖（不是 Figma）。文字和內容照參考圖，版型沿用 1_080–1_110 Setup Guide。
+- 導覽列同 Setup Guide：‹ 返回、標題「Setup Guide」、右邊 ? 說明（→ `help`，待提供）。
+- 插圖用 SVG 直接畫（`modemIllust()`，沒有圖檔）：白色數據機（POWER / DS / US / ONLINE 四顆燈）、淺藍光暈、灰色電源線、牆上插座，插頭用藍圈標出來。
+- **1_033**：上方小字 Unplug the power cable only；插頭拔出來的動畫和藍色閃動線，四顆燈依序從綠變灰；下方標籤 ALL LIGHTS OFF / POWER PLUG。標題 Unplug the modem’s power.，說明 Wait until all lights are off.，淺藍提示框 Do not press the Reset button.，按鈕 All modem lights are off → 1_036。
+- **1_036**：上方小字 Reconnect the power cable；插頭插進去的動畫和來回推的箭頭，POWER / DS / US 依序亮綠燈，ONLINE 保持灰；下方標籤 CABLE MODEM / POWER。標題 Plug the modem back in.，按鈕 Modem is plugged in → `led-check` 1_040。
 
 ### 5.4 `1_040` 燈號顯示頁 `led-check`
 - Figma node：`1867:1962`
@@ -437,6 +444,8 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_010 | 啟動頁 `opening` | 打開 App 的第一個畫面，選擇「設定新網路」或「管理已連接的路由器」 |
 | 1_020 | 選擇系列裝置 `series` | 選要設定的產品系列（無線路由器 / ZenWiFi / Lyra） |
 | 1_030 | 選擇 ZenWiFi 裝置 `series-zenwifi` | 從清單中點選要設定的 ZenWiFi 型號 |
+| 1_033 | 拔掉數據機電源 `modem-unplug` | 重新啟動數據機（1/2）：只拔數據機的電源線，等所有燈都熄滅，不要按 Reset |
+| 1_036 | 插回數據機電源 `modem-plug` | 重新啟動數據機（2/2）：把電源線插回數據機，燈號重新亮起後再繼續 |
 | 1_040 | 燈號顯示頁 `led-check` | 請使用者看路由器的燈，從呼吸綠燈變成恆亮藍燈才能開始設定 |
 | 1_050 | QR Code 找裝置 `qr-intro` | 說明路由器上的 QR Code 在哪裡，選擇用相機掃描或手動連 WiFi |
 | 1_060 | 啟用相機掃描 `qr-scan` | 把相機對準路由器上的 QR Code，掃到後系統詢問是否加入路由器的 Wi-Fi |
