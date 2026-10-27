@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="旅遊誌">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="apple-touch-icon" id="apple-touch-icon-link" href="">
+  <link rel="icon" id="icon-link" href="">
+  <title>旅遊誌</title>
+  <script>
+  (function(){
+    const c = document.createElement('canvas');
+    c.width = 512; c.height = 512;
+    const ctx = c.getContext('2d');
+    const r = 112;
+    ctx.beginPath();
+    ctx.moveTo(r,0); ctx.lineTo(512-r,0);
+    ctx.quadraticCurveTo(512,0,512,r);
+    ctx.lineTo(512,512-r); ctx.quadraticCurveTo(512,512,512-r,512);
+    ctx.lineTo(r,512); ctx.quadraticCurveTo(0,512,0,512-r);
+    ctx.lineTo(0,r); ctx.quadraticCurveTo(0,0,r,0);
+    ctx.closePath();
+    ctx.fillStyle = '#ffffff'; ctx.fill();
+    ctx.fillStyle = '#000000';
+    ctx.font = 'bold 120px Helvetica Neue, Arial, sans-serif';
+    ctx.fillText('TT/', 110, 200);
+    ctx.font = 'bold 148px Helvetica Neue, Arial, sans-serif';
+    ctx.fillText('02', 110, 360);
+    const png = c.toDataURL('image/png');
+    document.getElementById('apple-touch-icon-link').href = png;
+    document.getElementById('icon-link').href = png;
+  })();
+  </script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="app">
+  <div class="page-container">
+  <!-- ═══ HOME ═══ -->
+  <div id="screen-home" class="page">
+    <div class="home-topbar">
+      <span class="home-brand">Travel Trace</span>
+      <button class="home-add-btn" onclick="openHomeMoreSheet()">
+        <svg xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 -960 960 960" width="28px" fill="#C9A84C"><path d="M315.38-444.57Q330-459.14 330-479.95q0-20.82-14.57-35.43Q300.86-530 280.05-530q-20.82 0-35.43 14.57Q230-500.86 230-480.05q0 20.82 14.57 35.43Q259.14-430 279.95-430q20.82 0 35.43-14.57Zm200 0Q530-459.14 530-479.95q0-20.82-14.57-35.43Q500.86-530 480.05-530q-20.82 0-35.43 14.57Q430-500.86 430-480.05q0 20.82 14.57 35.43Q459.14-430 479.95-430q20.82 0 35.43-14.57Zm200 0Q730-459.14 730-479.95q0-20.82-14.57-35.43Q700.86-530 680.05-530q-20.82 0-35.43 14.57Q630-500.86 630-480.05q0 20.82 14.57 35.43Q659.14-430 679.95-430q20.82 0 35.43-14.57ZM480.07-100q-78.84 0-148.21-29.92t-120.68-81.21q-51.31-51.29-81.25-120.63Q100-401.1 100-479.93q0-78.84 29.92-148.21t81.21-120.68q51.29-51.31 120.63-81.25Q401.1-860 479.93-860q78.84 0 148.21 29.92t120.68 81.21q51.31 51.29 81.25 120.63Q860-558.9 860-480.07q0 78.84-29.92 148.21t-81.21 120.68q-51.29 51.31-120.63 81.25Q558.9-100 480.07-100Zm-.07-60q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>
+      </button>
+    </div>
+    <div class="home-year-tabs" id="home-year-tabs"></div>
+    <div class="home-trip-list-scroll">
+      <div class="home-trip-list" id="home-trip-list"></div>
+    </div>
+  </div>
+
+  <!-- ═══ ITINERARY ═══ -->
+  <div id="screen-itinerary" class="page active">
+    <!-- Banner (rendered by JS) -->
+    <div id="banner-area"></div>
+
+    <!-- Day Tabs -->
+    <div class="day-tabs-wrap">
+      <div class="day-tabs-header">
+        <span class="day-tabs-label">DAY</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button onclick="openSmartImport()" class="day-tabs-add-event"><svg xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 -960 960 960" width="28px"><path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z"/></svg></button>
+          <button class="day-tabs-add-event" onclick="openEventModal()"><svg xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 -960 960 960" width="28px"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg></button>
+        </div>
+      </div>
+      <div class="day-tabs" id="day-tabs"></div>
+    </div>
+
+    <!-- Timeline — scrolls independently -->
+    <div class="timeline-section" id="timeline-section">
+      <div class="timeline" id="timeline-list"></div>
+    </div>
+  </div>
+
+  <!-- ═══ INFO SUB: MAP ═══ -->
+  <div id="screen-info-map" class="page">
+    <!-- Header -->
+    <div class="screen-header sub-header" id="map-sub-header">
+      <button class="sub-back-btn" onclick="closeInfoSub('map')">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/></svg>
+      </button>
+      <div class="screen-title" style="flex:1;font-family:var(--mono)">地圖</div>
+      <!-- Dropdown selector (多張地圖時顯示) -->
+      <div id="map-selector-wrap" style="display:none;position:relative;margin-right:6px;align-self:center;margin-top:8px">
+        <button onclick="mapToggleDropdown()" style="display:flex;align-items:center;gap:8px;background:none;border:1px solid #DDDDDD;border-radius:0;padding:7px 14px;font-family:var(--mono);font-size:13px;color:#1A1A1A;cursor:pointer;min-width:130px;justify-content:space-between;-webkit-tap-highlight-color:transparent">
+          <div style="display:flex;align-items:center;gap:6px;overflow:hidden">
+            <span id="map-current-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">地圖</span>
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="#888" style="flex-shrink:0"><path d="M480-360 280-560h400L480-360Z"/></svg>
+        </button>
+        <div id="map-dropdown" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:#fff;border:0.5px solid #E0E0E0;border-radius:0;box-shadow:0 4px 16px rgba(0,0,0,0.15);z-index:200;min-width:160px;overflow:hidden"></div>
+      </div>
+      <button class="sub-header-action" onclick="mapAddNew()" style="padding:4px">
+        <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
+      </button>
+    </div>
+
+    <!-- Empty state -->
+    <div id="map-empty-state" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:40px 32px;text-align:center">
+      <svg xmlns="http://www.w3.org/2000/svg" height="64px" viewBox="0 -960 960 960" width="64px" fill="#D0D0D0"><path d="m600-176-240-84-150 58q-14 5-26-3t-12-23v-468q0-10 4.5-18.5T190-726l170-58 240 84 150-58q14-5 26 1.5t12 20.5v476q0 11-6 19t-16 11l-166 54Zm-14-34v-468l-212-74v468l212 74Zm28 0 146-48v-474l-146 54v468Zm-414-18 146-56v-468l-146 50v474Zm414-450v468-468Zm-268-74v468-468Z"/></svg>
+      <div style="font-family:var(--mono);font-size:15px;font-weight:700;color:#AAAAAA">尚未新增地圖</div>
+      <div style="font-size:13px;color:#CCCCCC;font-family:var(--mono);line-height:1.6">點右上角 ＋ 新增地圖</div>
+    </div>
+
+    <!-- Map Viewer -->
+    <div id="map-viewer" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;background:#F0F0F0;touch-action:none">
+      <img id="map-img" src="" alt="map"
+        style="position:absolute;top:0;left:0;width:100%;transform-origin:0 0;user-select:none;-webkit-user-drag:none;pointer-events:none;display:block"/>
+      <button id="map-reset-btn" onclick="mapResetView()"
+        style="position:absolute;bottom:20px;right:16px;z-index:10;width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.95);border:1px solid rgba(0,0,0,0.10);box-shadow:0 2px 8px rgba(0,0,0,0.12);cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent">
+        <svg xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 -960 960 960" width="22px" fill="#555"><path d="M200-120q-33 0-56.5-23.5T120-200v-160h80v160h160v80H200Zm400 0v-80h160v-160h80v160q0 33-23.5 56.5T760-120H600ZM120-600v-160q0-33 23.5-56.5T200-840h160v80H200v160h-80Zm640 0v-160H600v-80h160q33 0 56.5 23.5T840-760v160h-80Z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ MAP NAME MODAL ═══ -->
+  <div class="modal-overlay" id="modal-map-name">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="modal-map-name-title">新增地圖</div>
+      <div class="modal-body" style="padding:0 20px 20px">
+        <div class="ff-label">地圖名稱</div>
+        <input class="ff-input" id="map-name-input" placeholder="" style="font-size:18px;font-weight:700">
+        <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px">
+          <div class="modal-btn-row" style="padding:0">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('modal-map-name')">取消</button>
+            <button class="modal-btn modal-btn-save" onclick="mapConfirmName()">完成</button>
+          </div>
+          <button id="map-delete-btn" onclick="mapDeleteCurrent()" style="display:none;width:100%;padding:14px;background:none;border:1px solid #E53935;color:#E53935;font-family:var(--mono);font-size:15px;cursor:pointer;box-sizing:border-box">刪除此地圖</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══ EXPENSE ═══ -->
+  <div id="screen-expense" class="page" style="overflow:hidden">
+    <div id="expense-fixed-header">
+      <div class="screen-header sub-header" style="position:relative">
+        <button class="sub-back-btn" onclick="closeInfoSub('expense')">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/></svg>
+        </button>
+        <div class="screen-title" style="flex:1">記帳</div>
+        <div style="display:flex;align-items:center;gap:0">
+          <button onclick="openSmartExpense()" class="sub-header-action" style="margin-top:0;padding:8px"><svg xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 -960 960 960" width="28px"><path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z"/></svg></button>
+          <button class="sub-header-action" onclick="openExpenseSheet()" style="margin-top:0;padding:8px">
+            <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="day-tabs-wrap" style="border-bottom: 0.5px solid var(--border-thin); padding:0 20px;">
+        <div id="expense-day-date" style="font-size:20px;color:#1A1A1A;font-family:var(--mono);font-weight:700;padding-top:12px;padding-bottom:4px"></div>
+        <div class="day-tabs-header">
+          <span class="day-tabs-label">DAY</span>
+        </div>
+        <div class="day-tabs" id="expense-day-tabs"></div>
+      </div>
+      <div style="padding:0 42px 6px;margin-top:-20px">
+        <div class="expense-total-card">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between">
+            <span class="expense-total-label">當日合計</span>
+            <div class="expense-total-amount" id="expense-total">0</div>
+          </div>
+          <div class="expense-trip-total-row" style="margin-top:12px;justify-content:space-between">
+            <span class="expense-trip-label">旅行總計</span>
+            <span class="expense-trip-amount" id="expense-trip-total">0</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin:-20px 24px 0">
+        <div style="height:1.5px;background:#C2C2C2;width:100%"></div>
+        <span class="expense-count-label" id="expense-count" style="display:block;color:#AAAAAA;font-size:10px;margin-top:8px;margin-bottom:8px">0 筆記錄</span>
+      </div>
+    </div>
+    <div class="expense-list" id="expense-list" style="overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;height:0;background:#fff"></div>
+  </div>
+
+  <!-- ═══ INFO HUB ═══ -->
+  <div id="screen-info" class="page">
+    <div class="screen-header">
+      <div style="padding: 0 20px 14px; display:flex; align-items:center; justify-content:space-between;">
+        <div class="screen-title">旅遊資訊</div>
+        <button class="sub-header-action" onclick="openInfoCustomSheet()" style="margin-top:0;padding:4px;">
+          <svg xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 -960 960 960" width="22px"><path d="M160-120q-33 0-56.5-23.5T80-200v-560q0-33 23.5-56.5T160-840h640q33 0 56.5 23.5T880-760v560q0 33-23.5 56.5T800-120H160Zm0-80h640v-560H160v560Zm40-80h200v-80H200v80Zm382-80 198-198-57-57-141 142-57-57-56 57 113 113Zm-382-80h200v-80H200v80Zm0-160h200v-80H200v80Zm-40 400v-560 560Z"/></svg>
+        </button>
+      </div>
+    </div>
+      <div class="info-list" id="info-grid">
+      <button class="info-list-item" id="info-btn-flight" onclick="openInfoSub('flight')">
+        <span class="info-list-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" width="24" height="24"><path d="m354-334 356-94q15-4 22.5-18.5T736-476q-4-15-17.5-22.5T690-502l-98 26-160-150-56 14 96 168-96 24-50-38-38 10 66 114Zm446 174H160q-33 0-56.5-23.5T80-240v-160q33 0 56.5-23.5T160-480q0-33-23.5-56.5T80-560v-160q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160Zm0-80v-480H160v102q37 22 58.5 58.5T240-480q0 43-21.5 79.5T160-342v102h640ZM480-480Z"/></svg></span>
+        <span class="info-list-label">機票</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" width="18" height="18"><path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/></svg>
+      </button>
+      <button class="info-list-item" id="info-btn-hotel" onclick="openInfoSub('hotel')">
+        <span class="info-list-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" width="24" height="24"><path d="M40-200v-600h80v400h320v-320h320q66 0 113 47t47 113v360h-80v-120H120v120H40Zm155-275q-35-35-35-85t35-85q35-35 85-35t85 35q35 35 35 85t-35 85q-35 35-85 35t-85-35Zm325 75h320v-160q0-33-23.5-56.5T760-640H520v240ZM308.5-531.5Q320-543 320-560t-11.5-28.5Q297-600 280-600t-28.5 11.5Q240-577 240-560t11.5 28.5Q263-520 280-520t28.5-11.5ZM280-560Zm240-80v240-240Z"/></svg></span>
+        <span class="info-list-label">飯店</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" width="18" height="18"><path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/></svg>
+      </button>
+      <button class="info-list-item" id="info-btn-expense" onclick="openInfoSub('expense')">
+        <span class="info-list-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" width="24" height="24"><path d="M444-200h70v-50q50-9 86-39t36-89q0-42-24-77t-96-61q-60-20-83-35t-23-41q0-26 18.5-41t53.5-15q32 0 50 15.5t26 38.5l64-26q-11-35-40.5-61T516-710v-50h-70v50q-50 11-78 44t-28 74q0 47 27.5 76t86.5 50q63 23 87.5 41t24.5 47q0 33-23.5 48.5T486-314q-33 0-58.5-20.5T390-396l-66 26q14 48 43.5 77.5T444-252v52Zm36 120q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg></span>
+        <span class="info-list-label">記帳</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" width="18" height="18"><path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/></svg>
+      </button>
+      <button class="info-list-item" id="info-btn-ticket" onclick="openInfoSub('ticket')">
+        <span class="info-list-icon"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm0-80h640v-480H160v480Zm0 0v-480 480Zm280-200h320v-240H440v240Zm80-80v-80h160v80H520Z"/></svg></span>
+        <span class="info-list-label">圖集</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" width="18" height="18"><path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/></svg>
+      </button>
+      <button class="info-list-item" id="info-btn-notes" onclick="openInfoSub('notes')">
+        <span class="info-list-icon"><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M560-80v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q8 9 12.5 20t4.5 22q0 11-4 22.5T903-300L683-80H560Zm300-263-37-37 37 37ZM620-140h38l121-122-18-19-19-18-122 121v38ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v120h-80v-80H520v-200H240v640h240v80H240Zm280-400Zm241 199-19-18 37 37-18-19Z"/></svg></span>
+        <span class="info-list-label">筆記</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" width="18" height="18"><path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/></svg>
+      </button>
+      <button class="info-list-item" id="info-btn-shopping" onclick="openInfoSub('shopping')">
+        <span class="info-list-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" width="24" height="24"><path d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720ZM240-160v-480 480Z"/></svg></span>
+        <span class="info-list-label">購物清單</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" width="18" height="18"><path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/></svg>
+      </button>
+      <button class="info-list-item" id="info-btn-checklist" onclick="openInfoSub('checklist')">
+        <span class="info-list-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" width="24" height="24"><path d="m424-296 282-282-56-56-226 226-114-114-56 56 170 170Zm56 216q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg></span>
+        <span class="info-list-label">點檢表</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" width="18" height="18"><path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/></svg>
+      </button>
+      <button class="info-list-item info-btn-map-hidden" id="info-btn-map" onclick="openInfoSub('map')" style="display:none">
+        <span class="info-list-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" width="24" height="24"><path d="m600-120-240-84-186 72q-20 8-37-4.5T120-170v-560q0-13 7.5-23t20.5-15l212-72 240 84 186-72q20-8 37 4.5t17 33.5v560q0 13-7.5 23T812-192l-212 72Zm-40-98v-468l-160-56v468l160 56Zm80 0 120-40v-474l-120 46v468Zm-440-10 120-46v-468l-120 40v474Zm440-458v468-468Zm-320-56v468-468Z"/></svg></span>
+        <span class="info-list-label">地圖</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" width="18" height="18"><path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/></svg>
+      </button>
+      </div>
+  </div>
+
+  <!-- ═══ INFO SUB: FLIGHT ═══ -->
+  <div id="screen-info-flight" class="page">
+    <div class="screen-header sub-header">
+      <button class="sub-back-btn" onclick="closeInfoSub('flight')">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/></svg>
+      </button>
+      <div class="screen-title" style="flex:1;font-family:var(--mono)">機票</div>
+      <button class="sub-header-action" onclick="openFlightSheet()">
+        <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
+      </button>
+    </div>
+    <div class="info-section" style="padding-top:20px">
+      <div id="flight-cards"></div>
+    </div>
+  </div>
+
+  <!-- ═══ FLIGHT BOTTOM SHEET ═══ -->
+  <div class="modal-overlay" id="modal-flight-sheet">
+    <div class="modal-sheet" style="max-height:75vh;overflow-y:auto">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="flight-sheet-title">新增機票</div>
+      <div class="modal-body" style="padding:0 20px">
+
+        <!-- 訂單共通資訊 -->
+        <div style="padding:4px 0 0">
+          <div class="ff-label">訂位代號</div>
+          <input class="ff-input" id="ff-pnr" placeholder="" style="text-transform:uppercase;letter-spacing:0.1em">
+        </div>
+        <div style="display:flex;gap:16px;padding:12px 0 0">
+          <div style="flex:1">
+            <div class="ff-label">航空公司</div>
+            <input class="ff-input" id="ff-airline" placeholder="">
+          </div>
+          <div style="flex:1">
+            <div class="ff-label">票價</div>
+            <input class="ff-input" id="ff-price" placeholder="" inputmode="numeric" oninput="fmtFlightPrice(this)">
+          </div>
+        </div>
+        <div style="padding:12px 0 0">
+          <div class="ff-label">網站</div>
+          <input class="ff-input" id="ff-url" placeholder="https://" inputmode="url" style="width:100%">
+        </div>
+
+        <!-- 去程 -->
+        <div class="ff-seg-header" style="margin-top:20px">去程</div>
+        <div style="display:flex;gap:16px;padding:8px 0 0">
+          <div style="flex:1">
+            <div class="ff-label">日期</div>
+            <input class="ff-input" id="ff-ob-date" placeholder="MM/DD">
+          </div>
+          <div style="flex:1">
+            <div class="ff-label">班機編號</div>
+            <input class="ff-input" id="ff-ob-flightNo" placeholder="" style="text-transform:uppercase">
+          </div>
+        </div>
+        <div style="padding:12px 0 0">
+          <div class="ff-label">班機時間</div>
+          <input class="ff-input" id="ff-ob-times" placeholder="hh:mm－hh:mm" inputmode="numeric" oninput="fmtFlightTimes(this)">
+        </div>
+        <div style="display:flex;gap:16px;padding:12px 0 0">
+          <div style="flex:1">
+            <div class="ff-label">出發 IATA</div>
+            <input class="ff-input" id="ff-ob-fromCode" placeholder="" style="text-transform:uppercase">
+          </div>
+          <div style="flex:2">
+            <div class="ff-label">出發機場名稱</div>
+            <input class="ff-input" id="ff-ob-fromName" placeholder="">
+          </div>
+          <div style="flex:0.6">
+            <div class="ff-label">T</div>
+            <input class="ff-input" id="ff-ob-fromTerminal" placeholder="">
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;padding:12px 0 0">
+          <div style="flex:1">
+            <div class="ff-label">抵達 IATA</div>
+            <input class="ff-input" id="ff-ob-toCode" placeholder="" style="text-transform:uppercase">
+          </div>
+          <div style="flex:2">
+            <div class="ff-label">抵達機場名稱</div>
+            <input class="ff-input" id="ff-ob-toName" placeholder="">
+          </div>
+          <div style="flex:0.6">
+            <div class="ff-label">T</div>
+            <input class="ff-input" id="ff-ob-toTerminal" placeholder="">
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;padding:12px 0 0">
+          <div style="flex:1">
+            <div class="ff-label">行李重量（kg）</div>
+            <input class="ff-input" id="ff-ob-baggage" placeholder="" inputmode="numeric">
+          </div>
+          <div style="flex:1">
+            <div class="ff-label">座位</div>
+            <input class="ff-input" id="ff-ob-seat" placeholder="" style="text-transform:uppercase">
+          </div>
+        </div>
+
+        <!-- 回程 toggle -->
+        <div id="ff-inbound-toggle" style="display:flex;justify-content:center;padding:20px 0 4px">
+          <button onclick="ffShowInbound()" style="background:none;border:1px dashed #CCCCCC;border-radius:8px;padding:8px 24px;font-family:var(--mono);font-size:13px;color:#AAAAAA;cursor:pointer;width:100%">＋ 新增回程</button>
+        </div>
+
+        <!-- 回程 -->
+        <div id="ff-inbound-wrap" style="display:none">
+          <div class="ff-seg-header" style="margin-top:20px">回程</div>
+          <div style="display:flex;gap:16px;padding:8px 0 0">
+            <div style="flex:1">
+              <div class="ff-label">日期</div>
+              <input class="ff-input" id="ff-ib-date" placeholder="MM/DD">
+            </div>
+            <div style="flex:1">
+              <div class="ff-label">班機編號</div>
+              <input class="ff-input" id="ff-ib-flightNo" placeholder="" style="text-transform:uppercase">
+            </div>
+          </div>
+          <div style="padding:12px 0 0">
+            <div class="ff-label">班機時間</div>
+            <input class="ff-input" id="ff-ib-times" placeholder="hh:mm－hh:mm" inputmode="numeric" oninput="fmtFlightTimes(this)">
+          </div>
+          <div style="display:flex;gap:16px;padding:12px 0 0">
+            <div style="flex:1">
+              <div class="ff-label">出發 IATA</div>
+              <input class="ff-input" id="ff-ib-fromCode" placeholder="" style="text-transform:uppercase">
+            </div>
+            <div style="flex:2">
+              <div class="ff-label">出發機場名稱</div>
+              <input class="ff-input" id="ff-ib-fromName" placeholder="">
+            </div>
+            <div style="flex:0.6">
+              <div class="ff-label">T</div>
+              <input class="ff-input" id="ff-ib-fromTerminal" placeholder="">
+            </div>
+          </div>
+          <div style="display:flex;gap:16px;padding:12px 0 0">
+            <div style="flex:1">
+              <div class="ff-label">抵達 IATA</div>
+              <input class="ff-input" id="ff-ib-toCode" placeholder="" style="text-transform:uppercase">
+            </div>
+            <div style="flex:2">
+              <div class="ff-label">抵達機場名稱</div>
+              <input class="ff-input" id="ff-ib-toName" placeholder="">
+            </div>
+            <div style="flex:0.6">
+              <div class="ff-label">T</div>
+              <input class="ff-input" id="ff-ib-toTerminal" placeholder="">
+            </div>
+          </div>
+          <div style="display:flex;gap:16px;padding:12px 0 0">
+            <div style="flex:1">
+              <div class="ff-label">行李重量（kg）</div>
+              <input class="ff-input" id="ff-ib-baggage" placeholder="" inputmode="numeric">
+            </div>
+            <div style="flex:1">
+              <div class="ff-label">座位</div>
+              <input class="ff-input" id="ff-ib-seat" placeholder="" style="text-transform:uppercase">
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:20px 0 16px">
+          <div class="modal-btn-row" style="padding:0">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('modal-flight-sheet')">取消</button>
+            <button class="modal-btn modal-btn-save" onclick="saveFlightSheet()">儲存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ INFO SUB: HOTEL ═══ -->
+  <div id="screen-info-hotel" class="page">
+    <div class="screen-header sub-header">
+      <button class="sub-back-btn" onclick="closeInfoSub('hotel')">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/></svg>
+      </button>
+      <div class="screen-title" style="flex:1">住宿</div>
+      <button class="sub-header-action" onclick="openHotelSheet()">
+        <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
+      </button>
+    </div>
+    <div class="info-section">
+      <div id="hotel-cards"></div>
+    </div>
+  </div>
+
+  <!-- ═══ HOTEL BOTTOM SHEET ═══ -->
+  <div class="modal-overlay" id="modal-hotel-sheet">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="hotel-sheet-title">新增住宿</div>
+      <div class="modal-body" style="padding:0 20px">
+
+        <div style="padding:12px 0 0">
+          <div class="ff-label">日期</div>
+          <input class="ff-input" id="hf-dates" placeholder="MM/DD－MM/DD" oninput="fmtHotelDates(this)">
+        </div>
+        <div style="padding:12px 0 0">
+          <div class="ff-label">飯店名稱</div>
+          <input class="ff-input" id="hf-name" placeholder="">
+        </div>
+        <div style="padding:12px 0 0">
+          <div class="ff-label">訂單編號</div>
+          <input class="ff-input" id="hf-ref" placeholder="">
+        </div>
+        <div style="padding:12px 0 0">
+          <div class="ff-label">地址</div>
+          <textarea class="ff-input ev-auto" id="hf-addr" placeholder="" rows="1" style="resize:none;line-height:1.6;overflow:hidden"></textarea>
+        </div>
+        <div style="padding:12px 0 16px">
+          <div class="ff-label">總價</div>
+          <input class="ff-input" id="hf-price" placeholder="" type="text" inputmode="decimal" oninput="fmtHotelPrice(this)">
+        </div>
+
+        <div style="padding:0 0 16px">
+          <div class="modal-btn-row" style="padding:0">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('modal-hotel-sheet')">取消</button>
+            <button class="modal-btn modal-btn-save" id="hotel-sheet-save-btn" onclick="saveHotelSheet()">儲存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ INFO SUB: CHECKLIST ═══ -->
+  <div id="screen-info-checklist" class="page">
+    <div class="screen-header sub-header">
+      <button class="sub-back-btn" onclick="closeInfoSub('checklist')">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/></svg>
+      </button>
+      <div class="screen-title" style="flex:1;font-family:var(--mono)">點檢表</div>
+      <button class="sub-header-action" onclick="resetChecklist()" title="重置">
+        <svg xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 -960 960 960" width="22px"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>
+      </button>
+    </div>
+    <div class="info-section" id="checklist-section">
+      <div id="checklist-items"></div>
+    </div>
+  </div>
+
+  <!-- ═══ INFO SUB: SHOPPING ═══ -->
+  <div id="screen-info-shopping" class="page">
+    <div class="screen-header sub-header">
+      <button class="sub-back-btn" onclick="closeInfoSub('shopping')">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/></svg>
+      </button>
+      <div class="screen-title" style="flex:1;font-family:var(--mono)">購物清單</div>
+      <button class="sub-header-action" onclick="openShopSheet(null)">
+        <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
+      </button>
+    </div>
+    <div class="info-section" style="padding:0">
+      <div id="shopping-items"></div>
+    </div>
+  </div>
+
+  <!-- ═══ SHOP SHEET ═══ -->
+  <div class="modal-overlay" id="modal-shop-sheet">
+    <div class="modal-sheet">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 0">
+        <span class="modal-title" id="shop-sheet-title" style="padding:0">新增品項</span>
+        <button onclick="closeModal('modal-shop-sheet')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-secondary)">×</button>
+      </div>
+      <div style="padding:0 20px">
+        <div style="padding:12px 0 0">
+          <div class="ff-label">項目</div>
+          <input class="ff-input" id="sf-name" placeholder="">
+        </div>
+        <div style="padding:12px 0 0">
+          <div class="ff-label">地址</div>
+          <textarea class="ff-input ev-auto" id="sf-addr" placeholder="" rows="1" style="resize:none;line-height:1.6;overflow:hidden"></textarea>
+        </div>
+        <div style="padding:12px 0 0">
+          <div class="ff-label">營業時間</div>
+          <input class="ff-input" id="sf-hours" placeholder="" inputmode="numeric" oninput="fmtShopHours(this)">
+        </div>
+        <div style="padding:12px 0 0">
+          <div class="ff-label">網址</div>
+          <textarea class="ff-input ev-auto" id="sf-link" placeholder="" rows="1" style="resize:none;line-height:1.6;overflow:hidden;padding-right:28px"></textarea>
+        </div>
+        <div style="padding:12px 0 0">
+          <div class="ff-label">數量</div>
+          <input class="ff-input" id="sf-qty" placeholder="" type="number" inputmode="numeric">
+        </div>
+        <div style="padding:12px 0 16px;cursor:pointer" onclick="document.getElementById('sf-photo-input').click()">
+          <div class="ff-label">圖檔</div>
+          <div id="sf-photo-preview" class="sf-photo-preview">
+            <span class="sf-photo-plus">＋</span>
+          </div>
+          <input type="file" id="sf-photo-input" accept="image/*" style="display:none" onchange="handleShopPhotoSheet(this)">
+        </div>
+        <div style="padding:0 0 16px">
+          <div class="modal-btn-row" style="padding:0">
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal('modal-shop-sheet')">取消</button>
+            <button class="modal-btn modal-btn-save" onclick="saveShopSheet()">儲存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ INFO SUB: TICKET ═══ -->
+  <div id="screen-info-ticket" class="page">
+    <div class="screen-header sub-header">
+      <button class="sub-back-btn" onclick="closeInfoSub('ticket')">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/></svg>
+      </button>
+      <div class="screen-title" style="flex:1">圖集</div>
+      <label class="sub-header-action">
+        <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
+        <input type="file" accept="image/*" multiple style="display:none" onchange="addTicketFromPhoto(this)">
+      </label>
+    </div>
+    <div class="info-section">
+      <div id="ticket-cards"></div>
+    </div>
+  </div>
+
+  <!-- ═══ INFO SUB: NOTES ═══ -->
+  <div id="screen-info-notes" class="page">
+    <div class="screen-header sub-header">
+      <button class="sub-back-btn" onclick="closeInfoSub('notes')">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/></svg>
+      </button>
+      <div class="screen-title" style="flex:1">筆記</div>
+      <button class="sub-header-action" onclick="openNoteSheet(null)">
+        <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
+      </button>
+    </div>
+    <div class="info-section" id="notes-card-list" style="padding:30px 20px 16px;display:flex;flex-direction:column;gap:16px"></div>
+  </div>
+
+  <!-- ═══ INFO SUB: PHOTO ═══ -->
+  <div id="screen-photo" class="page" style="overflow:hidden;background:#fff">
+    <div id="photo-fixed-header">
+      <div class="screen-header">
+        <div style="padding: 0 20px 14px; display:flex; align-items:center; justify-content:space-between;">
+          <div class="screen-title">相片</div>
+          <label class="sub-header-action" style="cursor:pointer;margin-top:0;padding:4px;">
+            <svg xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 -960 960 960" width="28px"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
+            <input type="file" accept="image/*" multiple style="display:none" onchange="addPhotoFromPicker(this)">
+          </label>
+        </div>
+      </div>
+      <div class="day-tabs-wrap" style="border-bottom:0.5px solid var(--border-thin);padding:0 20px">
+        <div id="photo-day-date" style="font-size:20px;color:#1A1A1A;font-family:var(--mono);font-weight:700;padding-top:12px;padding-bottom:2px"></div>
+        <div id="photo-day-subtitle" style="font-size:17px;color:#C9A020;font-family:var(--mono);font-weight:700;padding-bottom:11px;min-height:0"></div>
+        <div class="day-tabs-header" style="padding-top:0"><span class="day-tabs-label">DAY</span></div>
+        <div class="day-tabs" id="photo-day-tabs"></div>
+      </div>
+    </div>
+    <div id="photo-page-grid" style="overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;height:0;width:100%;box-sizing:border-box"></div>
+  </div>
+
+  <!-- ═══ SETTINGS ═══ -->
+  <div id="screen-settings" class="page">
+    <div class="screen-header">
+      <div style="padding: 0 20px 14px">
+        <div class="screen-title">設定</div>
+      </div>
+    </div>
+    <div class="set-body">
+      <!-- 第一區塊 -->
+      <div class="set-section">
+        <div class="set-field">
+          <span class="set-field-label">旅遊名稱</span>
+          <input class="set-field-val" id="set-trip-name" placeholder="未命名" onblur="saveSettings()">
+        </div>
+        <div class="set-field">
+          <span class="set-field-label">日期</span>
+          <input class="set-field-val" id="set-trip-dates" placeholder="YYYY/MM/DD–MM/DD" oninput="fmtTripDates(this)" onblur="saveSettings()">
+        </div>
+        <div class="set-field set-field-select" onclick="toggleCurrencyDropdown()">
+          <span class="set-field-label">幣別</span>
+          <div class="set-field-row">
+            <span class="set-field-val" id="set-currency-display">NT$ 新台幣</span>
+            <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 0 24 24" width="20px"><path fill="#1A1A1A" d="M7 10l5 5 5-5z"/></svg>
+          </div>
+          <div class="set-currency-dropdown" id="set-currency-dropdown">
+            <div class="set-currency-option" onclick="event.stopPropagation();setCurrencyBtn('TWD','NT$','新台幣')">NT$　新台幣</div>
+            <div class="set-currency-option" onclick="event.stopPropagation();setCurrencyBtn('JPY','¥','日圓')">¥　日圓</div>
+            <div class="set-currency-option" onclick="event.stopPropagation();setCurrencyBtn('USD','$','美金')">$　美金</div>
+            <div class="set-currency-option" onclick="event.stopPropagation();setCurrencyBtn('EUR','€','歐元')">€　歐元</div>
+            <div class="set-currency-option" onclick="event.stopPropagation();setCurrencyBtn('HKD','HK$','港幣')">HK$　港幣</div>
+            <div class="set-currency-option" onclick="event.stopPropagation();setCurrencyBtn('CNY','CN¥','人民幣')">CN¥　人民幣</div>
+            <div class="set-currency-option" onclick="event.stopPropagation();setCurrencyBtn('THB','฿','泰銖')">฿　泰銖</div>
+          </div>
+        </div>
+
+        <!-- 天氣地點 -->
+        <div class="set-field set-field-select" onclick="openWeatherLocationSheet()">
+          <span class="set-field-label">天氣地點</span>
+          <div class="set-field-row">
+            <span class="set-field-val" id="set-weather-location-display">現在地</span>
+            <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 0 24 24" width="20px"><path fill="#1A1A1A" d="M7 10l5 5 5-5z"/></svg>
+          </div>
+        </div>
+
+      </div>
+
+
+      <!-- 第三區塊 -->
+      <div class="set-section-label">設定</div>
+      <div class="set-section">
+        <div class="set-action" onclick="exportJSON()">
+          <span class="set-action-title">匯出JASON</span>
+          <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"><path fill="#1A1A1A" d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/></svg>
+        </div>
+        <div class="set-action" onclick="document.getElementById('import-json-input').click()">
+          <span class="set-action-title">匯入JASON</span>
+          <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"><path fill="#1A1A1A" d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/></svg>
+          <input type="file" id="import-json-input" accept=".json" style="display:none" onchange="importJSON(this)">
+        </div>
+        <div class="set-action" onclick="exportItinerary()">
+          <span class="set-action-title">匯出行程文字</span>
+          <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"><path fill="#1A1A1A" d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 匯出行程文字 ═══ -->
+  <div id="screen-export-itinerary" class="page" style="z-index:50;background:#fff">
+    <div class="screen-header sub-header">
+      <button class="sub-back-btn" onclick="document.getElementById('screen-export-itinerary').classList.remove('active');document.body.style.overflow=''">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/></svg>
+      </button>
+      <div class="screen-title" style="flex:1">匯出行程文字</div>
+      <button class="sub-header-action" onclick="selectExportText()">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path fill="#B8860B" d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"/></svg>
+      </button>
+    </div>
+    <div style="padding:16px">
+      <div id="export-itinerary-text" style="font-size:13px;font-family:'JetBrains Mono',monospace;line-height:1.7;border:1.5px solid #EBEBEB;background:#F9F9F9;color:#1A1A1A;padding:14px;white-space:pre-wrap;word-break:break-all;-webkit-user-select:text;user-select:text"></div>
+    </div>
+  </div>
+
+  <!-- ═══ 一鍵匯入 SHEET ═══ -->
+  <div class="modal-overlay" id="modal-smart-import">
+    <div class="modal-sheet" style="max-height:92vh;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;flex-shrink:0">
+        <span class="modal-title" style="padding:0">AI 行程</span>
+        <button onclick="closeModal('modal-smart-import')" style="background:none;border:none;font-size:22px;cursor:pointer;color:#BBBBBB;line-height:1">×</button>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:0 20px">
+        <textarea id="smart-import-text"
+          placeholder="貼入行程文字…"
+          style="width:100%;box-sizing:border-box;min-height:220px;resize:vertical;padding:14px;border:1.5px solid #EBEBEB;border-radius:0;font-size:16px;font-family:var(--mono);outline:none;line-height:1.6"></textarea>
+        <div style="text-align:right;margin-top:6px;margin-bottom:8px">
+          <span id="smart-import-count" style="font-family:var(--mono);font-size:12px;color:#AAAAAA">0 / 3000</span>
+        </div>
+      </div>
+      <!-- Loading -->
+      <div id="smart-import-loading" style="display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:16px">
+        <div class="smart-import-spinner"></div>
+        <span style="font-family:var(--mono);font-size:14px;color:#AAAAAA">解析中…</span>
+      </div>
+      <!-- 整理表 -->
+      <div id="smart-import-report" style="display:none;padding:0 20px 8px">
+        <div style="font-family:var(--mono);font-size:13px;color:#AAAAAA;margin-bottom:10px">AI 已完成以下處理：</div>
+        <div id="smart-import-report-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+      <!-- 按鈕 -->
+      <div style="padding:12px 20px 24px;flex-shrink:0;display:flex;gap:10px" id="smart-import-actions">
+        <button class="modal-btn modal-btn-cancel" style="flex:1" onclick="closeModal('modal-smart-import')">取消</button>
+        <button class="modal-btn modal-btn-save" style="flex:1" onclick="runSmartImport()">加入</button>
+      </div>
+      <div style="padding:0 20px 24px;flex-shrink:0;display:none" id="smart-import-done-actions">
+        <button class="modal-btn modal-btn-save" style="width:100%" onclick="closeSmartImportDone()">確定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ AI 記帳 SHEET ═══ -->
+  <div class="modal-overlay" id="modal-smart-expense">
+    <div class="modal-sheet" style="max-height:92vh;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;flex-shrink:0">
+        <span class="modal-title" style="padding:0">AI 記帳</span>
+        <button onclick="closeModal('modal-smart-expense')" style="background:none;border:none;font-size:22px;cursor:pointer;color:#BBBBBB;line-height:1">×</button>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:0 20px">
+        <textarea id="smart-expense-text"
+          placeholder="貼入支出記錄…"
+          style="width:100%;box-sizing:border-box;min-height:220px;resize:vertical;padding:14px;border:1.5px solid #EBEBEB;border-radius:0;font-size:16px;font-family:var(--mono);outline:none;line-height:1.6"></textarea>
+        <div style="text-align:right;margin-top:6px;margin-bottom:8px">
+          <span id="smart-expense-count" style="font-family:var(--mono);font-size:12px;color:#AAAAAA">0 / 3000</span>
+        </div>
+      </div>
+      <div id="smart-expense-loading" style="display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:16px">
+        <div class="smart-import-spinner"></div>
+        <span style="font-family:var(--mono);font-size:14px;color:#AAAAAA">解析中…</span>
+      </div>
+      <div id="smart-expense-report" style="display:none;padding:0 20px 8px">
+        <div style="font-family:var(--mono);font-size:13px;color:#AAAAAA;margin-bottom:10px">AI 已完成以下處理：</div>
+        <div id="smart-expense-report-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+      <div style="padding:12px 20px 24px;flex-shrink:0;display:flex;gap:10px" id="smart-expense-actions">
+        <button class="modal-btn modal-btn-cancel" style="flex:1" onclick="closeModal('modal-smart-expense')">取消</button>
+        <button class="modal-btn modal-btn-save" style="flex:1" onclick="runSmartExpense()">加入</button>
+      </div>
+      <div style="padding:0 20px 24px;flex-shrink:0;display:none" id="smart-expense-done-actions">
+        <button class="modal-btn modal-btn-save" style="width:100%" onclick="closeSmartExpenseDone()">確定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ WEATHER LOCATION SHEET ═══ -->
+  <div class="modal-overlay" id="modal-weather-location">
+    <div class="modal-sheet">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px">
+        <span class="modal-title" style="padding:0">天氣地點</span>
+        <button onclick="closeModal('modal-weather-location')" style="background:none;border:none;font-size:22px;cursor:pointer;color:#BBBBBB;line-height:1">×</button>
+      </div>
+      <!-- GPS 選項 -->
+      <div class="currency-option-row" onclick="setWeatherGPS()" style="padding:16px 20px">
+        <svg xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 -960 960 960" width="22px" fill="#888"><path d="M480-80q-83 0-141.5-58.5T280-280q0-48 20.5-90.5T360-446v-394l120 80 120-80v394q39 27 59.5 69.5T680-280q0 83-58.5 141.5T480-80Zm0-80q50 0 85-35t35-85q0-39-22-69.5T520-397v-363l-40 26-40-26v363q-36 18-58 48.5T360-280q0 50 35 85t85 35Zm0-120Z"/></svg>
+        <span style="font-family:var(--mono);font-size:16px;color:#1A1A1A;flex:1">現在地（GPS）</span>
+        <svg id="weather-gps-check" xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#1A1A1A" style="display:none"><path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"/></svg>
+      </div>
+      <div style="height:0.5px;background:#F0F0F0;margin:0 20px"></div>
+      <!-- 手動輸入 -->
+      <div style="padding:16px 20px 12px">
+        <div style="font-family:var(--mono);font-size:13px;color:#AAAAAA;margin-bottom:12px">指定地點</div>
+        <div style="display:flex;gap:10px;align-items:stretch;padding-right:0">
+          <input id="weather-city-input" type="text" placeholder="例：Osaka、大阪市"
+            style="flex:1;padding:14px;border:1.5px solid #EBEBEB;border-radius:0;font-size:16px;font-family:var(--mono);outline:none;box-sizing:border-box;height:52px">
+          <button onclick="searchWeatherCity()" style="height:52px;padding:0 18px;background:#1A1A1A;color:#fff;border:none;font-family:var(--mono);font-size:14px;cursor:pointer;white-space:nowrap;flex-shrink:0;box-sizing:border-box">搜尋</button>
+        </div>
+        <!-- 搜尋結果列表 -->
+        <div id="weather-city-results" style="margin-top:8px"></div>
+        <div id="weather-city-status" style="font-family:var(--mono);font-size:13px;color:#AAAAAA;margin-top:4px;min-height:18px"></div>
+      </div>
+      <div style="padding:0 20px 28px">
+        <button onclick="confirmWeatherCity()" id="weather-city-confirm" style="display:none;width:100%;padding:14px;background:#1A1A1A;color:#fff;border:none;font-family:var(--mono);font-size:15px;cursor:pointer;box-sizing:border-box">確認使用此地點</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TAG SHEET ═══ -->
+  <div class="modal-overlay" id="modal-tag-sheet">
+    <div class="modal-sheet">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 0">
+        <span style="font-family:var(--mono);font-size:14px;color:var(--text-secondary)">加入標籤</span>
+        <button onclick="closeModal('modal-tag-sheet')" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-secondary)">×</button>
+      </div>
+      <div style="display:flex;align-items:center;border-bottom:1.5px solid #000;margin:12px 20px 0;padding-bottom:8px">
+        <input class="set-tag-input" id="set-tag-input" placeholder="" style="flex:1;background:none;border:none;outline:none;font-family:var(--mono);font-size:26px;font-weight:700;color:var(--text-primary)">
+        <button onclick="addSettingsTag()" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--text-primary);padding:0">＋</button>
+      </div>
+      <div class="set-tags-cloud" id="set-tags-cloud" style="padding:20px 20px;display:flex;flex-wrap:wrap;gap:12px 16px"></div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB BAR ═══ -->
+  </div><!-- end page-container -->
+
+  <div class="tab-bar">
+    <button class="tab-item active" onclick="switchTab('home')" id="tab-home">
+      <span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z"/></svg></span>
+      <span class="tab-label">首頁</span>
+    </button>
+    <button class="tab-item" onclick="switchTab('itinerary')" id="tab-itinerary">
+      <span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M200-80q-33 0-56.5-23.5T120-160v-560q0-33 23.5-56.5T200-800h40v-80h80v80h320v-80h80v80h40q33 0 56.5 23.5T840-720v560q0 33-23.5 56.5T760-80H200Zm0-80h560v-400H200v400Zm0-480h560v-80H200v80Zm0 0v-80 80Zm280 240q-17 0-28.5-11.5T440-440q0-17 11.5-28.5T480-480q17 0 28.5 11.5T520-440q0 17-11.5 28.5T480-400Zm-188.5-11.5Q280-423 280-440t11.5-28.5Q303-480 320-480t28.5 11.5Q360-457 360-440t-11.5 28.5Q337-400 320-400t-28.5-11.5ZM640-400q-17 0-28.5-11.5T600-440q0-17 11.5-28.5T640-480q17 0 28.5 11.5T680-440q0 17-11.5 28.5T640-400ZM480-240q-17 0-28.5-11.5T440-280q0-17 11.5-28.5T480-320q17 0 28.5 11.5T520-280q0 17-11.5 28.5T480-240Zm-188.5-11.5Q280-263 280-280t11.5-28.5Q303-320 320-320t28.5 11.5Q360-297 360-280t-11.5 28.5Q337-240 320-240t-28.5-11.5ZM640-240q-17 0-28.5-11.5T600-280q0-17 11.5-28.5T640-320q17 0 28.5 11.5T680-280q0 17-11.5 28.5T640-240Z"/></svg></span>
+      <span class="tab-label">行程</span>
+    </button>
+    <button class="tab-item" onclick="switchTab('photo')" id="tab-photo">
+      <span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm40-80h480L570-480 450-320l-90-120-120 160Zm-40 80v-560 560Z"/></svg></span>
+      <span class="tab-label">相片</span>
+    </button>
+    <button class="tab-item" onclick="switchTab('info')" id="tab-info">
+      <span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M348.5-291.5Q360-303 360-320t-11.5-28.5Q337-360 320-360t-28.5 11.5Q280-337 280-320t11.5 28.5Q303-280 320-280t28.5-11.5Zm0-160Q360-463 360-480t-11.5-28.5Q337-520 320-520t-28.5 11.5Q280-497 280-480t11.5 28.5Q303-440 320-440t28.5-11.5Zm0-160Q360-623 360-640t-11.5-28.5Q337-680 320-680t-28.5 11.5Q280-657 280-640t11.5 28.5Q303-600 320-600t28.5-11.5ZM440-280h240v-80H440v80Zm0-160h240v-80H440v80Zm0-160h240v-80H440v80ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0-560v560-560Z"/></svg></span>
+      <span class="tab-label">資訊</span>
+    </button>
+    <button class="tab-item" onclick="switchTab('settings')" id="tab-settings">
+      <span class="tab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z"/></svg></span>
+      <span class="tab-label">設定</span>
+    </button>
+  </div>
+</div><!-- end app -->
+
+
+<!-- ═══ EXPENSE SHEET ═══ -->
+<div class="modal-overlay" id="modal-expense-sheet">
+  <div class="modal-sheet">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 0">
+      <span class="modal-title" style="padding:0">新增記帳</span>
+      <button onclick="closeModal('modal-expense-sheet')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-secondary)">×</button>
+    </div>
+    <div style="padding:0">
+      <div class="fsheet-row">
+        <span class="fsheet-label">類別</span>
+        <div class="exp-cat-wrap" id="exp-cat-wrap" style="flex:1;display:flex;justify-content:flex-end;align-items:center">
+          <button class="exp-sheet-cat-btn" id="exp-cat-btn" onclick="toggleCatDropdown()" type="button">
+            <span id="exp-cat-label" style="font-family:var(--mono);font-size:20px;font-weight:700;color:#000">餐飲</span>
+            <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path fill="#9CA3AF" d="M7 10l5 5 5-5z"/></svg>
+          </button>
+          <div class="exp-cat-dropdown" id="exp-cat-dropdown"></div>
+        </div>
+      </div>
+      <div class="fsheet-row">
+        <span class="fsheet-label">時間</span>
+        <input class="fsheet-input" id="exp-time" placeholder="hh:mm" inputmode="numeric" oninput="fmtEventTime(this)" style="max-width:100px">
+      </div>
+      <div class="fsheet-row">
+        <span class="fsheet-label">項目</span>
+        <input class="fsheet-input" id="exp-name" placeholder="">
+      </div>
+      <div class="fsheet-row">
+        <span class="fsheet-label">金額</span>
+        <div style="display:flex;align-items:center;gap:8px;flex:1">
+          <input class="fsheet-input" id="exp-amount" placeholder="" type="text" inputmode="decimal" style="flex:1;text-align:right">
+          <button type="button" onclick="toggleExpNegative()" id="exp-neg-btn"
+            style="flex-shrink:0;background:none;border:1.5px solid #E0E0E0;border-radius:0;font-family:var(--mono);font-size:16px;font-weight:700;color:#AAAAAA;width:40px;height:40px;cursor:pointer;line-height:1">±</button>
+        </div>
+      </div>
+      <!-- 子項目 -->
+      <div style="padding:8px 20px 0">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <span style="font-family:var(--mono);font-size:12px;color:#AAAAAA">子項目</span>
+          <button onclick="addExpSubitemRow()" style="background:none;border:none;font-family:var(--mono);font-size:13px;color:#C9A84C;cursor:pointer;padding:0">＋ 新增</button>
+        </div>
+        <div id="exp-subitems-list"></div>
+      </div>
+      <div style="padding:16px 20px">
+        <div class="modal-btn-row" style="padding:0">
+          <button class="modal-btn modal-btn-cancel" onclick="closeModal('modal-expense-sheet')">取消</button>
+          <button class="modal-btn modal-btn-save" onclick="addExpense()">加入</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ EVENT MODAL ═══ -->
+<div class="modal-overlay" id="modal-event">
+  <div class="modal-sheet">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 0">
+      <span class="modal-title" id="modal-event-title" style="padding:0">新增行程</span>
+      <button onclick="closeModal('modal-event')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-secondary)">×</button>
+    </div>
+    <div style="padding:0">
+      <div style="padding:12px 20px 0">
+        <div style="font-size:12px;color:#888;font-family:var(--mono);margin-bottom:6px">時間</div>
+        <input class="ev-big-input" id="ev-time" placeholder="hh:mm" inputmode="numeric" oninput="fmtEventTime(this)">
+      </div>
+      <div style="padding:12px 20px 0">
+        <div style="font-size:12px;color:#888;font-family:var(--mono);margin-bottom:6px">行程</div>
+        <textarea class="ev-big-input ev-auto" id="ev-title" placeholder="" rows="1"></textarea>
+      </div>
+      <div style="padding:12px 20px 0">
+        <div style="font-size:12px;color:#888;font-family:var(--mono);margin-bottom:6px">行程說明</div>
+        <textarea class="ev-big-input ev-auto" id="ev-note" placeholder="" rows="1"></textarea>
+      </div>
+      <div style="padding:12px 20px 0">
+        <div style="font-size:12px;color:#888;font-family:var(--mono);margin-bottom:6px">地址</div>
+        <textarea class="ev-big-input ev-auto" id="ev-addr" placeholder="" rows="1"></textarea>
+      </div>
+      <div style="padding:12px 20px 0">
+        <div style="font-size:12px;color:#888;font-family:var(--mono);margin-bottom:6px">車站</div>
+        <input class="ev-big-input" id="ev-station" placeholder="">
+      </div>
+      <div style="padding:12px 20px 16px">
+        <div style="font-size:12px;color:#888;font-family:var(--mono);margin-bottom:6px">線路名稱</div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <input class="ev-big-input" id="ev-line" placeholder="" style="flex:1">
+          <div id="ev-color-swatch" onclick="openColorSheet()" style="width:36px;height:36px;border-radius:0;background:#CCC;cursor:pointer;flex-shrink:0;border:1.5px solid #E0E0E0"></div>
+        </div>
+      </div>
+      <div style="padding:0 20px 16px">
+        <div class="modal-btn-row" style="padding:0">
+          <button class="modal-btn modal-btn-cancel" onclick="closeModal('modal-event')">取消</button>
+          <button class="modal-btn modal-btn-save" onclick="saveEvent()">儲存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ BANNER PHOTO MODAL ═══ -->
+<div class="modal-overlay" id="modal-banner">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">封面照片</div>
+    <div class="modal-body">
+      <div class="photo-grid" id="photo-grid"></div>
+      <div class="modal-btn-row">
+        <button class="modal-btn modal-btn-cancel" onclick="closeModal('modal-banner')">取消</button>
+        <button class="modal-btn modal-btn-save" onclick="saveBanner()">儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ BANNER ACTION SHEET ═══ -->
+<div class="modal-overlay" id="action-sheet-banner">
+  <div class="action-sheet">
+    <div class="modal-handle"></div>
+    <button class="action-sheet-btn" onclick="bannerActionAddDay()">
+      <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
+      新增天數
+    </button>
+    <div class="action-sheet-divider"></div>
+    <button class="action-sheet-btn" onclick="closeActionSheet('action-sheet-banner');openReorderSheet()">
+      <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"><path d="M160-360v-80h640v80H160Zm0-160v-80h640v80H160Zm0-160v-80h640v80H160Z"/></svg>
+      移動行程
+    </button>
+    <div class="action-sheet-divider"></div>
+    <button class="action-sheet-btn action-sheet-btn-danger" onclick="bannerActionDelete()">
+      <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
+      刪除此天行程
+    </button>
+    <button class="action-sheet-btn action-sheet-btn-cancel" onclick="closeActionSheet('action-sheet-banner')">取消</button>
+  </div>
+</div>
+
+<!-- ═══ REORDER DAY SHEET ═══ -->
+<div class="modal-overlay" id="modal-reorder-sheet">
+  <div class="modal-sheet" style="max-height:80vh;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;flex-shrink:0;background:#fff">
+      <span class="modal-title" style="padding:0">移動行程</span>
+      <button onclick="closeModal('modal-reorder-sheet')" style="background:none;border:none;font-size:22px;cursor:pointer;color:#999">×</button>
+    </div>
+    <div id="reorder-arrow-bar" style="display:flex;align-items:center;justify-content:space-between;padding:8px 20px 12px;flex-shrink:0;border-bottom:1px solid #F0F0F0;background:#fff">
+      <span id="reorder-selected-label" style="font-size:14px;font-family:var(--mono);color:#AAAAAA">點選行程後移動</span>
+      <div style="display:flex;gap:12px">
+        <button onclick="reorderMoveSelected(-1)" style="width:44px;height:44px;border-radius:50%;background:#F0F0F0;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center">
+          <svg xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 -960 960 960" width="22px"><path d="M480-528 296-344l-56-56 240-240 240 240-56 56-184-184Z" fill="#1A1A1A"/></svg>
+        </button>
+        <button onclick="reorderMoveSelected(1)" style="width:44px;height:44px;border-radius:50%;background:#F0F0F0;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center">
+          <svg xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 -960 960 960" width="22px"><path d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z" fill="#1A1A1A"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="reorder-list" style="overflow-y:auto;flex:1;padding:0 0 8px"></div>
+    <div style="padding:12px 20px 16px;flex-shrink:0;display:flex;gap:10px;background:#fff">
+      <button class="modal-btn modal-btn-cancel" style="flex:1" onclick="closeModal('modal-reorder-sheet')">取消</button>
+      <button class="modal-btn modal-btn-save" style="flex:1" onclick="applyReorder()">確定</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ NOTE EDIT SHEET ═══ -->
+<div class="modal-overlay" id="modal-note-sheet">
+  <div class="modal-sheet" style="display:flex;flex-direction:column;max-height:92vh;background:#fff">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;flex-shrink:0;background:#fff">
+      <span class="modal-title" style="padding:0" id="note-sheet-title">新增筆記</span>
+      <div style="display:flex;align-items:center;gap:12px">
+        <!-- 插入圖片 icon -->
+        <button onclick="noteInsertImage()" style="background:none;border:none;cursor:pointer;padding:2px;color:#BBBBBB;display:flex;align-items:center" title="插入圖片">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm40-80h480L570-480 450-320l-90-120-120 160Zm-40 80v-560 560Z"/></svg>
+        </button>
+        <button onclick="closeModal('modal-note-sheet')" style="background:none;border:none;font-size:22px;cursor:pointer;color:#BBBBBB;line-height:1">×</button>
+      </div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:0 20px 16px;background:#fff">
+      <textarea id="note-sheet-content" class="note-sheet-textarea" placeholder="第一行為標題…"></textarea>
+      <!-- 縮圖列 -->
+      <div id="note-img-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
+    </div>
+    <div style="padding:0 20px 20px;flex-shrink:0;background:#fff">
+
+      <div style="display:flex;gap:10px">
+        <button class="modal-btn modal-btn-cancel" style="flex:1" onclick="closeModal('modal-note-sheet')">取消</button>
+        <button class="modal-btn modal-btn-save" style="flex:1" onclick="saveNoteSheet()">儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CHECKLIST ADD MODAL ═══ -->
+<div class="modal-overlay" id="modal-checklist-add">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">新增項目</div>
+    <div class="modal-body">
+      <input class="modal-input" id="checklist-add-input" placeholder="項目名稱"
+        onkeydown="if(event.key==='Enter')saveChecklistModal()">
+      <div class="modal-btn-row">
+        <button class="modal-btn modal-btn-cancel" onclick="closeModal('modal-checklist-add')">取消</button>
+        <button class="modal-btn modal-btn-save" onclick="saveChecklistModal()">加入</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SHOP FIELD SHEET ═══ -->
+<div class="modal-overlay" id="modal-shop-field">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="shop-field-title">備注</div>
+    <div class="modal-body">
+      <input class="modal-input" id="shop-field-input" placeholder=""
+        onkeydown="if(event.key==='Enter')saveShopFieldFromModal()">
+      <div class="modal-btn-row">
+        <button class="modal-btn modal-btn-cancel" onclick="closeModal('modal-shop-field')">取消</button>
+        <button class="modal-btn modal-btn-save" onclick="saveShopFieldFromModal()">儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TRIP ADD SHEET ═══ -->
+<div class="modal-overlay" id="modal-trip-sheet">
+  <div class="modal-sheet">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 0">
+      <span class="modal-title" style="padding:0">新增行程</span>
+      <button onclick="closeModal('modal-trip-sheet')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-secondary)">×</button>
+    </div>
+    <div style="padding:0 20px">
+      <div style="padding:12px 0 0">
+        <div class="ff-label">旅遊名稱</div>
+        <input class="ff-input" id="tf-name" placeholder="">
+      </div>
+      <div style="padding:12px 0 0">
+        <div class="ff-label">日期</div>
+        <input class="ff-input" id="tf-dates" placeholder="YYYY/MM/DD–MM/DD" inputmode="numeric" oninput="fmtTripSheetDates(this)">
+      </div>
+      <div style="padding:12px 0 16px" onclick="openTripCurrencySheet()" style="cursor:pointer">
+        <div class="ff-label">幣別</div>
+        <div style="display:flex;align-items:center;gap:4px;padding:8px 0;border-bottom:1.5px solid #E0E0E0;cursor:pointer" onclick="openTripCurrencySheet()">
+          <span id="tf-currency-display" style="font-family:var(--mono);font-size:16px;font-weight:700;flex:1;color:#1A1A1A">NT$ 新台幣</span>
+          <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 0 24 24" width="20px"><path fill="#1A1A1A" d="M7 10l5 5 5-5z"/></svg>
+        </div>
+      </div>
+      <div style="padding:0 0 16px">
+        <button class="modal-btn modal-btn-save" style="width:100%;margin:0" onclick="saveTripSheet()">Add</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HOME MORE SHEET ═══ -->
+<div class="modal-overlay" id="modal-home-more">
+  <div class="action-sheet">
+    <div class="modal-handle"></div>
+    <button class="action-sheet-btn" onclick="closeActionSheet('modal-home-more');openTripSheet()">
+      <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
+      新增行程
+    </button>
+    <div class="action-sheet-divider"></div>
+    <button class="action-sheet-btn" onclick="closeActionSheet('modal-home-more');toggleTripDeleteMode()">
+      <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
+      刪除行程
+    </button>
+    <div class="action-sheet-divider"></div>
+    <button class="action-sheet-btn" onclick="closeActionSheet('modal-home-more');openTripFilterSheet()">
+      <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"><path d="M160-120q-33 0-56.5-23.5T80-200v-560q0-33 23.5-56.5T160-840h640q33 0 56.5 23.5T880-760v560q0 33-23.5 56.5T800-120H160Zm0-80h640v-560H160v560Zm40-80h200v-80H200v80Zm382-80 198-198-57-57-141 142-57-57-56 57 113 113Zm-382-80h200v-80H200v80Zm0-160h200v-80H200v80Zm-40 400v-560 560Z"/></svg>
+      顯示行程
+    </button>
+    <button class="action-sheet-btn action-sheet-btn-cancel" onclick="closeActionSheet('modal-home-more')">取消</button>
+  </div>
+</div>
+
+<!-- ═══ COLOR PICKER SHEET ═══ -->
+<div class="modal-overlay" id="modal-color-sheet">
+  <div class="modal-sheet" style="max-height:85vh;overflow-y:auto;background:#fff">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;position:sticky;top:0;background:#fff;z-index:1">
+      <span class="modal-title" style="padding:0">選擇路線顏色</span>
+      <button onclick="closeModal('modal-color-sheet')" style="background:none;border:none;font-size:22px;cursor:pointer;color:#999">×</button>
+    </div>
+    <div style="padding:0 16px 24px">
+      <div class="cpk-row">
+        <div class="cpk-swatch" style="background:#CC0000" onclick="pickColor('#CC0000')"></div>
+        <div class="cpk-swatch" style="background:#FF3B30" onclick="pickColor('#FF3B30')"></div>
+        <div class="cpk-swatch" style="background:#FF2D78" onclick="pickColor('#FF2D78')"></div>
+        <div class="cpk-swatch" style="background:#A0522D" onclick="pickColor('#A0522D')"></div>
+        <div class="cpk-swatch" style="background:#FF8000" onclick="pickColor('#FF8000')"></div>
+        <div class="cpk-swatch" style="background:#CC8800" onclick="pickColor('#CC8800')"></div>
+        <div class="cpk-swatch" style="background:#C8A060" onclick="pickColor('#C8A060')"></div>
+        <div class="cpk-swatch" style="background:#FFA500" onclick="pickColor('#FFA500')"></div>
+        <div class="cpk-swatch" style="background:#FFD700" onclick="pickColor('#FFD700')"></div>
+        <div class="cpk-swatch" style="background:#1A6B2A" onclick="pickColor('#1A6B2A')"></div>
+        <div class="cpk-swatch" style="background:#00886A" onclick="pickColor('#00886A')"></div>
+        <div class="cpk-swatch" style="background:#4CC417" onclick="pickColor('#4CC417')"></div>
+        <div class="cpk-swatch" style="background:#A8C000" onclick="pickColor('#A8C000')"></div>
+        <div class="cpk-swatch" style="background:#1A3FCC" onclick="pickColor('#1A3FCC')"></div>
+        <div class="cpk-swatch" style="background:#00AAEE" onclick="pickColor('#00AAEE')"></div>
+        <div class="cpk-swatch" style="background:#00C8A0" onclick="pickColor('#00C8A0')"></div>
+        <div class="cpk-swatch" style="background:#4B0082" onclick="pickColor('#4B0082')"></div>
+        <div class="cpk-swatch" style="background:#8B2FC9" onclick="pickColor('#8B2FC9')"></div>
+        <div class="cpk-swatch" style="background:#B06AE0" onclick="pickColor('#B06AE0')"></div>
+        <div class="cpk-swatch" style="background:#AACCEE" onclick="pickColor('#AACCEE')"></div>
+        <div class="cpk-swatch" style="background:#CC00AA" onclick="pickColor('#CC00AA')"></div>
+        <div class="cpk-swatch" style="background:#E080D0" onclick="pickColor('#E080D0')"></div>
+        <div class="cpk-swatch" style="background:#F0A080" onclick="pickColor('#F0A080')"></div>
+        <div class="cpk-swatch" style="background:#909090" onclick="pickColor('#909090')"></div>
+        <div class="cpk-swatch" style="background:#C0C0C0" onclick="pickColor('#C0C0C0')"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TRIP FILTER SHEET ═══ -->
+<div class="modal-overlay" id="modal-trip-filter">
+  <div class="modal-sheet">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px">
+      <span class="modal-title" style="padding:0">顯示行程</span>
+      <button onclick="closeModal('modal-trip-filter')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-secondary)">×</button>
+    </div>
+    <div id="trip-filter-list"></div>
+    <div style="padding:12px 20px 16px;display:flex;gap:10px">
+      <button class="modal-btn modal-btn-cancel" style="flex:1" onclick="setAllTripFilter(true)">全選</button>
+      <button class="modal-btn modal-btn-save" style="flex:1" onclick="saveTripFilter()">完成</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ INFO CUSTOMIZE SHEET ═══ -->
+<div class="modal-overlay" id="modal-info-custom">
+  <div class="modal-sheet">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px">
+      <span class="modal-title" style="padding:0">顯示項目</span>
+      <button onclick="closeModal('modal-info-custom')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-secondary)">×</button>
+    </div>
+    <div id="info-custom-list"></div>
+    <div style="padding:16px 20px">
+      <button class="modal-btn modal-btn-save" style="width:100%;margin:0" onclick="saveInfoModules()">完成</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TRIP CURRENCY SHEET ═══ -->
+<!-- ═══ CURRENCY SHEET (shared) ═══ -->
+<div class="modal-overlay" id="modal-currency-sheet">
+  <div class="modal-sheet" style="max-height:65vh;display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 10px;flex-shrink:0">
+      <span class="modal-title" style="padding:0">選擇幣別</span>
+      <button onclick="closeModal('modal-currency-sheet')" style="background:none;border:none;font-size:22px;cursor:pointer;color:#BBBBBB;line-height:1">×</button>
+    </div>
+    <!-- 幣別清單 -->
+    <div id="currency-sheet-list" style="flex:1;overflow-y:auto;padding:0 0 20px"></div>
+    <!-- context 記錄 -->
+    <input type="hidden" id="currency-sheet-context" value="settings">
+  </div>
+</div>
+
+<script src="app.js"></script>
+
+
+</body>
