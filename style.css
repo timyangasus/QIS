@@ -1869,7 +1869,7 @@ button {
   width: var(--to);
   border-radius: 2.5px;
   background: var(--guide-title);
-  animation: progress-range 3s linear both;
+  animation: progress-range 1.6s linear both;
 }
 
 @keyframes progress-range {

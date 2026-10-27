@@ -1183,7 +1183,7 @@
       `,
       // Each step takes ~3s, then the next one picks up the bar where this one stopped
       mount: () => {
-        const timer = setTimeout(() => location.replace(`#${i + 1 < all.length ? `mesh-${i + 2}` : 'internet-live'}`), 3200);
+        const timer = setTimeout(() => location.replace(`#${i + 1 < all.length ? `mesh-${i + 2}` : 'internet-live'}`), 1700);
         return () => clearTimeout(timer);
       },
     })),
