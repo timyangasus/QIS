@@ -1395,7 +1395,9 @@ button {
   background: #dde6f2;
 }
 
+/* Width is driven by the countdown script, not the shared fill animation */
 .wait-progress .progress-fill {
+  animation: none;
   width: 3%;
   border-radius: 4px;
   background: var(--brand);
@@ -1636,7 +1638,7 @@ button {
   width: 0;
   border-radius: 2px;
   background: var(--guide-title);
-  animation: progress-fill 4s ease-out forwards;
+  animation: progress-fill 2s ease-out forwards;
 }
 
 @keyframes progress-fill {
@@ -1842,7 +1844,7 @@ button {
 
 .progress.apply-progress { margin-top: 26px; }
 
-.apply-progress .progress-fill { animation-duration: 6s; }
+.apply-progress .progress-fill { animation-duration: 3s; }
 
 .apply-status {
   margin-top: 46px;

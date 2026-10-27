@@ -306,11 +306,11 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 - Figma node：`757:189`
 - 和 1_120 同一個版面（產品圖、機型名稱），差別：
   - 返回箭頭是深色 `--guide-ink`
-  - 機型名稱下方加一條進度條（寬 306、高 4，灰底，`--guide-title` 藍色填滿，4 秒跑完）
+  - 機型名稱下方加一條進度條（寬 306、高 4，灰底，`--guide-title` 藍色填滿，2 秒跑完）
   - 進度條下方：「Detecting your Internet connection status...」17 pt `--brand` 藍色，兩行置中
   - Get Started 變成**不能按**：深灰底 `#5a5a5a`、淺灰字
   - Advanced Settings 變成灰色，不能按
-- **進度跑完（約 4 秒）自動跳到 `setup-ssid` 1_140**（用取代方式換頁，返回不會再回到這頁）
+- **進度跑完（約 2 秒）自動跳到 `setup-ssid` 1_140**（用取代方式換頁，返回不會再回到這頁）
 
 ### 5.11 `1_140`–`1_170` 設定頁
 
@@ -334,7 +334,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_140 | 建立 WiFi 網路 `setup-ssid` | `757:185` | WiFi 圖示；Create WiFi Network；SSID（可清除）、密碼（強度）、□ Separate WiFi network | Next → 1_150（SSID 空白或密碼太弱時不能按）；返回 → 1_120 |
 | 1_150 | 建立 IoT 網路 `setup-iot` | `757:182` | 房子+齒輪圖示；Create Iot Network；說明 IoT／舊裝置可能和 WiFi 7 不相容；IoT SSID、密碼 | Next → 1_160；Set Up Later（淺藍文字）→ 1_160 |
 | 1_160 | 設定登入帳號 `setup-account` | `757:179` | 人像圖示；Set up Local Login Account；Username、Password（強度）、Confirm Password | Next → 1_170；兩次密碼不一致時顯示紅字「Passwords do not match.」且不能按 |
-| 1_170 | 套用設定 `setup-apply` | `757:176` | ‹ 返回（→ 1_160）；裝置圖（同 1_040，166 × 202）；Setting up your network（`--brand`）；進度條 6 秒；Now applying your settings. | 約 6 秒後自動 → 1_180 |
+| 1_170 | 套用設定 `setup-apply` | `757:176` | ‹ 返回（→ 1_160）；裝置圖（同 1_040，166 × 202）；Setting up your network（`--brand`）；進度條 3 秒；Now applying your settings. | 約 3 秒後自動 → 1_180 |
 
 ### 5.12 `1_180`–`1_200` AiMesh 建立中 `mesh-1`～`mesh-3`
 - Figma node：`803:414`、`803:400`、`803:383`
@@ -477,11 +477,11 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_100 | 設定指南 3/4 `guide-3` | 避免干擾：遠離使用 2.4GHz 頻段的家電和裝置 |
 | 1_110 | 設定指南 4/4 `guide-4` | 開啟節點電源：節點會自動尋找 AiMesh 路由器，連線時燈號閃藍燈 |
 | 1_120 | 安裝歡迎頁 `welcome` | 顯示偵測到的機型 ZenWiFi BT8，按 Get Started 開始設定 |
-| 1_130 | 偵測網路連線 `wan-detecting` | 已偵測到 WAN（網路線已接），正在檢查網際網路連線狀態（約 4 秒後自動跳下一頁） |
+| 1_130 | 偵測網路連線 `wan-detecting` | 已偵測到 WAN（網路線已接），正在檢查網際網路連線狀態（約 2 秒後自動跳下一頁） |
 | 1_140 | 建立 WiFi 網路 `setup-ssid` | 設定主要 WiFi 的名稱（SSID）和密碼 |
 | 1_150 | 建立 IoT 網路 `setup-iot` | 為 IoT／舊裝置另建一個 WiFi，可稍後再設 |
 | 1_160 | 設定登入帳號 `setup-account` | 設定路由器管理介面的帳號和密碼 |
-| 1_170 | 套用設定 `setup-apply` | 路由器正在套用剛才的 WiFi 和帳號設定（約 6 秒後自動跳下一頁） |
+| 1_170 | 套用設定 `setup-apply` | 路由器正在套用剛才的 WiFi 和帳號設定（約 3 秒後自動跳下一頁） |
 | 1_180 | AiMesh 建立中 1/3 `mesh-1` | 建立 AiMesh 網路：路由器和節點開始連線 |
 | 1_190 | AiMesh 建立中 2/3 `mesh-2` | AiMesh 最佳化：節點自動加入網路 |
 | 1_200 | AiMesh 建立中 3/3 `mesh-3` | AiMesh 最佳化：可以改到背景執行，先開始上網 |

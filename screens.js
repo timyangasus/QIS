@@ -1018,9 +1018,9 @@
           <span class="guide-link welcome-advanced is-disabled">Advanced Settings</span>
         </div>
       `,
-      // Internet check finishes with the progress bar (4s), then on to WiFi setup
+      // Internet check finishes with the progress bar (2s), then on to WiFi setup
       mount: () => {
-        const timer = setTimeout(() => location.replace('#setup-ssid'), 4200);
+        const timer = setTimeout(() => location.replace('#setup-ssid'), 2200);
         return () => clearTimeout(timer);
       },
     },
@@ -1130,7 +1130,7 @@
         </div>
       `,
       mount: () => {
-        const timer = setTimeout(() => location.replace('#mesh-1'), 6200);
+        const timer = setTimeout(() => location.replace('#mesh-1'), 3200);
         return () => clearTimeout(timer);
       },
     },
