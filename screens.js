@@ -904,7 +904,7 @@
           <div class="home-actions">
             <button data-go="router-info" data-label="資訊" aria-label="資訊">${HOME_ICON.info}</button>
             <button data-go="notifications" data-label="通知" aria-label="通知">${HOME_ICON.bell}</button>
-            <button data-go="add-device" data-label="新增" aria-label="新增">${HOME_ICON.plus}</button>
+            <button data-go="opening" aria-label="新增裝置（重新開始 QIS 設定）">${HOME_ICON.plus}</button>
           </div>
         </header>
 
