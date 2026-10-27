@@ -388,16 +388,18 @@
 
     const leds = ['POWER', 'DS', 'US', 'ONLINE'].map((name, i) => {
       const y = 156 + i * 24;
-      // Right after the move, lights quickly go off (1_033) or come on (1_036) one by one, each with a glow
-      const t = `begin="${(3.0 + i * 0.12).toFixed(2)}s" dur="0.2s" fill="freeze"`;
-      const startLit = !on;
+      // Right after the move, lights quickly go off one by one (1_033), or come on and keep
+      // blinking like a modem starting up (1_036), each with a glow; each light blinks at its own pace
+      const begin = `begin="${(3.0 + i * 0.12).toFixed(2)}s"`;
+      const off = `${begin} dur="0.2s" fill="freeze"`;
+      const blink = `${begin} dur="${(0.7 + i * 0.16).toFixed(2)}s" repeatCount="indefinite" calcMode="discrete" keyTimes="0;0.55"`;
       return `
         <text x="112" y="${y + 3}" text-anchor="end" class="modem-led-label">${name}</text>
-        <circle cx="127" cy="${y}" r="9.5" fill="${LED_ON}" opacity="${startLit ? 0.28 : 0}">
-          <animate attributeName="opacity" ${t} values="${startLit ? '0.28;0' : '0;0.28'}"/>
+        <circle cx="127" cy="${y}" r="9.5" fill="${LED_ON}" opacity="${on ? 0 : 0.28}">
+          <animate attributeName="opacity" ${on ? `${blink} values="0.28;0"` : `${off} values="0.28;0"`}/>
         </circle>
-        <circle cx="127" cy="${y}" r="5" fill="${startLit ? LED_ON : LED_OFF}">
-          <animate attributeName="fill" ${t} values="${startLit ? `${LED_ON};${LED_OFF}` : `${LED_OFF};${LED_ON}`}"/>
+        <circle cx="127" cy="${y}" r="5" fill="${on ? LED_OFF : LED_ON}">
+          <animate attributeName="fill" ${on ? `${blink} values="${LED_ON};${LED_OFF}"` : `${off} values="${LED_ON};${LED_OFF}"`}/>
         </circle>`;
     }).join('');
 
