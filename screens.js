@@ -29,6 +29,29 @@
   })();
 
 
+  // Realistic-looking (but not scannable) 25×25 QR for the simulated camera feed
+  const QR_CAMERA = (() => {
+    const N = 25;
+    let seed = 20260;
+    const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const inFinder = (x, y) => (x < 8 && y < 8) || (x > N - 9 && y < 8) || (x < 8 && y > N - 9);
+    const finder = (x, y) => `<path d="M${x} ${y}h7v7h-7z M${x + 1} ${y + 1}v5h5v-5z M${x + 2} ${y + 2}h3v3h-3z" fill-rule="evenodd"/>`;
+    let cells = '';
+    for (let y = 0; y < N; y++) {
+      for (let x = 0; x < N; x++) {
+        if (inFinder(x, y)) continue;
+        const timing = (x === 6 || y === 6);
+        const on = timing ? (x + y) % 2 === 0 : rand() < 0.48;
+        if (on) cells += `M${x} ${y}h1v1h-1z`;
+      }
+    }
+    const align = `<path d="M16 16h5v5h-5z M17 17v3h3v-3z M18 18h1v1h-1z" fill-rule="evenodd"/>`;
+    return `<svg viewBox="-1 -1 ${N + 2} ${N + 2}" width="112" height="112" shape-rendering="crispEdges" fill="#111">
+      <rect x="-1" y="-1" width="${N + 2}" height="${N + 2}" fill="#fff"/>
+      ${finder(0, 0)}${finder(N - 7, 0)}${finder(0, N - 7)}${align}<path d="${cells}"/>
+    </svg>`;
+  })();
+
   // ── Setup forms: shared values (prefilled with reasonable demo values) ──
   const FORM = {
     ssid: 'timmmbt8',
@@ -119,9 +142,9 @@
     update();
   }
 
-  function setupHeader(backTo) {
+  function setupHeader() {
     return `<header class="navbar navbar-guide">
-      ${backTo ? `<button class="navbar-btn" data-go="${backTo}" aria-label="返回">${ICON.back}</button>` : ''}
+      <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
       <h1 class="navbar-title navbar-title-bold">System Setup</h1>
       <button class="navbar-btn navbar-btn-right" data-go="help" data-label="說明" aria-label="說明">${ICON.helpOutline}</button>
     </header>`;
@@ -271,20 +294,113 @@
     : `${kbps >= 100 ? kbps.toFixed(0) : kbps >= 10 ? kbps.toFixed(1) : kbps.toFixed(2)}<small>Kbps</small>`;
 
 
+  // The modem power-cycle pages are shared by two flows: right after 1_030 (setup), and when
+  // 1_120 finds no WAN (wan), where each step is followed by a timed wait before continuing.
+  let MODEM_FLOW = 'setup';
+
+  // Small modem for the wait pages: 'off' = unplugged, all lights off; 'starting' = lights blinking
+  function modemMini(mode) {
+    const starting = mode === 'starting';
+    const leds = ['POWER', 'DS', 'US', 'ONLINE'].map((name, i) => {
+      const y = 48 + i * 15;
+      return `
+        <text x="22" y="${y + 2.5}" text-anchor="end" class="modem-mini-label">${name}</text>
+        <circle cx="31" cy="${y}" r="3.2" class="modem-mini-led${starting ? ' is-blink' : ''}" style="--i:${i}"/>`;
+    }).join('');
+    return `
+      <svg class="modem-mini" viewBox="0 0 240 150" width="240" height="150" aria-hidden="true">
+        <ellipse cx="28" cy="140" rx="44" ry="5" fill="#e4e7ec"/>
+        <rect x="2" y="10" width="54" height="128" rx="11" fill="#2b323b"/>
+        <rect x="4" y="12" width="50" height="4" rx="2" fill="#3a434e"/>
+        <rect x="10" y="22" width="38" height="108" rx="7" fill="#353d47"/>
+        <text x="29" y="36" text-anchor="middle" class="modem-mini-name">MODEM</text>
+        ${leds}
+        ${starting ? `
+          <path d="M56 120 C80 140 110 140 124 128" fill="none" stroke="#6f7780" stroke-width="4" stroke-linecap="round"/>
+        ` : `
+          <path d="M56 120 C80 146 150 146 176 126" fill="none" stroke="#6f7780" stroke-width="4" stroke-linecap="round"/>
+          <g transform="translate(196 122) rotate(-12)">
+            <rect x="-22" y="-7" width="18" height="14" rx="3" fill="#3a4452"/>
+            <rect x="-5" y="-5" width="5" height="10" rx="1.5" fill="#5b6573"/>
+            <rect x="0" y="-4" width="9" height="2.2" rx="1" fill="#a3abb5"/>
+            <rect x="0" y="1.8" width="9" height="2.2" rx="1" fill="#a3abb5"/>
+          </g>
+        `}
+        <text x="${starting ? 172 : 150}" y="${starting ? 66 : 56}" text-anchor="middle" class="modem-mini-tag${starting ? '' : ' is-off'}">${starting ? 'STARTING UP' : 'POWER OFF'}</text>
+        <line x1="${starting ? 126 : 112}" x2="${starting ? 218 : 188}" y1="${starting ? 73 : 63}" y2="${starting ? 73 : 63}" class="modem-mini-dash"/>
+        ${starting ? '<text x="172" y="88" text-anchor="middle" class="modem-mini-tag is-brand">LIGHTS MAY BLINK</text>' : ''}
+      </svg>`;
+  }
+
+  // Wait page countdown. Demo runs the real minutes fast (a few seconds) so the flow stays quick.
+  function startCountdown(el, totalSec, demoMs) {
+    const timeEl = el.querySelector('.wait-time');
+    const fill = el.querySelector('.wait-progress .progress-fill');
+    const btn = el.querySelector('.wait-continue');
+    const fmt = sec => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
+    const t0 = performance.now();
+    let raf;
+    const tick = now => {
+      const p = Math.min(1, (now - t0) / demoMs);
+      timeEl.textContent = fmt(Math.ceil(totalSec * (1 - p)));
+      fill.style.width = `${Math.max(3, p * 100)}%`;
+      if (p < 1) raf = requestAnimationFrame(tick);
+      else { btn.disabled = false; el.querySelector('.wait-card').classList.add('is-done'); }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }
+
+  function waitPage({ title, label, totalSec, hint, mode, next }) {
+    return `
+      <header class="navbar navbar-guide">
+        <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
+        <h1 class="navbar-title">Setup Guide</h1>
+        <button class="navbar-btn navbar-btn-right" data-go="help" data-label="說明" aria-label="說明">${ICON.helpOutline}</button>
+      </header>
+
+      <div class="guide-body">
+        <div class="guide-illust wait-illust">
+          <div class="wait-card">
+            <p class="wait-label">${label}</p>
+            <p class="wait-time">${Math.floor(totalSec / 60)}:${String(totalSec % 60).padStart(2, '0')}</p>
+            <div class="progress wait-progress"><div class="progress-fill"></div></div>
+            <p class="wait-hint">${hint}</p>
+            ${modemMini(mode)}
+          </div>
+        </div>
+        <h2 class="guide-title">${title}</h2>
+        <button class="btn-brand wait-continue" data-go="${next}" data-label="Continue" disabled>Continue</button>
+      </div>`;
+  }
+
   // 1_033 / 1_036 modem power-cycle illustration, drawn in the Setup Guide style
   function modemIllust(state) {
     const on = state === 'on';
+    // Each page plays one move once and stays there: 1_033 pulls the plug out, 1_036 pushes it in.
+    // An arrow first fades in and nudges the way to go, then the plug moves. SMIL so the cable can bend with it.
+    // IN sits over the outlet face so plug and outlet overlap like it is really plugged in
+    const IN = { x: 324, y: 168, r: 0, cable: 'M150 280 C170 334 252 330 252 244 C252 194 262 168 288 168' };
+    const OUT = { x: 236, y: 182, r: -10, cable: 'M150 280 C170 334 200 326 196 258 C193 214 186 184 200 182' };
+    const [from, to] = on ? [OUT, IN] : [IN, OUT];
+    const MOVE = 'begin="1.9s" dur="1.1s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.45 0 0.2 1"';
+    const LED_ON = '#34d86f', LED_OFF = '#4a525d';
+
     const leds = ['POWER', 'DS', 'US', 'ONLINE'].map((name, i) => {
       const y = 156 + i * 24;
-      const lit = on && i < 3;
+      // Right after the move, lights quickly go off (1_033) or come on (1_036) one by one, each with a glow
+      const t = `begin="${(3.0 + i * 0.12).toFixed(2)}s" dur="0.2s" fill="freeze"`;
+      const startLit = !on;
       return `
         <text x="112" y="${y + 3}" text-anchor="end" class="modem-led-label">${name}</text>
-        <circle cx="126" cy="${y}" r="4.2" class="modem-led ${on ? (lit ? 'is-lit' : '') : 'is-off'}" style="--i:${i}"/>`;
+        <circle cx="127" cy="${y}" r="9.5" fill="${LED_ON}" opacity="${startLit ? 0.28 : 0}">
+          <animate attributeName="opacity" ${t} values="${startLit ? '0.28;0' : '0;0.28'}"/>
+        </circle>
+        <circle cx="127" cy="${y}" r="5" fill="${startLit ? LED_ON : LED_OFF}">
+          <animate attributeName="fill" ${t} values="${startLit ? `${LED_ON};${LED_OFF}` : `${LED_OFF};${LED_ON}`}"/>
+        </circle>`;
     }).join('');
-    const plugX = on ? 296 : 252, plugY = on ? 168 : 178;
-    const cable = on
-      ? 'M150 280 C170 334 240 330 236 244 C233 192 238 168 260 168'
-      : 'M150 280 C170 334 214 326 210 254 C207 206 200 180 216 178';
+
     return `
       <svg class="modem-svg" viewBox="0 0 400 330" width="400" height="330" aria-hidden="true">
         <defs>
@@ -297,8 +413,11 @@
         <circle cx="120" cy="196" r="118" fill="url(#modem-halo-${state})"/>
         <ellipse cx="120" cy="290" rx="100" ry="9" fill="#eceef2"/>
 
-        <rect x="78" y="90" width="84" height="198" rx="16" fill="#fff" stroke="#d5dae1" stroke-width="2"/>
-        <rect x="90" y="102" width="60" height="174" rx="10" fill="#f5f7fa"/>
+        <!-- Dark modem body so it reads as a modem, not a power strip -->
+        <rect x="78" y="90" width="84" height="198" rx="16" fill="#2b323b"/>
+        <rect x="80" y="92" width="80" height="6" rx="3" fill="#3a434e"/>
+        <rect x="90" y="104" width="60" height="172" rx="10" fill="#353d47"/>
+        <rect x="98" y="112" width="1.5" height="156" rx="0.75" fill="#424b56"/>
         <text x="120" y="128" text-anchor="middle" class="modem-name">MODEM</text>
         ${leds}
 
@@ -308,28 +427,40 @@
         <rect x="342" y="155" width="4" height="17" rx="2" fill="#5b6573"/>
         <circle cx="336" cy="183" r="2.6" fill="#5b6573"/>
 
-        <path d="${cable}" fill="none" stroke="#6f7780" stroke-width="6" stroke-linecap="round"/>
-        <g transform="translate(${plugX} ${plugY})${on ? '' : ' rotate(-8)'}">
-          <g class="${on ? 'modem-plug-in' : 'modem-plug-out'}">
+        <path fill="none" stroke="#6f7780" stroke-width="6" stroke-linecap="round" d="${from.cable}">
+          <animate attributeName="d" ${MOVE} values="${from.cable};${to.cable}"/>
+        </path>
+        <g transform="translate(${from.x} ${from.y})">
+          <animateTransform attributeName="transform" type="translate" ${MOVE} values="${from.x} ${from.y};${to.x} ${to.y}"/>
+          <g transform="rotate(${from.r})">
+            <animateTransform attributeName="transform" type="rotate" ${MOVE} values="${from.r};${to.r}"/>
             <rect x="-36" y="-11" width="30" height="22" rx="5" fill="#3a4452"/>
             <rect x="-8" y="-8" width="8" height="16" rx="2" fill="#5b6573"/>
             <rect x="0" y="-6" width="14" height="3.2" rx="1.2" fill="#a3abb5"/>
             <rect x="0" y="2.8" width="14" height="3.2" rx="1.2" fill="#a3abb5"/>
           </g>
         </g>
-        ${on ? `
-          <path class="modem-arrow" d="M268 194 H312 M302 184 L313 194 L302 204" fill="none" stroke="var(--brand)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-        ` : `
-          <g class="modem-spark" stroke="var(--brand)" stroke-width="3.5" stroke-linecap="round">
-            <path d="M276 112 L279 132"/><path d="M286 146 L300 132"/><path d="M294 160 L312 155"/>
+        <g opacity="0">
+          <animate attributeName="opacity" begin="0.4s" dur="0.3s" fill="freeze" values="0;1"/>
+          <animate attributeName="opacity" begin="1.9s" dur="0.25s" fill="freeze" values="1;0"/>
+          <g class="modem-arrow ${on ? 'is-right' : 'is-left'}">
+            <path transform="${on ? 'translate(270 242)' : 'translate(318 242) scale(-1 1)'}"
+              d="M-30 -6 H4 V-16 L30 0 L4 16 V6 H-30 Z" fill="var(--brand)" stroke="var(--brand)" stroke-width="5" stroke-linejoin="round"/>
+          </g>
+        </g>
+        ${on ? '' : `
+          <g stroke="var(--brand)" stroke-width="3.5" stroke-linecap="round" opacity="0">
+            <animate attributeName="opacity" begin="2.8s" dur="0.3s" fill="freeze" values="0;1"/>
+            <path d="M262 112 L265 132"/><path d="M272 146 L286 132"/><path d="M280 160 L298 155"/>
           </g>
         `}
-        <circle cx="${on ? 300 : 268}" cy="${on ? 170 : 176}" r="42" fill="none" stroke="var(--brand)" stroke-width="3"/>
 
         <text x="120" y="322" text-anchor="middle" class="modem-caption">${on ? 'CABLE MODEM' : 'ALL LIGHTS OFF'}</text>
         <text x="336" y="322" text-anchor="middle" class="modem-caption modem-caption-brand">${on ? 'POWER' : 'POWER PLUG'}</text>
       </svg>`;
   }
+
+
 
   window.QIS_SCREENS = [
     {
@@ -370,13 +501,14 @@
     },
     {
       id: 'series',
+      back: 'opening',
       code: '1_020',
       name: '選擇系列裝置',
       description: '選擇設定裝置：選要設定的產品系列（無線路由器 / ZenWiFi / Lyra）',
       figmaNode: '711:111',
       render: () => `
         <header class="navbar">
-          <button class="navbar-btn" data-go="opening" aria-label="關閉">${ICON.close}</button>
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
           <h1 class="navbar-title">選擇設定裝置</h1>
         </header>
 
@@ -413,14 +545,16 @@
     },
     {
       id: 'series-zenwifi',
+      back: 'series',
       code: '1_030',
       name: '選擇 ZenWiFi 裝置',
       description: '華碩 ZenWiFi 系列：從清單中點選要設定的 ZenWiFi 型號',
       figmaNode: '711:115',
       theme: 'light',
+      mount: () => { MODEM_FLOW = 'setup'; },
       render: () => `
         <header class="navbar">
-          <button class="navbar-btn" data-go="series" aria-label="返回">${ICON.back}</button>
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
           <h1 class="navbar-title">華碩 ZenWiFi 系列</h1>
         </header>
 
@@ -454,6 +588,7 @@
     },
     {
       id: 'modem-unplug',
+      get back() { return MODEM_FLOW === 'wan' ? 'welcome' : 'series-zenwifi'; },
       code: '1_033',
       name: '拔掉數據機電源',
       description: '重新啟動數據機（1/2）：只拔數據機的電源線，等所有燈都熄滅，不要按 Reset',
@@ -473,12 +608,13 @@
           <h2 class="guide-title">Unplug the modem’s power.</h2>
           <p class="guide-desc">Wait until all lights are off.</p>
           <p class="modem-note">Do not press the Reset button.</p>
-          <button class="btn-brand" data-go="modem-plug" data-label="All modem lights are off">All modem lights are off</button>
+          <button class="btn-brand" data-go="${MODEM_FLOW === 'wan' ? 'modem-wait-off' : 'modem-plug'}" data-label="All modem lights are off">All modem lights are off</button>
         </div>
       `,
     },
     {
       id: 'modem-plug',
+      get back() { return MODEM_FLOW === 'wan' ? 'modem-wait-off' : 'modem-unplug'; },
       code: '1_036',
       name: '插回數據機電源',
       description: '重新啟動數據機（2/2）：把電源線插回數據機，燈號重新亮起後再繼續',
@@ -496,12 +632,47 @@
             ${modemIllust('on')}
           </div>
           <h2 class="guide-title">Plug the modem back in.</h2>
-          <button class="btn-brand" data-go="led-check" data-label="Modem is plugged in">Modem is plugged in</button>
+          <button class="btn-brand" data-go="${MODEM_FLOW === 'wan' ? 'modem-wait-start' : 'led-check'}" data-label="Modem is plugged in">Modem is plugged in</button>
         </div>
       `,
     },
     {
+      id: 'modem-wait-off',
+      back: 'modem-unplug',
+      code: '1_034',
+      name: '等待 3 分鐘（拔電）',
+      description: '未偵測到 WAN：數據機保持拔電 3 分鐘，倒數結束 Continue 才能按（DEMO 加速倒數）',
+      theme: 'light',
+      render: () => waitPage({
+        title: 'Keep the modem unplugged.',
+        label: 'WAIT 3 MINUTES',
+        totalSec: 180,
+        hint: 'Continue unlocks when the timer ends.',
+        mode: 'off',
+        next: 'modem-plug',
+      }),
+      mount: el => { MODEM_FLOW = 'wan'; return startCountdown(el, 180, 5000); },
+    },
+    {
+      id: 'modem-wait-start',
+      back: 'modem-plug',
+      code: '1_037',
+      name: '等待數據機啟動 3½ 分鐘',
+      description: '未偵測到 WAN：插回電源後等數據機啟動 3½ 分鐘，燈可能會閃，倒數結束 Continue 才能按（DEMO 加速倒數），之後重新偵測 WAN',
+      theme: 'light',
+      render: () => waitPage({
+        title: 'Wait for the modem to start.',
+        label: 'WAIT AT LEAST 3½ MINUTES',
+        totalSec: 210,
+        hint: 'Blinking lights? Keep waiting.',
+        mode: 'starting',
+        next: 'wan-detecting',
+      }),
+      mount: el => { MODEM_FLOW = 'wan'; return startCountdown(el, 210, 5500); },
+    },
+    {
       id: 'led-check',
+      back: 'modem-plug',
       code: '1_040',
       name: '燈號顯示頁',
       description: '確認燈號：請使用者看路由器的燈，從呼吸綠燈變成恆亮藍燈才能開始設定',
@@ -509,6 +680,7 @@
       theme: 'light',
       render: () => `
         <header class="navbar">
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
           <h1 class="navbar-title navbar-title-plain">系統設定</h1>
         </header>
 
@@ -547,6 +719,7 @@
     },
     {
       id: 'qr-intro',
+      back: 'led-check',
       code: '1_050',
       name: 'QR Code 找裝置',
       description: '掃描 QR Code：說明路由器上的 QR Code 在哪裡，選擇用相機掃描或手動連 WiFi',
@@ -554,7 +727,7 @@
       theme: 'light',
       render: () => `
         <header class="navbar">
-          <button class="navbar-btn" data-go="led-check" aria-label="返回">${ICON.back}</button>
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
           <h1 class="navbar-title">華碩 ZenWiFi 系列</h1>
           <button class="navbar-btn navbar-btn-right" data-go="help" data-label="說明" aria-label="說明">${ICON.help}</button>
         </header>
@@ -585,6 +758,7 @@
     },
     {
       id: 'qr-scan',
+      back: 'qr-intro',
       code: '1_060',
       name: '啟用相機掃描',
       description: '相機掃描：把相機對準路由器上的 QR Code，掃到後系統詢問是否加入路由器的 Wi-Fi',
@@ -592,7 +766,7 @@
       theme: 'light',
       render: () => `
         <header class="navbar">
-          <button class="navbar-btn" data-go="qr-intro" aria-label="返回">${ICON.back}</button>
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
           <h1 class="navbar-title">連線到ASUS Router</h1>
         </header>
 
@@ -600,7 +774,18 @@
           <p class="qr-subtitle">將相機對準 QR Code。</p>
 
           <button class="scan-view" data-action="scan" aria-label="模擬掃描到 QR Code">
-            <span class="scan-feed">相機畫面</span>
+            <!-- Simulated camera feed: close-up of the router with its QR sticker, drifting like a handheld phone -->
+            <span class="scan-feed" aria-hidden="true">
+              <span class="cam-scene">
+                <span class="cam-router"></span>
+                <span class="cam-label">
+                  ${QR_CAMERA}
+                  <span class="cam-label-text">SSID: ASUS_14_BT8</span>
+                </span>
+              </span>
+              <span class="cam-vignette"></span>
+              <span class="cam-focus"></span>
+            </span>
             <span class="scan-line"></span>
             <span class="scan-corner tl"></span><span class="scan-corner tr"></span>
             <span class="scan-corner bl"></span><span class="scan-corner br"></span>
@@ -642,6 +827,7 @@
     },
     {
       id: 'detecting',
+      back: 'qr-scan',
       code: '1_070',
       name: '偵測路由器',
       description: '偵測中：加入路由器的 Wi-Fi 後，App 正在搜尋 ASUS 路由器',
@@ -649,6 +835,7 @@
       theme: 'light',
       render: () => `
         <header class="navbar">
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
           <h1 class="navbar-title">Detecting</h1>
         </header>
 
@@ -705,6 +892,7 @@
       },
     ].map((g, i, all) => ({
       id: `guide-${i + 1}`,
+      back: i === 0 ? 'qr-scan' : `guide-${i}`,
       code: g.code,
       name: `設定指南 ${i + 1}/${all.length}`,
       description: `設定指南 ${i + 1}/${all.length}：${g.summary}`,
@@ -712,7 +900,7 @@
       theme: 'light',
       render: () => `
         <header class="navbar navbar-guide">
-          <button class="navbar-btn" data-go="${i === 0 ? 'qr-scan' : 'back'}" aria-label="返回">${ICON.back}</button>
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
           <h1 class="navbar-title">Setup Guide</h1>
           <button class="navbar-btn navbar-btn-right" data-go="help" data-label="說明" aria-label="說明">${ICON.helpOutline}</button>
         </header>
@@ -730,11 +918,13 @@
     })),
     {
       id: 'welcome',
+      back: 'guide-4',
       code: '1_120',
       name: '安裝歡迎頁',
       description: '安裝歡迎頁：顯示偵測到的機型 ZenWiFi BT8，按 Get Started 開始設定',
       figmaNode: '757:192',
       theme: 'light',
+      mount: () => { MODEM_FLOW = 'wan'; },
       render: () => `
         <header class="navbar navbar-guide">
           <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
@@ -752,6 +942,7 @@
     },
     {
       id: 'wan-detecting',
+      back: 'welcome',
       code: '1_130',
       name: '偵測網路連線',
       description: 'WAN 偵測中：已偵測到 WAN（網路線已接），正在檢查網際網路連線狀態',
@@ -781,13 +972,14 @@
     },
     {
       id: 'setup-ssid',
+      back: 'welcome',
       code: '1_140',
       name: '建立 WiFi 網路',
       description: '建立 WiFi 網路：設定主要 WiFi 的名稱（SSID）和密碼（已預先填好）',
       figmaNode: '757:185',
       theme: 'light',
       render: () => `
-        ${setupHeader('welcome')}
+        ${setupHeader()}
         <div class="setup-body">
           <span class="setup-icon">${SETUP_ICON.wifi}</span>
           <h2 class="setup-title">Create WiFi Network</h2>
@@ -810,6 +1002,7 @@
     },
     {
       id: 'setup-iot',
+      back: 'setup-ssid',
       code: '1_150',
       name: '建立 IoT 網路',
       description: '建立 IoT 網路：為 IoT／舊裝置另建一個 WiFi，名稱預設為主網路名稱加 _IoT，可稍後再設',
@@ -818,7 +1011,7 @@
       render: () => {
         if (!FORM.iotSsid) FORM.iotSsid = `${FORM.ssid}_IoT`;
         return `
-        ${setupHeader('back')}
+        ${setupHeader()}
         <div class="setup-body">
           <span class="setup-icon">${SETUP_ICON.iot}</span>
           <h2 class="setup-title">Create Iot Network</h2>
@@ -838,13 +1031,14 @@
     },
     {
       id: 'setup-account',
+      back: 'setup-iot',
       code: '1_160',
       name: '設定登入帳號',
       description: '設定本機登入帳號：設定路由器管理介面的帳號和密碼（已預先填好）',
       figmaNode: '757:179',
       theme: 'light',
       render: () => `
-        ${setupHeader('back')}
+        ${setupHeader()}
         <div class="setup-body">
           <span class="setup-icon">${SETUP_ICON.user}</span>
           <h2 class="setup-title">Set up Local Login Account</h2>
@@ -866,13 +1060,14 @@
     },
     {
       id: 'setup-apply',
+      back: 'setup-account',
       code: '1_170',
       name: '套用設定',
       description: '套用設定：路由器正在套用剛才的 WiFi 和帳號設定',
       figmaNode: '757:176',
       theme: 'light',
       render: () => `
-        ${setupHeader(null)}
+        ${setupHeader()}
         <div class="welcome-body">
           <img class="apply-device" src="assets/zenwifi-device.png" alt="ZenWiFi 路由器" width="166" height="202">
           <h2 class="apply-title">Setting up your network</h2>
@@ -908,6 +1103,7 @@
       },
     ].map((m, i, all) => ({
       id: `mesh-${i + 1}`,
+      back: 'setup-account',
       code: m.code,
       name: `AiMesh 建立中 ${i + 1}/${all.length}`,
       description: m.summary,
@@ -939,6 +1135,7 @@
     })),
     {
       id: 'internet-live',
+      back: 'setup-account',
       code: '1_210',
       name: '完成：網路已連線',
       description: '設定完成：網際網路已連線（Internet Connection is Live!）',
@@ -946,6 +1143,7 @@
       theme: 'light',
       render: () => `
         <header class="navbar navbar-guide">
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
           <h1 class="navbar-title">Setup Guide</h1>
         </header>
 
@@ -966,6 +1164,7 @@
     },
     {
       id: 'summary',
+      back: 'internet-live',
       code: '1_220',
       name: '設定摘要',
       description: '設定摘要：列出剛設定好的 WiFi 名稱／密碼、登入帳號和 IoT 訪客網路，按 Finish 完成',
@@ -976,6 +1175,7 @@
         const wifi = band => row(SUMMARY_ICON.wifi(band, '#1b74e4'), [['WiFi Name', band === '2G' ? FORM.ssid : `${FORM.ssid}_${band}`], ['WiFi Password', FORM.wifiPassword]]);
         return `
         <header class="navbar navbar-guide">
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
           <h1 class="navbar-title navbar-title-bold">System Setup</h1>
         </header>
 
@@ -1001,6 +1201,7 @@
     },
     {
       id: 'home',
+      back: 'summary',
       code: '1_230',
       name: '首頁',
       description: '首頁：設定完成後進入 App 首頁，顯示路由器資訊和即時上傳／下載流量',
@@ -1008,6 +1209,7 @@
       theme: 'light',
       render: () => `
         <header class="home-top">
+          <button class="home-back" data-go="back" aria-label="返回">${ICON.back}</button>
           <button class="home-avatar" data-go="account" data-label="帳號">${HOME_ICON.google}</button>
           <h1 class="home-title">首頁</h1>
           <div class="home-actions">
@@ -1076,7 +1278,7 @@
       title: '是否偵測到 WAN（網路線已接上）？',
       options: [
         { label: 'Yes · WAN Detected', short: 'Yes', value: 'yes', to: 'wan-detecting' },
-        { label: 'No · WAN 未偵測到', short: 'No', value: 'no', to: 'wan-not-detected' },
+        { label: 'No · WAN 未偵測到', short: 'No', value: 'no', to: 'modem-unplug' },
       ],
     },
   };

@@ -108,7 +108,8 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 | 元件 | 規格 |
 |---|---|
-| 導覽列 `.navbar` | 高 44 pt，標題置中，左側 44 × 44 的按鈕（✕ 或返回 ‹）；淺色頁面標題和按鈕用 `--accent` 藍色 |
+| 導覽列 `.navbar` | 高 44 pt，標題置中，左側 44 × 44 的返回 ‹；淺色頁面標題和按鈕用 `--accent` 藍色 |
+| **返回規則** | **除了 1_010 啟動頁，每一頁左上都有 ‹ 返回**（`data-go="back"`）。有 App 內的瀏覽紀錄時退回實際的上一頁；沒有紀錄時（直接開網址、從 DEMO 列跳頁、或剛經過自動跳頁），回到該頁設定的流程上一頁（screen 的 `back` 欄位）。退到 1_010 就停住，不會跳出 App。 |
 | 捲動區 `.scroll-body` | 導覽列固定不動，下方內容可以捲動，並延伸到下方安全區底下 |
 | 右箭頭 `.chevron` | 22 pt，`--text-sub` 色 |
 | 卡片 | `--card` 底色，按下時變成 `--card-pressed` |
@@ -144,14 +145,14 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 ### 5.2 `1_020` 選擇系列裝置 `series`
 - Figma node：`711:111`
-- 導覽列：左邊 ✕，標題「選擇設定裝置」
+- 導覽列：左邊 ‹ 返回（原稿是 ✕，依返回規則改成 ‹），標題「選擇設定裝置」
 - 截圖左上角的「◂ App Store」是 iOS 系統的返回連結，不用做。
 - Figma 畫面外的綠色箭頭是原型的流程線，不屬於 UI。目前箭頭從 ZenWiFi 拉出，表示主要流程走 ZenWiFi。
 - 系列卡片：寬 414、高 169、間距 11，圓角 7；內容依序是藍色標題、型號列表（最多 2 行）、一排產品暫代圖，右側中間有箭頭。
 
 | 元件 | 產品暫代圖 | 動作 |
 |---|---|---|
-| ✕ 關閉 | — | → `opening` 1_010 |
+| ‹ 返回 | — | → `opening` 1_010 |
 | 華碩無線路由器 | 黑色天線路由器、電競路由器、寬版路由器、電競方塊 | → `series-router`（待提供） |
 | 華碩 ZenWiFi 系列 | 4 台白色機種、1 台黑色機種 | → `series-zenwifi` 1_030 |
 | 華碩 Lyra 系列 | 圓盤、三角、長條 | → `series-lyra`（待提供） |
@@ -176,14 +177,25 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 ### 5.3a `1_033` / `1_036` 重新啟動數據機 `modem-unplug` / `modem-plug`
 - 來源：使用者提供的參考圖（不是 Figma）。文字和內容照參考圖，版型沿用 1_080–1_110 Setup Guide。
 - 導覽列同 Setup Guide：‹ 返回、標題「Setup Guide」、右邊 ? 說明（→ `help`，待提供）。
-- 插圖用 SVG 直接畫（`modemIllust()`，沒有圖檔）：白色數據機（POWER / DS / US / ONLINE 四顆燈）、淺藍光暈、灰色電源線、牆上插座，插頭用藍圈標出來。
-- **1_033**：上方小字 Unplug the power cable only；插頭拔出來的動畫和藍色閃動線，四顆燈依序從綠變灰；下方標籤 ALL LIGHTS OFF / POWER PLUG。標題 Unplug the modem’s power.，說明 Wait until all lights are off.，淺藍提示框 Do not press the Reset button.，按鈕 All modem lights are off → 1_036。
-- **1_036**：上方小字 Reconnect the power cable；插頭插進去的動畫和來回推的箭頭，POWER / DS / US 依序亮綠燈，ONLINE 保持灰；下方標籤 CABLE MODEM / POWER。標題 Plug the modem back in.，按鈕 Modem is plugged in → `led-check` 1_040。
+- 插圖用 SVG 直接畫（`modemIllust()`，沒有圖檔），動畫用 SVG SMIL，讓電線形狀可以跟著插頭變：黑色數據機（POWER / DS / US / ONLINE 四顆燈）、淺藍光暈、灰色電源線、牆上插座。
+- **1_033**：上方小字 Unplug the power cable only；動畫只播一次：插頭疊在插座上，看起來是插著的（燈全綠）→ 出現往左的粗箭頭（實心藍色）並往左推 3 下，提示要往左拔 → 插頭往左拔出約 90 pt（電線跟著動），箭頭消失 → 出現藍色閃動線，四顆燈連同綠色光暈快速依序熄滅變灰（每顆 0.2 秒），停在拔掉的畫面；下方標籤 ALL LIGHTS OFF / POWER PLUG。標題 Unplug the modem’s power.，說明 Wait until all lights are off.，淺藍提示框 Do not press the Reset button.，按鈕 All modem lights are off → 1_036（WAN 流程 → 1_034）。
+- **1_036**：上方小字 Reconnect the power cable；動畫只播一次：插頭在插座外（燈全灰）→ 出現往右的粗箭頭（實心藍色）並往右推 3 下，提示要往右插 → 插頭推進插座並疊在插座上（電線跟著動），箭頭消失 → 四顆燈快速依序亮綠燈並出現綠色光暈（每顆 0.2 秒），停在插好的畫面；下方標籤 CABLE MODEM / POWER（參考圖的 ONLINE 是灰的，依需求改成四顆全亮）。標題 Plug the modem back in.，按鈕 Modem is plugged in → `led-check` 1_040（WAN 流程 → 1_037）。
+- **兩條流程共用這兩頁**（`MODEM_FLOW`）：進到 1_030 時是「設定」流程（1_030 → 1_033 → 1_036 → 1_040）；進到 1_120 時是「WAN」流程（見 5.3b）。按鈕去向和沒有瀏覽紀錄時的返回目標會跟著流程變。
+
+### 5.3b 未偵測到 WAN：`1_034` / `1_037` 等待數據機 `modem-wait-off` / `modem-wait-start`
+- 來源：使用者提供的參考圖。版型沿用 Setup Guide（導覽列 ‹ 返回、Setup Guide、?）。
+- 流程：1_120 Get Started → DEMO 判斷 WAN 選 **No** → 1_033 拔電 → **1_034 等 3 分鐘** → 1_036 插回 → **1_037 等 3½ 分鐘** → 1_130 重新偵測 WAN → 1_140。
+- 插圖區放一張淺灰圓角卡片：上方藍色小字（WAIT 3 MINUTES / WAIT AT LEAST 3½ MINUTES）、68 pt 藍色粗體倒數（3:00 / 3:30）、藍色進度條、灰色提示（Continue unlocks when the timer ends. / Blinking lights? Keep waiting.）、小數據機圖。
+  - 1_034：燈全滅、插頭拔在旁邊，標籤 POWER OFF。
+  - 1_037：電源線插著，燈號綠色閃爍，標籤 STARTING UP / LIGHTS MAY BLINK。
+- 標題 Keep the modem unplugged. / Wait for the modem to start.
+- **Continue 一開始是灰色不能按，倒數到 0:00 才亮起**（倒數數字和進度條同時變綠）。
+- **DEMO 加速**：畫面上照真實時間從 3:00／3:30 倒數，但實際只跑約 5 秒／5.5 秒，讓展示時馬上知道「要等待」。正式 App 改成真實時間。
 
 ### 5.4 `1_040` 燈號顯示頁 `led-check`
 - Figma node：`1867:1962`
 - **淺色頁面**：Figma 原稿是深藍星空背景，依需求**改成白底**，配色改用淺色頁面 token；文字維持原稿英文。
-- 導覽列：標題「系統設定」（一般字重、深色），原稿沒有返回按鈕。
+- 導覽列：左邊 ‹ 返回（→ 1_036；原稿沒有，依返回規則加上），標題「系統設定」（一般字重、深色）。
 - 由上而下：
 
 | 元件 | 規格 |
@@ -223,7 +235,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 元件 | 規格 | 動作 |
 |---|---|---|
 | 副標 | 「將相機對準 QR Code。」17 pt，藍色 | — |
-| 相機畫面 | 331 × 331 方形；目前用灰色暫代，四角綠色框，綠色掃描線上下移動 | 點一下 → 立刻模擬掃到 |
+| 相機畫面 | 331 × 331 方形，用 HTML/CSS 模擬相機畫面：近拍白色路由器機身，上面貼著白色 QR Code 標籤（25 × 25 仿真 QR，不能掃，下方寫 SSID: ASUS_14_BT8）；畫面略為模糊並輕微晃動，像手拿手機在對焦；四角綠色框，綠色掃描線上下移動。掃到時畫面停止晃動、變清楚，掃描線消失，黃色偵測框縮放框住 QR Code | 點一下 → 立刻模擬掃到 |
 | 說明 | 置中 15 pt：QR Code 位置（同 1_050）＋「確定您在光線充足的環境下進行掃描。」 | — |
 | 手動 WiFi 連線 | 白色膠囊按鈕，寬 277 | → `manual-wifi`（待提供） |
 
@@ -239,7 +251,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 ### 5.7 `1_070` 偵測路由器 `detecting`
 - Figma node：`711:107`
-- **淺色頁面**；導覽列只有標題「Detecting」（藍色），**沒有返回按鈕**
+- **淺色頁面**；導覽列：‹ 返回（→ 1_060）+ 標題「Detecting」（藍色）
 - 畫面中間：「Searching for ASUS router...」17 pt 藍色（`--btn`），下方 40 pt 是轉圈圖示。
 - **約 2 秒後自動跳到 `guide-1` 1_080**。用「取代」的方式換頁，所以在設定指南按返回不會再回到這頁（避免又自動跳走）。
 
@@ -317,7 +329,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_140 | 建立 WiFi 網路 `setup-ssid` | `757:185` | WiFi 圖示；Create WiFi Network；SSID（可清除）、密碼（強度）、□ Separate WiFi network | Next → 1_150（SSID 空白或密碼太弱時不能按）；返回 → 1_120 |
 | 1_150 | 建立 IoT 網路 `setup-iot` | `757:182` | 房子+齒輪圖示；Create Iot Network；說明 IoT／舊裝置可能和 WiFi 7 不相容；IoT SSID、密碼 | Next → 1_160；Set Up Later（淺藍文字）→ 1_160 |
 | 1_160 | 設定登入帳號 `setup-account` | `757:179` | 人像圖示；Set up Local Login Account；Username、Password（強度）、Confirm Password | Next → 1_170；兩次密碼不一致時顯示紅字「Passwords do not match.」且不能按 |
-| 1_170 | 套用設定 `setup-apply` | `757:176` | **沒有返回**；裝置圖（同 1_040，166 × 202）；Setting up your network（`--brand`）；進度條 6 秒；Now applying your settings. | 約 6 秒後自動 → 1_180 |
+| 1_170 | 套用設定 `setup-apply` | `757:176` | ‹ 返回（→ 1_160）；裝置圖（同 1_040，166 × 202）；Setting up your network（`--brand`）；進度條 6 秒；Now applying your settings. | 約 6 秒後自動 → 1_180 |
 
 ### 5.12 `1_180`–`1_200` AiMesh 建立中 `mesh-1`～`mesh-3`
 - Figma node：`803:414`、`803:400`、`803:383`
@@ -334,7 +346,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 ### 5.13 `1_210` 完成：網路已連線 `internet-live`
 - Figma node：`1867:2040`（Figma 是靜態圖，**這頁完全用程式自己畫，加上完成的動態效果**）
-- 導覽列只有「Setup Guide」，沒有返回
+- 導覽列：‹ 返回（沒有紀錄時 → 1_160）+「Setup Guide」
 - 動畫順序：
   1. 0 秒：路由器（`zenwifi-device.png`）從下方彈出來，下面有一條層架
   2. 0.35 秒起：15 個彩色紙花（三角形、圓環、長條、圓點、齒輪、地球、星星）從路由器後面**往外炸開**，接著稍微往下飄並**淡出消失**（約 2 秒內全部消失，只出現一次）
@@ -346,7 +358,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 ### 5.14 `1_220` 設定摘要 `summary`
 - Figma node：`819:320`
-- **淺色頁面**；導覽列只有「System Setup」，沒有返回
+- **淺色頁面**；導覽列：‹ 返回（→ 1_210）+「System Setup」
 - 由上而下：BT8 三入組圖（`bt8-3pack.jpg`，264 × 169）→ 分隔線 → **Summary** → 分隔線 → **Guest Network** → Finish
 
 | 區塊 | 圖示 | 內容（**帶入 1_140～1_160 填的值**） |
@@ -368,7 +380,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 | 區塊 | 規格 |
 |---|---|
-| 頂部列 | 左：52 pt 圓形頭像（Google G，白邊＋陰影）＋「首頁」21 pt `#5b9be6`；右：白色膠囊（174 × 52，陰影）內有 ⓘ、🔔、＋（`#4a90e2`） |
+| 頂部列 | 左：‹ 返回（→ 1_220，依返回規則加上）＋ 52 pt 圓形頭像（Google G，白邊＋陰影）＋「首頁」21 pt `#5b9be6`；右：白色膠囊（174 × 52，陰影）內有 ⓘ、🔔、＋（`#4a90e2`） |
 | 路由器卡片 | 411 × 85，白底，藍色光暈陰影 `rgba(74,144,226,.35)`；左：裝置小圖＋「ZenWiFi BT8」；中：區域網路 IP »（灰）/ 192.168.50.1（藍）/ 無線網路名稱（灰）/ **SSID（帶入 1_140 的值）**；右：直線分隔＋灰色測速儀圖示 |
 | 即時流量 | 標題 21 pt `#2a62d6`；下方 416 × 253 的**即時流量圖** |
 | 下載 / 上傳 | 淺藍圓圈↓「下載」、綠色圓圈↑「上傳」；數值 21 pt `#555`，**跟著流量圖即時更新**（超過 1000 Kbps 自動換成 Mbps） |
@@ -433,7 +445,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 | # | 名稱 | 在哪一頁觸發 | 問題 | 選項 → 頁面 |
 |---|---|---|---|---|
-| 0 | `wan` | 1_120 按 Get Started | 是否偵測到 WAN（網路線已接上）？ | Yes → `wan-detecting` 1_130；No → `wan-not-detected`（待提供） |
+| 0 | `wan` | 1_120 按 Get Started | 是否偵測到 WAN（網路線已接上）？ | Yes → `wan-detecting` 1_130；No → `modem-unplug` 1_033（WAN 流程，見 5.3b） |
 
 - 正式 App 會自動偵測，不會有這個面板；它只是讓展示時可以切換不同情況。
 
@@ -445,7 +457,9 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_020 | 選擇系列裝置 `series` | 選要設定的產品系列（無線路由器 / ZenWiFi / Lyra） |
 | 1_030 | 選擇 ZenWiFi 裝置 `series-zenwifi` | 從清單中點選要設定的 ZenWiFi 型號 |
 | 1_033 | 拔掉數據機電源 `modem-unplug` | 重新啟動數據機（1/2）：只拔數據機的電源線，等所有燈都熄滅，不要按 Reset |
+| 1_034 | 等待 3 分鐘（拔電）`modem-wait-off` | 未偵測到 WAN：數據機保持拔電 3 分鐘，倒數結束 Continue 才能按（DEMO 加速） |
 | 1_036 | 插回數據機電源 `modem-plug` | 重新啟動數據機（2/2）：把電源線插回數據機，燈號重新亮起後再繼續 |
+| 1_037 | 等待數據機啟動 3½ 分鐘 `modem-wait-start` | 未偵測到 WAN：插回電源後等 3½ 分鐘，倒數結束 Continue 才能按（DEMO 加速），之後重新偵測 WAN |
 | 1_040 | 燈號顯示頁 `led-check` | 請使用者看路由器的燈，從呼吸綠燈變成恆亮藍燈才能開始設定 |
 | 1_050 | QR Code 找裝置 `qr-intro` | 說明路由器上的 QR Code 在哪裡，選擇用相機掃描或手動連 WiFi |
 | 1_060 | 啟用相機掃描 `qr-scan` | 把相機對準路由器上的 QR Code，掃到後系統詢問是否加入路由器的 Wi-Fi |

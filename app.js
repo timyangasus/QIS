@@ -177,10 +177,20 @@
     go(id, el.dataset.label || el.textContent.trim());
   });
 
+  // Each in-app step stores its depth in history.state. Back follows real history while there is
+  // an in-app step to undo; otherwise (page opened directly, from the demo bar, or after an
+  // auto-advance) it goes to the screen's logical previous page, never out of the app.
   function go(id, label) {
-    if (id === 'back') return history.back();
+    if (id === 'back') {
+      if (history.state?.qis > 0) return history.back();
+      const prev = screens[currentId()].back;
+      if (prev) location.replace(`#${prev}`);
+      return;
+    }
     if (!screens[id]) return toast(`「${label}」頁面尚未加入`);
+    const depth = (history.state?.qis || 0) + 1;
     location.hash = id;
+    history.replaceState({ qis: depth }, '');
   }
 
   window.addEventListener('hashchange', render);
