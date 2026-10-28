@@ -125,7 +125,9 @@
     decisions[d.index] = { name, value };
     renderDecisionBar();
     closeDecision();
-    go(opt.to, opt.label);
+    // An option can run its own step (e.g. an alert on the same page) instead of navigating
+    if (opt.action) opt.action();
+    else go(opt.to, opt.label);
   }
 
   function renderDecisionBar() {

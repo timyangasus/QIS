@@ -325,7 +325,8 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 - 「請選擇您的網路連線類型（WAN Type）」；藍色小標 Wan Type；三個單選（有分隔線）：DHCP（Default，預設選取）／PPPoE／Static IP，每個下方有一行灰色說明。
 - **Special options**：點一下展開／收合（箭頭翻轉），展開後是 Phone Modem：iPhone／Android 單選（和上面同一組），下方灰字 No wired internet service, but mobile hotspot is available.
 - **Next**（藍色）→ 1_140。
-- **Auto Detect**（藍色粗體文字）→ 畫面中央跳出黑色圓角方塊（轉圈 + Detecting...），約 1.8 秒後跳出 **DEMO 流程判斷：Auto Detect**（見 6.2）：Yes → 1_140；No → 待提供。
+- **Auto Detect**（藍色粗體文字）→ 畫面中央跳出黑色圓角方塊（轉圈 + Detecting...），約 1.8 秒後跳出 **DEMO 流程判斷：Auto Detect**（見 6.2）：Yes → 1_140；No → 留在 1_125，跳出 iOS 提示（Figma `1867:771`）。
+- **No 的提示**：畫面變暗，中央白色圓角卡片：標題「連線無線路由器」；灰字「無法偵測到您的 WAN 狀態。請檢查網路線是否已插入路由器的 WAN 連接埠和數據機的連接埠。若皆已插入，請將網路線拔下然後重新插入，或使用其他網路線嘗試連線。」；灰色膠囊按鈕「確定」→ 關閉提示，留在 1_125 讓使用者手動選 WAN Type。
 
 ### 5.10 `1_130` 偵測網路連線 `wan-detecting`（WAN Detected = Yes）
 - Figma node：`757:189`
@@ -469,14 +470,14 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 選擇後 | 依選項跳到對應頁面；同時在 demo bar 加一個**下拉選單**（例如「WAN: Yes」），之後隨時可以改選，直接跳到另一條路線 |
 | 改選前面的判斷 | 後面的判斷會清掉（因為那些是舊答案帶出來的） |
 | RESET | 清掉所有判斷 |
-| 實作 | 按鈕加 `data-decide="判斷名稱"`；判斷內容寫在 `screens.js` 的 `QIS_DECISIONS` |
+| 實作 | 按鈕加 `data-decide="判斷名稱"`；判斷內容寫在 `screens.js` 的 `QIS_DECISIONS`。選項可以用 `to` 跳頁，或用 `action` 在原頁執行（例如跳出提示）；頁面也可以自己呼叫 `window.QIS_decide(名稱)` 打開判斷 |
 
 **目前的判斷**
 
 | # | 名稱 | 在哪一頁觸發 | 問題 | 選項 → 頁面 |
 |---|---|---|---|---|
 | 0 | `wan` | 1_120 按 Get Started | WAN 偵測結果？ | 1 正常 → `wan-detecting` 1_130；2 沒有偵測到 WAN、要不到 IP、US SKU → `modem-unplug` 1_033（WAN 流程，見 5.3b）；3 沒有偵測到 WAN → `wan-type` 1_125 |
-| 1 | `wanDetect` | 1_125 按 Auto Detect（Detecting... 轉約 1.8 秒後跳出） | Auto Detect：這次有偵測到 WAN 嗎？ | Yes → `setup-ssid` 1_140；No → `wan-not-detected`（待提供） |
+| 1 | `wanDetect` | 1_125 按 Auto Detect（Detecting... 轉約 1.8 秒後跳出） | Auto Detect：這次有偵測到 WAN 嗎？ | Yes → `setup-ssid` 1_140；No → 留在 1_125，跳出「連線無線路由器」提示，按確定關閉 |
 | 1 | `wanRetry` | 1_039 按 重新嘗試 | 重新嘗試：這次有偵測到 WAN 嗎？ | Yes → `wan-detecting` 1_130；No → `modem-unplug` 1_033（拔電重來） |
 
 - 正式 App 會自動偵測，不會有這個面板；它只是讓展示時可以切換不同情況。

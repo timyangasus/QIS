@@ -298,6 +298,16 @@
   // 1_120 finds no WAN (wan), where each step is followed by a timed wait before continuing.
   let MODEM_FLOW = 'setup';
 
+  // 1_125 Auto Detect → No: the "can't detect WAN" alert pops up over 1_125 (opening 1_125 first
+  // when picked again from the demo bar on another page)
+  let WAN_ALERT_PENDING = false;
+  function showWanAlert() {
+    const alert = document.querySelector('.wan-type-alert');
+    if (alert) return alert.classList.add('show');
+    WAN_ALERT_PENDING = true;
+    location.hash = 'wan-type';
+  }
+
   // Small modem for the wait pages: 'off' = unplugged, all lights off; 'starting' = lights blinking
   function modemMini(mode) {
     const starting = mode === 'starting';
@@ -1132,12 +1142,24 @@
           <span class="wan-type-spinner">${Array.from({ length: 12 }, (_, i) => `<i style="--i:${i}"></i>`).join('')}</span>
           Detecting...
         </div>
+
+        <div class="wan-type-alert" role="alertdialog" aria-labelledby="wan-alert-title">
+          <div class="wan-alert-card">
+            <h2 id="wan-alert-title">連線無線路由器</h2>
+            <p>無法偵測到您的 WAN 狀態。請檢查網路線是否已插入路由器的 WAN 連接埠和數據機的連接埠。若皆已插入，請將網路線拔下然後重新插入，或使用其他網路線嘗試連線。</p>
+            <button class="wan-alert-ok">確定</button>
+          </div>
+        </div>
       `,
-      // Special options expands in place; Auto Detect shows the Detecting... HUD, then the demo decision
+      // Special options expands in place; Auto Detect shows the Detecting... HUD, then the demo decision;
+      // No pops up an alert and 確定 leaves the user on this page to pick a WAN type
       mount: el => {
         const more = el.querySelector('.wan-type-special');
         const hud = el.querySelector('.wan-type-hud');
+        const alert = el.querySelector('.wan-type-alert');
         let timer;
+        if (WAN_ALERT_PENDING) { WAN_ALERT_PENDING = false; alert.classList.add('show'); }
+        el.querySelector('.wan-alert-ok').addEventListener('click', () => alert.classList.remove('show'));
         more.addEventListener('click', () => more.setAttribute('aria-expanded', more.getAttribute('aria-expanded') !== 'true'));
         el.querySelector('.wan-type-detect').addEventListener('click', () => {
           hud.classList.add('show');
@@ -1495,7 +1517,7 @@
       title: 'Auto Detect：這次有偵測到 WAN 嗎？',
       options: [
         { label: 'Yes · WAN Detected', short: 'Yes', value: 'yes', to: 'setup-ssid' },
-        { label: 'No · 仍未偵測到 WAN', short: 'No', value: 'no', to: 'wan-not-detected' },
+        { label: 'No · 仍未偵測到 WAN（跳出提示，留在 1_125）', short: 'No', value: 'no', action: showWanAlert },
       ],
     },
     wanRetry: {
