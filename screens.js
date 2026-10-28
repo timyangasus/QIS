@@ -1523,8 +1523,8 @@
       label: '重啟後 WAN',
       title: '數據機重啟後：是否已偵測到 WAN、要到 IP？（兩種都會進到 1_140）',
       options: [
-        { label: 'Yes · 已偵測到 WAN、要到 IP（有 1_210）', short: 'Yes', value: 'yes', to: 'setup-ssid', action: () => { WAN_OK = true; } },
-        { label: 'No · 仍沒有偵測到 WAN、要不到 IP（沒有 1_210）', short: 'No', value: 'no', to: 'setup-ssid', action: () => { WAN_OK = false; } },
+        { label: 'Yes · 已偵測到 WAN、要到 IP', short: 'Yes', value: 'yes', to: 'setup-ssid', action: () => { WAN_OK = true; } },
+        { label: 'No · 仍沒有偵測到 WAN、要不到 IP', short: 'No', value: 'no', to: 'setup-ssid', action: () => { WAN_OK = false; } },
       ],
     },
   };
