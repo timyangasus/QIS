@@ -2325,3 +2325,157 @@ button {
   line-height: 20px;
   text-align: center;
 }
+
+/* ── 1_050 ? 說明選單（iOS action sheet） ── */
+.action-sheet {
+  position: absolute;
+  inset: 0;
+  z-index: 6; /* above the fake status bar so it dims too */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 14px calc(var(--safe-bottom) + 10px);
+  background: rgba(0, 0, 0, .4);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .25s, visibility .25s;
+}
+
+.action-sheet.show { opacity: 1; visibility: visible; }
+
+.action-sheet-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  transform: translateY(100%);
+  transition: transform .3s cubic-bezier(.2, .8, .2, 1);
+}
+
+.action-sheet.show .action-sheet-panel { transform: none; }
+
+.action-sheet-group {
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.action-sheet-btn {
+  height: 61px;
+  background: rgba(249, 249, 249, .94);
+  color: #007aff;
+  font-size: 20px;
+  text-align: center;
+}
+
+.action-sheet-btn + .action-sheet-btn { border-top: 1px solid rgba(60, 60, 67, .29); }
+
+.action-sheet-btn:active { background: rgba(225, 225, 230, .94); }
+
+.action-sheet-cancel {
+  border-radius: 14px;
+  background: #fff;
+  font-weight: 600;
+}
+
+/* ── 1_051–1_055 Setup Guide（1_050 的 ?） ── */
+.sg-need {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, 128px);
+  gap: 8px 40px;
+  margin-top: 6px;
+}
+
+.sg-need li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--brand);
+}
+
+.sg-need img { width: 128px; height: 128px; border-radius: 50%; }
+
+.btn-brand.sg-next { margin-bottom: 22px; }
+
+.sg-dots {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.sg-dots span {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #b9d8f6;
+}
+
+.sg-dots span.is-on { background: #3d8fe6; }
+
+/* ── 1_056 LED Guide ── */
+.led-guide-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.led-guide-device { margin-top: 12px; }
+
+.led-guide-intro {
+  width: 354px;
+  margin: 22px 0 14px;
+  font-size: 15px;
+  line-height: 20px;
+  text-align: center;
+  color: #4a4a4a;
+}
+
+.led-guide-list {
+  list-style: none;
+  width: 380px;
+  font-size: 14px;
+  line-height: 18px;
+  color: #4a4a4a;
+}
+
+.led-guide-list li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 50px;
+  padding: 8px 0;
+}
+
+.led-guide-list li + li { border-top: 1px solid var(--divider); }
+
+.led-guide-swatch {
+  flex-shrink: 0;
+  width: 34px;
+  height: 17px;
+}
+
+.led-guide-swatch.is-green { background: #6be38a; }
+.led-guide-swatch.is-blue { background: #0aa6f0; }
+.led-guide-swatch.is-blue-blink { background: #0aa6f0; animation: led-guide-blink 1s steps(1) infinite; }
+.led-guide-swatch.is-white { background: #f4f4f4; box-shadow: 0 0 6px rgba(0, 0, 0, .08); }
+.led-guide-swatch.is-yellow { background: #f7df78; }
+.led-guide-swatch.is-red { background: #f26a6a; }
+.led-guide-swatch.is-green-glow { background: #4fe06a; box-shadow: 0 0 8px #4fe06a; animation: led-guide-breathe 2s ease-in-out infinite; }
+
+@keyframes led-guide-blink { 50% { opacity: 0; } }
+@keyframes led-guide-breathe { 50% { opacity: .35; box-shadow: none; } }
+
+.pill-btn.led-guide-ok {
+  flex-shrink: 0;
+  width: 185px;
+  height: 54px;
+  margin: auto 0 22px;
+  padding-top: 0;
+  font-size: 19px;
+  color: var(--brand);
+}

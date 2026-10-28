@@ -756,7 +756,7 @@
         <header class="navbar">
           <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
           <h1 class="navbar-title">華碩 ZenWiFi 系列</h1>
-          <button class="navbar-btn navbar-btn-right" data-go="help" data-label="說明" aria-label="說明">${ICON.help}</button>
+          <button class="navbar-btn navbar-btn-right" data-sheet="open" aria-label="說明">${ICON.help}</button>
         </header>
 
         <div class="qr-body">
@@ -780,6 +780,122 @@
             <button class="pill-btn" data-go="manual-wifi" data-label="手動 WiFi 連線">${ICON.wifiSolid}<span>手動 WiFi 連線</span></button>
             <button class="text-link text-link-small" data-go="setup-guide">設定指南</button>
           </div>
+        </div>
+
+        <div class="action-sheet" data-sheet="close">
+          <div class="action-sheet-panel">
+            <div class="action-sheet-group">
+              <button class="action-sheet-btn" data-go="setup-guide">Setup Guide</button>
+              <button class="action-sheet-btn" data-go="led-guide">LED Guide</button>
+            </div>
+            <button class="action-sheet-btn action-sheet-cancel" data-sheet="close">Cancel</button>
+          </div>
+        </div>
+      `,
+      // ? opens an iOS action sheet; tapping Cancel or the dimmed area closes it
+      mount: el => {
+        const sheet = el.querySelector('.action-sheet');
+        const onClick = e => {
+          const t = e.target.closest('[data-sheet]');
+          if (!t || (t === sheet && e.target !== sheet)) return;
+          sheet.classList.toggle('show', t.dataset.sheet === 'open');
+        };
+        el.addEventListener('click', onClick);
+        return () => el.removeEventListener('click', onClick);
+      },
+    },
+    ...[
+      {
+        code: '1_051',
+        title: 'What we’ll need',
+        desc: 'Find these in your ASUS router’s packaging. You’ll only need one router for now if you have more than one device. More can be set up later.',
+        summary: '準備物品：數據機、路由器、電源線、網路線',
+        illust: `
+          <ul class="sg-need">
+            ${[['modem', 'Modem'], ['router', 'Router'], ['power', 'Power cord'], ['ethernet', 'Ethernet cord']].map(([k, label]) => `
+              <li><img src="assets/sg-need-${k}.jpg" alt="" width="148" height="148"><span>${label}</span></li>`).join('')}
+          </ul>`,
+      },
+      {
+        code: '1_052',
+        title: 'Unplug Modem and Older Router from Power',
+        desc: 'Unplug your cable/DSL modem. If it has a battery backup, remove the battery.<br>If you have other wireless equipment connected to your modem, please unplug it as well.',
+        summary: '拔掉數據機和舊路由器的電源',
+        illust: '<img src="assets/sg-unplug.jpg" alt="" width="318" height="318" style="margin-top:24px">',
+      },
+      {
+        code: '1_053',
+        title: 'Plug in Your Devices',
+        desc: 'Connect your modem’s LAN port to WAN port on router and power them both on.',
+        summary: '接上裝置：數據機 LAN 埠接到路由器 WAN 埠，兩台都開機',
+        illust: '<img src="assets/sg-plug.jpg" alt="" width="318" height="318" style="margin-top:24px">',
+      },
+      {
+        code: '1_054',
+        title: 'Prepare Another Node',
+        desc: '1. Place your node(s) and router within a proper distance.<br><br>2. Power node(s) on and wait until you see a static blue light. Your node(s) will automatically connect to your router afterwards.',
+        summary: '準備節點：放在適當距離內，開機等恆亮藍燈',
+        illust: '<img src="assets/sg-nodes.jpg" alt="" width="293" height="246" style="margin-top:70px">',
+      },
+      {
+        code: '1_055',
+        title: 'Check LED Lights',
+        desc: 'Wait for one minute until you see a static blue light on the router and node(s).',
+        summary: '確認燈號：等一分鐘，路由器和節點都亮恆亮藍燈',
+        illust: '<img src="assets/sg-nodes.jpg" alt="" width="293" height="246" style="margin-top:70px">',
+        button: 'I’m ready',
+      },
+    ].map((g, i, all) => ({
+      id: i === 0 ? 'setup-guide' : `setup-guide-${i + 1}`,
+      back: i === 0 ? 'qr-intro' : i === 1 ? 'setup-guide' : `setup-guide-${i}`,
+      code: g.code,
+      name: `Setup Guide ${i + 1}/${all.length}`,
+      description: `1_050 的 ? → Setup Guide ${i + 1}/${all.length}：${g.summary}`,
+      figmaNode: '1891:1333',
+      theme: 'light',
+      render: () => `
+        <header class="navbar navbar-guide">
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
+          <h1 class="navbar-title">Setup Guide</h1>
+        </header>
+
+        <div class="guide-body">
+          <div class="guide-illust">${g.illust}</div>
+          <h2 class="guide-title">${g.title}</h2>
+          <p class="guide-desc">${g.desc}</p>
+          <button class="btn-brand sg-next" data-go="${i + 1 < all.length ? `setup-guide-${i + 2}` : 'qr-intro'}">${g.button || 'Next'}</button>
+          <div class="sg-dots" aria-hidden="true">${all.map((_, j) => `<span${j === i ? ' class="is-on"' : ''}></span>`).join('')}</div>
+        </div>
+      `,
+    })),
+    {
+      id: 'led-guide',
+      back: 'qr-intro',
+      code: '1_056',
+      name: 'LED Guide',
+      description: '1_050 的 ? → LED Guide：路由器正面燈號顏色代表的狀態',
+      figmaNode: '1891:1333',
+      theme: 'light',
+      render: () => `
+        <header class="navbar navbar-guide">
+          <h1 class="navbar-title">LED Guide</h1>
+        </header>
+
+        <div class="led-guide-body">
+          <img class="led-guide-device" src="assets/led-guide-device.jpg" alt="" width="164" height="155">
+          <p class="led-guide-intro">The light on the front of your ZenWiFi BT8 provides a general status update at a glance.</p>
+          <ul class="led-guide-list">
+            ${[
+              ['green', 'Your ZenWiFi BT8 is starting up.'],
+              ['blue', 'Your ZenWiFi BT8 is ready for setup.'],
+              ['blue-blink', 'Your node is syncing with the router.'],
+              ['white', 'Your ZenWiFi BT8 is online and all is well.'],
+              ['yellow', 'The connection between your ZenWiFi BT8 router and the node is weak.'],
+              ['red', 'Your ZenWiFi BT8 router has no Internet connection / Your node is disconnected from the router.'],
+              ['green-glow', 'Your mesh system is under optimization.<br>*This process might last for 1-10 minutes to verify that any radar in proximity is not using DFS frequencies in compliance with local government regulation.'],
+            ].map(([c, t]) => `<li><span class="led-guide-swatch is-${c}"></span><span>${t}</span></li>`).join('')}
+          </ul>
+          <button class="pill-btn led-guide-ok" data-go="back">OK</button>
         </div>
       `,
     },
