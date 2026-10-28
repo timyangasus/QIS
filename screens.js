@@ -308,6 +308,19 @@
     location.hash = 'wan-type';
   }
 
+  // WAN flow only (1_120 → 2): the user may have already restarted the modem back at 1_030,
+  // so each step says why it is needed again
+  const MODEM_WHY = {
+    unplug: 'Your router couldn’t get an Internet connection (IP address) from the modem. Many cable modems, common in the US, stay locked to the first device they were connected to. Restarting the modem clears that so it can work with your new ASUS router.',
+    waitOff: 'The modem needs a few minutes without power to fully reset and forget the device it was locked to. Plugging it in too soon may keep the old connection.',
+    plug: 'Powering the modem back on lets it reconnect to your Internet provider and get ready to pair with your new router.',
+    waitStart: 'Starting up and reconnecting to your Internet provider takes a few minutes. Once it finishes, your router can get an Internet address from it.',
+  };
+
+  function modemWhy(key) {
+    return MODEM_FLOW === 'wan' ? `<p class="modem-why">${MODEM_WHY[key]}</p>` : '';
+  }
+
   // Small modem for the wait pages: 'off' = unplugged, all lights off; 'starting' = lights blinking
   function modemMini(mode) {
     const starting = mode === 'starting';
@@ -361,7 +374,7 @@
     return () => cancelAnimationFrame(raf);
   }
 
-  function waitPage({ title, label, totalSec, hint, mode, next }) {
+  function waitPage({ title, label, totalSec, hint, mode, next, why }) {
     return `
       <header class="navbar navbar-guide">
         <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
@@ -380,6 +393,7 @@
           </div>
         </div>
         <h2 class="guide-title">${title}</h2>
+        <p class="modem-why">${MODEM_WHY[why]}</p>
         <button class="btn-brand wait-continue" data-go="${next}" data-label="Continue" disabled>Continue</button>
       </div>`;
   }
@@ -620,6 +634,7 @@
           <h2 class="guide-title">Unplug the modem’s power.</h2>
           <p class="guide-desc">Wait until all lights are off.</p>
           <p class="modem-note"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="currentColor"/><rect x="11" y="10" width="2" height="7" rx="1" fill="#fff"/><circle cx="12" cy="7" r="1.3" fill="#fff"/></svg>Do not press the Reset button.</p>
+          ${modemWhy('unplug')}
           <button class="btn-brand" data-go="${MODEM_FLOW === 'wan' ? 'modem-wait-off' : 'modem-plug'}" data-label="All modem lights are off">All modem lights are off</button>
         </div>
       `,
@@ -644,6 +659,7 @@
             ${modemIllust('on')}
           </div>
           <h2 class="guide-title">Plug the modem back in.</h2>
+          ${modemWhy('plug')}
           <button class="btn-brand" data-go="${MODEM_FLOW === 'wan' ? 'modem-wait-start' : 'led-check'}" data-label="Modem is plugged in">Modem is plugged in</button>
         </div>
       `,
@@ -662,6 +678,7 @@
         hint: 'Continue unlocks when the timer ends.',
         mode: 'off',
         next: 'modem-plug',
+        why: 'waitOff',
       }),
       mount: el => { MODEM_FLOW = 'wan'; return startCountdown(el, 180, 5000); },
     },
@@ -679,6 +696,7 @@
         hint: 'Blinking lights? Keep waiting.',
         mode: 'starting',
         next: 'wan-retry',
+        why: 'waitStart',
       }),
       mount: el => { MODEM_FLOW = 'wan'; return startCountdown(el, 210, 5500); },
     },

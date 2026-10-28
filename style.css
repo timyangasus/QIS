@@ -2679,3 +2679,12 @@ button {
 }
 
 .wan-alert-ok:active { background: #d9d9dd; }
+
+/* 1_033 / 1_034 / 1_036 / 1_037 WAN 流程：說明為什麼要做這一步 */
+.modem-why {
+  width: 340px;
+  margin-top: 20px;
+  font-size: 15px;
+  line-height: 21px;
+  color: var(--guide-desc);
+}
