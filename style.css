@@ -2479,3 +2479,147 @@ button {
   font-size: 19px;
   color: var(--brand);
 }
+
+/* ── 1_125 選擇網路連線類型（沒有偵測到 WAN） ── */
+.wan-type-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  color: #111;
+}
+
+.wan-type-intro {
+  margin: 16px 18px 0;
+  font-size: 18px;
+}
+
+.wan-type-section {
+  margin: 22px 22px 12px;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--guide-title);
+}
+
+.wan-type-list { border-top: 1px solid #d6d6d6; }
+
+.wan-type-option {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 80px;
+  padding: 0 18px 0 38px;
+  border-bottom: 1px solid #d6d6d6;
+}
+
+.wan-type-option input {
+  flex-shrink: 0;
+  width: 19px;
+  height: 19px;
+  margin: 0;
+  accent-color: var(--brand);
+}
+
+.wan-type-option b {
+  display: block;
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.wan-type-option small {
+  display: block;
+  margin-top: 3px;
+  font-size: 13px;
+  color: #555;
+}
+
+.wan-type-option.wan-type-phone { min-height: 50px; }
+
+.wan-type-phone + .wan-type-phone { border-top: none; }
+
+.wan-type-special {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 26px 6px 22px;
+  font-size: 18px;
+  color: #111;
+  text-align: left;
+}
+
+.wan-type-special svg { color: #9a9a9a; transition: transform .2s; }
+
+.wan-type-special[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+.wan-type-more { display: none; }
+
+.wan-type-special[aria-expanded="true"] + .wan-type-more { display: block; }
+
+.wan-type-more .wan-type-section { margin-top: 6px; }
+
+.wan-type-note {
+  margin: 10px 26px 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: #666;
+}
+
+.btn-brand.wan-type-next { align-self: center; }
+
+.wan-type-detect {
+  align-self: center;
+  margin: 20px 0 30px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f7fd4;
+}
+
+/* Detecting... HUD over the page */
+.wan-type-hud {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 4;
+  width: 186px;
+  height: 186px;
+  margin: -93px 0 0 -93px;
+  border-radius: 18px;
+  background: #000;
+  color: #fff;
+  font-size: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .2s, visibility .2s;
+}
+
+.wan-type-hud.show { opacity: 1; visibility: visible; }
+
+.wan-type-spinner {
+  position: relative;
+  width: 52px;
+  height: 52px;
+}
+
+.wan-type-spinner i {
+  position: absolute;
+  left: 24px;
+  top: 0;
+  width: 4px;
+  height: 14px;
+  border-radius: 2px;
+  background: #fff;
+  transform-origin: 2px 26px;
+  transform: rotate(calc(var(--i) * 30deg));
+  animation: wan-type-spin 1s linear infinite;
+  animation-delay: calc(var(--i) * 1s / 12 - 1s);
+}
+
+@keyframes wan-type-spin {
+  from { opacity: 1; }
+  to { opacity: .15; }
+}

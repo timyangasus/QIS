@@ -142,6 +142,9 @@
 
   document.getElementById('flow-decision-close').addEventListener('click', closeDecision);
 
+  // Screens can open a decision themselves after their own step (e.g. a detecting spinner)
+  window.QIS_decide = openDecision;
+
   // ── Screens ──
   function currentId() {
     const id = location.hash.slice(1);

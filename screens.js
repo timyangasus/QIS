@@ -1084,6 +1084,70 @@
       `,
     },
     {
+      id: 'wan-type',
+      back: 'welcome',
+      code: '1_125',
+      name: '選擇網路連線類型',
+      description: '沒有偵測到 WAN：請使用者選擇 WAN Type（DHCP／PPPoE／Static IP），或按 Auto Detect 再偵測一次',
+      figmaNode: '1867:563',
+      theme: 'light',
+      render: () => `
+        <header class="navbar navbar-guide">
+          <button class="navbar-btn navbar-btn-ink" data-go="back" aria-label="返回">${ICON.back}</button>
+          <h1 class="navbar-title navbar-title-bold">System Setup</h1>
+          <button class="navbar-btn navbar-btn-right" data-go="help" data-label="說明" aria-label="說明">${ICON.helpOutline}</button>
+        </header>
+
+        <div class="wan-type-body">
+          <p class="wan-type-intro">請選擇您的網路連線類型（WAN Type）</p>
+          <p class="wan-type-section">Wan Type</p>
+          <div class="wan-type-list">
+            ${[
+              ['dhcp', 'DHCP（Default）', '最常見，接線即可上網，不需要設定帳號、密碼或 IP。'],
+              ['pppoe', 'PPPoE', '需輸入ISP提供的使用者帳號與密碼才能上網。'],
+              ['static', 'Static IP', '需輸入特定 IP、遮罩設定資訊。'],
+            ].map(([v, t, d]) => `
+              <label class="wan-type-option">
+                <input type="radio" name="wan-type" value="${v}"${v === 'dhcp' ? ' checked' : ''}>
+                <span><b>${t}</b><small>${d}</small></span>
+              </label>`).join('')}
+          </div>
+          <button class="wan-type-special" aria-expanded="false">Special options<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+          <div class="wan-type-more">
+            <p class="wan-type-section">Phone Modem</p>
+            <div class="wan-type-list">
+              ${['iPhone', 'Android'].map(v => `
+                <label class="wan-type-option wan-type-phone">
+                  <input type="radio" name="wan-type" value="${v.toLowerCase()}">
+                  <span><b>${v}</b></span>
+                </label>`).join('')}
+            </div>
+            <p class="wan-type-note">No wired internet service, but mobile hotspot is available.</p>
+          </div>
+          <button class="btn-brand welcome-start wan-type-next" data-go="setup-ssid" data-label="Next">Next</button>
+          <button class="wan-type-detect">Auto Detect</button>
+        </div>
+
+        <div class="wan-type-hud" role="status">
+          <span class="wan-type-spinner">${Array.from({ length: 12 }, (_, i) => `<i style="--i:${i}"></i>`).join('')}</span>
+          Detecting...
+        </div>
+      `,
+      // Special options expands in place; Auto Detect shows the Detecting... HUD, then the demo decision
+      mount: el => {
+        const more = el.querySelector('.wan-type-special');
+        const hud = el.querySelector('.wan-type-hud');
+        let timer;
+        more.addEventListener('click', () => more.setAttribute('aria-expanded', more.getAttribute('aria-expanded') !== 'true'));
+        el.querySelector('.wan-type-detect').addEventListener('click', () => {
+          hud.classList.add('show');
+          clearTimeout(timer);
+          timer = setTimeout(() => { hud.classList.remove('show'); window.QIS_decide('wanDetect'); }, 1800);
+        });
+        return () => clearTimeout(timer);
+      },
+    },
+    {
       id: 'wan-detecting',
       back: 'welcome',
       code: '1_130',
@@ -1422,7 +1486,16 @@
       options: [
         { label: '1 · 正常', short: '正常', value: 'ok', to: 'wan-detecting' },
         { label: '2 · 沒有偵測到 WAN、要不到 IP、US SKU', short: '沒有 WAN、要不到 IP、US SKU', value: 'no-ip-us', to: 'modem-unplug' },
-        { label: '3 · 沒有偵測到 WAN', short: '沒有 WAN', value: 'no-wan', to: 'wan-not-detected' },
+        { label: '3 · 沒有偵測到 WAN', short: '沒有 WAN', value: 'no-wan', to: 'wan-type' },
+      ],
+    },
+    wanDetect: {
+      index: 1,
+      label: 'Auto Detect',
+      title: 'Auto Detect：這次有偵測到 WAN 嗎？',
+      options: [
+        { label: 'Yes · WAN Detected', short: 'Yes', value: 'yes', to: 'setup-ssid' },
+        { label: 'No · 仍未偵測到 WAN', short: 'No', value: 'no', to: 'wan-not-detected' },
       ],
     },
     wanRetry: {

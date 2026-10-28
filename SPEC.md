@@ -318,6 +318,15 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 - 機型名稱和產品圖目前是固定的 BT8；之後如果要依掃到的機型變化，再改成變數。
 
+### 5.9a `1_125` 選擇網路連線類型 `wan-type`（沒有偵測到 WAN）
+- Figma node：`1867:563`（預設）、`1867:600`（展開 Special options）、`1867:774`（Detecting...）。三張是同一頁的不同狀態。
+- 進入：1_120 Get Started → DEMO 判斷 WAN 選 **3 沒有偵測到 WAN**。
+- 導覽列：‹ 返回（→ 1_120）+ System Setup（粗體）+ ?。
+- 「請選擇您的網路連線類型（WAN Type）」；藍色小標 Wan Type；三個單選（有分隔線）：DHCP（Default，預設選取）／PPPoE／Static IP，每個下方有一行灰色說明。
+- **Special options**：點一下展開／收合（箭頭翻轉），展開後是 Phone Modem：iPhone／Android 單選（和上面同一組），下方灰字 No wired internet service, but mobile hotspot is available.
+- **Next**（藍色）→ 1_140。
+- **Auto Detect**（藍色粗體文字）→ 畫面中央跳出黑色圓角方塊（轉圈 + Detecting...），約 1.8 秒後跳出 **DEMO 流程判斷：Auto Detect**（見 6.2）：Yes → 1_140；No → 待提供。
+
 ### 5.10 `1_130` 偵測網路連線 `wan-detecting`（WAN Detected = Yes）
 - Figma node：`757:189`
 - 和 1_120 同一個版面（產品圖、機型名稱），差別：
@@ -466,7 +475,8 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 | # | 名稱 | 在哪一頁觸發 | 問題 | 選項 → 頁面 |
 |---|---|---|---|---|
-| 0 | `wan` | 1_120 按 Get Started | WAN 偵測結果？ | 1 正常 → `wan-detecting` 1_130；2 沒有偵測到 WAN、要不到 IP、US SKU → `modem-unplug` 1_033（WAN 流程，見 5.3b）；3 沒有偵測到 WAN → `wan-not-detected`（待提供） |
+| 0 | `wan` | 1_120 按 Get Started | WAN 偵測結果？ | 1 正常 → `wan-detecting` 1_130；2 沒有偵測到 WAN、要不到 IP、US SKU → `modem-unplug` 1_033（WAN 流程，見 5.3b）；3 沒有偵測到 WAN → `wan-type` 1_125 |
+| 1 | `wanDetect` | 1_125 按 Auto Detect（Detecting... 轉約 1.8 秒後跳出） | Auto Detect：這次有偵測到 WAN 嗎？ | Yes → `setup-ssid` 1_140；No → `wan-not-detected`（待提供） |
 | 1 | `wanRetry` | 1_039 按 重新嘗試 | 重新嘗試：這次有偵測到 WAN 嗎？ | Yes → `wan-detecting` 1_130；No → `modem-unplug` 1_033（拔電重來） |
 
 - 正式 App 會自動偵測，不會有這個面板；它只是讓展示時可以切換不同情況。
@@ -498,6 +508,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_100 | 設定指南 3/4 `guide-3` | 避免干擾：遠離使用 2.4GHz 頻段的家電和裝置 |
 | 1_110 | 設定指南 4/4 `guide-4` | 開啟節點電源：節點會自動尋找 AiMesh 路由器，連線時燈號閃藍燈 |
 | 1_120 | 安裝歡迎頁 `welcome` | 顯示偵測到的機型 ZenWiFi BT8，按 Get Started 開始設定 |
+| 1_125 | 選擇網路連線類型 `wan-type` | 沒有偵測到 WAN：選擇 WAN Type，或按 Auto Detect 再偵測一次（偵測到就到 1_140） |
 | 1_130 | 偵測網路連線 `wan-detecting` | 已偵測到 WAN（網路線已接），正在檢查網際網路連線狀態（約 2 秒後自動跳下一頁） |
 | 1_140 | 建立 WiFi 網路 `setup-ssid` | 設定主要 WiFi 的名稱（SSID）和密碼 |
 | 1_150 | 建立 IoT 網路 `setup-iot` | 為 IoT／舊裝置另建一個 WiFi，可稍後再設 |
