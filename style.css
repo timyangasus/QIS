@@ -1443,7 +1443,7 @@ button {
   box-shadow: none;
 }
 
-/* ── 1_038 設定節點 / 1_039 重新嘗試 ── */
+/* ── 1_039 重新嘗試 ── */
 .guide-illust.node-illust { align-items: center; }
 
 .guide-illust .node-device {
@@ -1451,21 +1451,6 @@ button {
   align-self: center;
   filter: drop-shadow(0 10px 18px rgba(30, 60, 110, .16));
 }
-
-.node-steps {
-  width: 327px;
-  margin-top: 22px;
-  padding-left: 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  font-size: 17px;
-  line-height: 23px;
-  color: var(--guide-desc);
-}
-
-.node-steps + .guide-link { margin-top: 18px; }
-.node-steps + .guide-link + .btn-brand { margin-top: auto; }
 
 .retry-model {
   font-size: 28px;
