@@ -1421,7 +1421,7 @@
       title: 'WAN 偵測結果？',
       options: [
         { label: '1 · 正常', short: '正常', value: 'ok', to: 'wan-detecting' },
-        { label: '2 · 沒有偵測到 WAN（要不到 IP · US SKU）', short: '要不到 IP（US）', value: 'no-ip-us', to: 'modem-unplug' },
+        { label: '2 · 沒有偵測到 WAN、要不到 IP、US SKU', short: '沒有 WAN、要不到 IP、US SKU', value: 'no-ip-us', to: 'modem-unplug' },
         { label: '3 · 沒有偵測到 WAN', short: '沒有 WAN', value: 'no-wan', to: 'wan-not-detected' },
       ],
     },

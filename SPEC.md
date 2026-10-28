@@ -184,7 +184,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 ### 5.3b 未偵測到 WAN：`1_034` / `1_037` 等待數據機 `modem-wait-off` / `modem-wait-start`
 - 來源：使用者提供的參考圖。版型沿用 Setup Guide（導覽列 ‹ 返回、Setup Guide、?）。
-- 流程：1_120 Get Started → DEMO 判斷 WAN 選 **2 沒有偵測到 WAN（要不到 IP · US SKU）** → 1_033 拔電 → **1_034 等 3 分鐘** → 1_036 插回 → **1_037 等 3½ 分鐘** → **1_039 重新嘗試**（DEMO 判斷「重試 WAN」：Yes → 1_130 偵測 WAN → 1_140；No → 回到 1_033 拔電重來）。
+- 流程：1_120 Get Started → DEMO 判斷 WAN 選 **2 沒有偵測到 WAN、要不到 IP、US SKU** → 1_033 拔電 → **1_034 等 3 分鐘** → 1_036 插回 → **1_037 等 3½ 分鐘** → **1_039 重新嘗試**（DEMO 判斷「重試 WAN」：Yes → 1_130 偵測 WAN → 1_140；No → 回到 1_033 拔電重來）。
 - 插圖區放一張淺灰圓角卡片：上方藍色小字（WAIT 3 MINUTES / WAIT AT LEAST 3½ MINUTES）、68 pt 藍色粗體倒數（3:00 / 3:30）、藍色進度條、灰色提示（Continue unlocks when the timer ends. / Blinking lights? Keep waiting.）、小數據機圖。
   - 1_034：燈全滅、插頭拔在旁邊，標籤 POWER OFF。
   - 1_037：電源線插著，燈號綠色閃爍，標籤 STARTING UP / LIGHTS MAY BLINK。
@@ -466,7 +466,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 | # | 名稱 | 在哪一頁觸發 | 問題 | 選項 → 頁面 |
 |---|---|---|---|---|
-| 0 | `wan` | 1_120 按 Get Started | WAN 偵測結果？ | 1 正常 → `wan-detecting` 1_130；2 沒有偵測到 WAN（要不到 IP · US SKU）→ `modem-unplug` 1_033（WAN 流程，見 5.3b）；3 沒有偵測到 WAN → `wan-not-detected`（待提供） |
+| 0 | `wan` | 1_120 按 Get Started | WAN 偵測結果？ | 1 正常 → `wan-detecting` 1_130；2 沒有偵測到 WAN、要不到 IP、US SKU → `modem-unplug` 1_033（WAN 流程，見 5.3b）；3 沒有偵測到 WAN → `wan-not-detected`（待提供） |
 | 1 | `wanRetry` | 1_039 按 重新嘗試 | 重新嘗試：這次有偵測到 WAN 嗎？ | Yes → `wan-detecting` 1_130；No → `modem-unplug` 1_033（拔電重來） |
 
 - 正式 App 會自動偵測，不會有這個面板；它只是讓展示時可以切換不同情況。
