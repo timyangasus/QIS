@@ -1443,27 +1443,6 @@ button {
   box-shadow: none;
 }
 
-/* ── 1_039 重新嘗試 ── */
-.guide-illust.node-illust { align-items: center; }
-
-.guide-illust .node-device {
-  display: block;
-  align-self: center;
-  filter: drop-shadow(0 10px 18px rgba(30, 60, 110, .16));
-}
-
-.retry-model {
-  font-size: 28px;
-  font-weight: 500;
-}
-
-.btn-brand.retry-btn { margin-bottom: 18px; }
-
-.guide-link.retry-advanced {
-  margin-top: 0;
-  margin-bottom: 58px;
-}
-
 /* ── 1_120 安裝歡迎頁 ── */
 .navbar-guide .navbar-title-bold { font-weight: 600; }
 

@@ -184,7 +184,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 ### 5.3b 未偵測到 WAN：`1_034` / `1_037` 等待數據機 `modem-wait-off` / `modem-wait-start`
 - 來源：使用者提供的參考圖。版型沿用 Setup Guide（導覽列 ‹ 返回、Setup Guide、?）。
-- 流程：1_120 Get Started → DEMO 判斷 WAN 選 **2 沒有偵測到 WAN、要不到 IP、US SKU** → 1_033 拔電 → **1_034 等 3 分鐘** → 1_036 插回 → **1_037 等 3½ 分鐘** → **1_039 重新嘗試**（DEMO 判斷「重試 WAN」：Yes → 1_130 偵測 WAN → 1_140；No → 回到 1_033 拔電重來）。
+- 流程：1_120 Get Started → DEMO 判斷 WAN 選 **2 沒有偵測到 WAN、要不到 IP、US SKU** → 1_033 拔電 → **1_034 等 3 分鐘** → 1_036 插回 → **1_037 等 3½ 分鐘** → 按 Continue 跳出 **DEMO 流程判斷：重啟後 WAN**（是否已偵測到 WAN、要到 IP？）。**Yes、No 都會進到 1_140**，接著照常走 1_150 → 1_160 → 1_170 → AiMesh 1_180–1_200；差別在最後：**Yes 有 1_210**（網路已連線），**No 沒有 1_210**（1_200 直接接 1_220 設定摘要，1_220 返回 → 1_200）。
 - 插圖區放一張淺灰圓角卡片：上方藍色小字（WAIT 3 MINUTES / WAIT AT LEAST 3½ MINUTES）、68 pt 藍色粗體倒數（3:00 / 3:30）、藍色進度條、灰色提示（Continue unlocks when the timer ends. / Blinking lights? Keep waiting.）、小數據機圖。
   - 1_034：燈全滅、插頭拔在旁邊，標籤 POWER OFF。
   - 1_037：電源線插著，燈號綠色閃爍，標籤 STARTING UP / LIGHTS MAY BLINK。
@@ -197,10 +197,6 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
   - 1_034 等 3 分鐘：數據機要斷電幾分鐘才會完全重置、忘記原本綁定的裝置，太早插回可能還是舊的連線。
   - 1_036 插回：重新通電讓數據機重新連上網路業者，準備好和新路由器配對。
   - 1_037 等 3½ 分鐘：開機並重新連上網路業者需要幾分鐘，完成後路由器才能從數據機拿到網路位址。
-
-### 5.3c `1_039` 重新嘗試 `wan-retry`
-- Figma node：`1726:310`（原稿是截圖）。文字照 Figma（中文），版型沿用 Setup Guide。
-- **1_039**：導覽列 ‹ 返回 + 「系統設定」；裝置圖；「ZenWiFi BT8」（28 pt `--brand`）；「重新嘗試」按鈕 → 跳出 **DEMO 流程判斷：重試 WAN**；「進階設定」連結（→ `advanced-settings`，待提供）。
 
 ### 5.4 `1_040` 燈號顯示頁 `led-check`
 - Figma node：`1867:1962`
@@ -379,7 +375,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_190 | AiMesh Network optimization | The AiMesh node(s) are now automatically joining the network, no manual setup is needed. | 一台節點、窗戶、花瓶（`mesh-2.jpg` 21 KB） |
 | 1_200 | AiMesh Network optimization | We could run the optimization in the background so you can start browsing instantly. | 節點在櫃子上、沙發、立燈（`mesh-3.jpg` 23 KB） |
 
-- 1_200 下方有「Run in background」藍色底線連結（`#007bfe`）→ 直接跳到 1_210。
+- 1_200 下方有「Run in background」藍色底線連結（`#007bfe`）→ 直接跳到 1_210（WAN 流程判斷「重啟後 WAN」選 No 時 → 1_220，沒有 1_210）。
 
 ### 5.13 `1_210` 完成：網路已連線 `internet-live`
 - Figma node：`1867:2040`（Figma 是靜態圖，**這頁完全用程式自己畫，加上完成的動態效果**）
@@ -484,7 +480,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 |---|---|---|---|---|
 | 0 | `wan` | 1_120 按 Get Started | WAN 偵測結果？ | 1 正常 → `wan-detecting` 1_130；2 沒有偵測到 WAN、要不到 IP、US SKU → `modem-unplug` 1_033（WAN 流程，見 5.3b）；3 沒有偵測到 WAN → `wan-type` 1_125 |
 | 1 | `wanDetect` | 1_125 按 Auto Detect（Detecting... 轉約 1.8 秒後跳出） | Auto Detect：這次有偵測到 WAN 嗎？ | Yes → `setup-ssid` 1_140；No → 留在 1_125，跳出「連線無線路由器」提示，按確定關閉 |
-| 1 | `wanRetry` | 1_039 按 重新嘗試 | 重新嘗試：這次有偵測到 WAN 嗎？ | Yes → `wan-detecting` 1_130；No → `modem-unplug` 1_033（拔電重來） |
+| 1 | `wanRestart` | 1_037 倒數結束按 Continue | 數據機重啟後：是否已偵測到 WAN、要到 IP？ | Yes → `setup-ssid` 1_140（之後有 1_210）；No → `setup-ssid` 1_140（之後沒有 1_210，1_200 → 1_220） |
 
 - 正式 App 會自動偵測，不會有這個面板；它只是讓展示時可以切換不同情況。
 
@@ -498,8 +494,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_033 | 拔掉數據機電源 `modem-unplug` | 重新啟動數據機（1/2）：只拔數據機的電源線，等所有燈都熄滅，不要按 Reset |
 | 1_034 | 等待 3 分鐘（拔電）`modem-wait-off` | 未偵測到 WAN：數據機保持拔電 3 分鐘，倒數結束 Continue 才能按（DEMO 加速） |
 | 1_036 | 插回數據機電源 `modem-plug` | 重新啟動數據機（2/2）：把電源線插回數據機，燈號重新亮起後再繼續 |
-| 1_037 | 等待數據機啟動 3½ 分鐘 `modem-wait-start` | 未偵測到 WAN：插回電源後等 3½ 分鐘，倒數結束 Continue 才能按（DEMO 加速），之後接 1_039 |
-| 1_039 | 重新嘗試偵測 WAN `wan-retry` | 再判斷一次 WAN：偵測到就繼續設定，偵測不到就回到拔電重來 |
+| 1_037 | 等待數據機啟動 3½ 分鐘 `modem-wait-start` | 未偵測到 WAN：插回電源後等 3½ 分鐘，倒數結束 Continue 才能按（DEMO 加速），之後判斷是否偵測到 WAN、要到 IP，兩種都接 1_140 |
 | 1_040 | 燈號顯示頁 `led-check` | 請使用者看路由器的燈，從呼吸綠燈變成恆亮藍燈才能開始設定 |
 | 1_050 | QR Code 找裝置 `qr-intro` | 說明路由器上的 QR Code 在哪裡，選擇用相機掃描或手動連 WiFi |
 | 1_051 | Setup Guide 1/5 `setup-guide` | 1_050 的 ? → Setup Guide：準備物品（數據機、路由器、電源線、網路線） |
@@ -524,7 +519,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_180 | AiMesh 建立中 1/3 `mesh-1` | 建立 AiMesh 網路：路由器和節點開始連線 |
 | 1_190 | AiMesh 建立中 2/3 `mesh-2` | AiMesh 最佳化：節點自動加入網路 |
 | 1_200 | AiMesh 建立中 3/3 `mesh-3` | AiMesh 最佳化：可以改到背景執行，先開始上網 |
-| 1_210 | 完成：網路已連線 `internet-live` | 設定完成，網際網路已連線（有完成動畫） |
+| 1_210 | 完成：網路已連線 `internet-live` | 設定完成，網際網路已連線（有完成動畫）。數據機重啟後仍沒有 WAN／IP 時跳過這頁 |
 | 1_220 | 設定摘要 `summary` | 列出剛設定好的 WiFi 名稱／密碼、登入帳號和 IoT 訪客網路 |
 | 1_230 | 首頁 `home` | 設定完成後進入 App 首頁，顯示路由器資訊和即時上傳／下載流量 |
 

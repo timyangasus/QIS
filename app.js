@@ -125,9 +125,9 @@
     decisions[d.index] = { name, value };
     renderDecisionBar();
     closeDecision();
-    // An option can run its own step (e.g. an alert on the same page) instead of navigating
+    // An option can run its own step (e.g. set a flow flag, or an alert on the same page) and/or navigate
     if (opt.action) opt.action();
-    else go(opt.to, opt.label);
+    if (opt.to) go(opt.to, opt.label);
   }
 
   function renderDecisionBar() {

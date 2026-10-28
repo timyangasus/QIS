@@ -301,6 +301,11 @@
   // 1_125 Auto Detect → No: the "can't detect WAN" alert pops up over 1_125 (opening 1_125 first
   // when picked again from the demo bar on another page)
   let WAN_ALERT_PENDING = false;
+
+  // After the 1_037 modem restart the flow always continues to 1_140; when the router still has
+  // no Internet (no WAN / no IP), the 1_210 "Internet is live" page is skipped after AiMesh setup
+  let WAN_OK = true;
+  const afterMesh = () => WAN_OK ? 'internet-live' : 'summary';
   function showWanAlert() {
     const alert = document.querySelector('.wan-type-alert');
     if (alert) return alert.classList.add('show');
@@ -374,7 +379,7 @@
     return () => cancelAnimationFrame(raf);
   }
 
-  function waitPage({ title, label, totalSec, hint, mode, next, why }) {
+  function waitPage({ title, label, totalSec, hint, mode, next, decide, why }) {
     return `
       <header class="navbar navbar-guide">
         <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
@@ -394,7 +399,7 @@
         </div>
         <h2 class="guide-title">${title}</h2>
         <p class="modem-why">${MODEM_WHY[why]}</p>
-        <button class="btn-brand wait-continue" data-go="${next}" data-label="Continue" disabled>Continue</button>
+        <button class="btn-brand wait-continue" ${decide ? `data-decide="${decide}"` : `data-go="${next}"`} data-label="Continue" disabled>Continue</button>
       </div>`;
   }
 
@@ -687,7 +692,7 @@
       back: 'modem-plug',
       code: '1_037',
       name: '等待數據機啟動 3½ 分鐘',
-      description: '未偵測到 WAN：插回電源後等數據機啟動 3½ 分鐘，燈可能會閃，倒數結束 Continue 才能按（DEMO 加速倒數），之後重新偵測 WAN',
+      description: '未偵測到 WAN：插回電源後等數據機啟動 3½ 分鐘，燈可能會閃，倒數結束 Continue 才能按（DEMO 加速倒數），之後判斷是否偵測到 WAN、要到 IP，兩種都接 1_140',
       theme: 'light',
       render: () => waitPage({
         title: 'Wait for the modem to start.',
@@ -695,35 +700,10 @@
         totalSec: 210,
         hint: 'Blinking lights? Keep waiting.',
         mode: 'starting',
-        next: 'wan-retry',
+        decide: 'wanRestart',
         why: 'waitStart',
       }),
       mount: el => { MODEM_FLOW = 'wan'; return startCountdown(el, 210, 5500); },
-    },
-    {
-      id: 'wan-retry',
-      back: 'modem-wait-start',
-      code: '1_039',
-      name: '重新嘗試偵測 WAN',
-      description: '仍未偵測到 WAN：按「重新嘗試」再判斷一次；偵測到就繼續設定，偵測不到就回到拔掉數據機電源重來',
-      figmaNode: '1726:310',
-      theme: 'light',
-      render: () => `
-        <header class="navbar navbar-guide">
-          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
-          <h1 class="navbar-title">系統設定</h1>
-        </header>
-
-        <div class="guide-body">
-          <div class="guide-illust node-illust">
-            <img class="node-device" src="assets/zenwifi-device.png" alt="ZenWiFi BT8" width="166" height="202">
-          </div>
-          <h2 class="guide-title guide-title-plain retry-model">ZenWiFi BT8</h2>
-          <button class="btn-brand retry-btn" data-decide="wanRetry">重新嘗試</button>
-          <button class="guide-link retry-advanced" data-go="advanced-settings">進階設定</button>
-        </div>
-      `,
-      mount: () => { MODEM_FLOW = 'wan'; },
     },
     {
       id: 'led-check',
@@ -1371,12 +1351,12 @@
             <span class="progress-fill" style="--from:${m.from}%;--to:${m.to}%"></span>
           </div>
           <p class="guide-desc">${m.desc}</p>
-          ${m.background ? '<button class="mesh-background" data-go="internet-live">Run in background</button>' : ''}
+          ${m.background ? `<button class="mesh-background" data-go="${afterMesh()}">Run in background</button>` : ''}
         </div>
       `,
       // Each step takes ~3s, then the next one picks up the bar where this one stopped
       mount: () => {
-        const timer = setTimeout(() => location.replace(`#${i + 1 < all.length ? `mesh-${i + 2}` : 'internet-live'}`), 1700);
+        const timer = setTimeout(() => location.replace(`#${i + 1 < all.length ? `mesh-${i + 2}` : afterMesh()}`), 1700);
         return () => clearTimeout(timer);
       },
     })),
@@ -1411,7 +1391,7 @@
     },
     {
       id: 'summary',
-      back: 'internet-live',
+      get back() { return WAN_OK ? 'internet-live' : 'mesh-3'; },
       code: '1_220',
       name: '設定摘要',
       description: '設定摘要：列出剛設定好的 WiFi 名稱／密碼、登入帳號和 IoT 訪客網路，按 Finish 完成',
@@ -1524,9 +1504,9 @@
       label: 'WAN',
       title: 'WAN 偵測結果？',
       options: [
-        { label: '1 · 正常', short: '正常', value: 'ok', to: 'wan-detecting' },
+        { label: '1 · 正常', short: '正常', value: 'ok', to: 'wan-detecting', action: () => { WAN_OK = true; } },
         { label: '2 · 沒有偵測到 WAN、要不到 IP、US SKU', short: '沒有 WAN、要不到 IP、US SKU', value: 'no-ip-us', to: 'modem-unplug' },
-        { label: '3 · 沒有偵測到 WAN', short: '沒有 WAN', value: 'no-wan', to: 'wan-type' },
+        { label: '3 · 沒有偵測到 WAN', short: '沒有 WAN', value: 'no-wan', to: 'wan-type', action: () => { WAN_OK = true; } },
       ],
     },
     wanDetect: {
@@ -1538,13 +1518,13 @@
         { label: 'No · 仍未偵測到 WAN（跳出提示，留在 1_125）', short: 'No', value: 'no', action: showWanAlert },
       ],
     },
-    wanRetry: {
+    wanRestart: {
       index: 1,
-      label: '重試 WAN',
-      title: '重新嘗試：這次有偵測到 WAN 嗎？',
+      label: '重啟後 WAN',
+      title: '數據機重啟後：是否已偵測到 WAN、要到 IP？（兩種都會進到 1_140）',
       options: [
-        { label: 'Yes · WAN Detected', short: 'Yes', value: 'yes', to: 'wan-detecting' },
-        { label: 'No · 仍未偵測到（回到拔電重來）', short: 'No', value: 'no', to: 'modem-unplug' },
+        { label: 'Yes · 已偵測到 WAN、要到 IP（有 1_210）', short: 'Yes', value: 'yes', to: 'setup-ssid', action: () => { WAN_OK = true; } },
+        { label: 'No · 仍沒有偵測到 WAN、要不到 IP（沒有 1_210）', short: 'No', value: 'no', to: 'setup-ssid', action: () => { WAN_OK = false; } },
       ],
     },
   };
