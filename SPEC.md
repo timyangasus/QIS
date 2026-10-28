@@ -184,7 +184,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 ### 5.3b 未偵測到 WAN：`1_034` / `1_037` 等待數據機 `modem-wait-off` / `modem-wait-start`
 - 來源：使用者提供的參考圖。版型沿用 Setup Guide（導覽列 ‹ 返回、Setup Guide、?）。
-- 流程：1_120 Get Started → DEMO 判斷 WAN 選 **2 沒有偵測到 WAN、要不到 IP、US SKU** → 1_033 拔電 → **1_034 等 3 分鐘** → 1_036 插回 → **1_037 等 3½ 分鐘** → 按 Continue 跳出 **DEMO 流程判斷：重啟後 WAN**（是否已偵測到 WAN、要到 IP？）。**Yes、No 都會進到 1_140**，接著照常走 1_150 → 1_160 → 1_170 → AiMesh 1_180–1_200；差別在最後：**Yes 有 1_210**（網路已連線），**No 沒有 1_210**（1_200 直接接 1_220 設定摘要，1_220 返回 → 1_200）。
+- 流程：1_120 Get Started → DEMO 判斷 WAN 選 **2 沒有偵測到 WAN、要不到 IP、US SKU** → 1_033 拔電 → **1_034 等 3 分鐘** → 1_036 插回 → **1_037 等 3½ 分鐘** → 按 Continue 跳出 **DEMO 流程判斷：重啟後 WAN**（是否已偵測到 WAN、要到 IP？）。**Yes、No 都會進到 1_140**，接著照常走 1_150 → 1_160 → 1_170 → AiMesh 1_180–1_200；差別在最後：**Yes 有 1_210**（網路已連線），**No 沒有 1_210**（1_200 直接接 1_220 設定摘要，1_220 返回 → 1_200，1_220 的 Finish 按鈕改成 Next）。
 - 插圖區放一張淺灰圓角卡片：上方藍色小字（WAIT 3 MINUTES / WAIT AT LEAST 3½ MINUTES）、68 pt 藍色粗體倒數（3:00 / 3:30）、藍色進度條、灰色提示（Continue unlocks when the timer ends. / Blinking lights? Keep waiting.）、小數據機圖。
   - 1_034：燈全滅、插頭拔在旁邊，標籤 POWER OFF。
   - 1_037：電源線插著，燈號綠色閃爍，標籤 STARTING UP / LIGHTS MAY BLINK。

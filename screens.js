@@ -1421,7 +1421,7 @@
               ${row(SUMMARY_ICON.wifi('IOT', '#5ec43c'), [['WiFi Name', FORM.iotSsid || `${FORM.ssid}_IoT`], ['WiFi Password', FORM.iotPassword]])}
             </ul>
           </section>
-          <button class="btn-brand setup-next" data-go="home">Finish</button>
+          <button class="btn-brand setup-next" data-go="home">${WAN_OK ? 'Finish' : 'Next'}</button>
         </div>
       `;
       },
