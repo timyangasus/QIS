@@ -351,7 +351,7 @@
       </div>
     </div>`;
 
-  // 1_240 / 1_250 / 1_300 navbar: bold "System Setup" + ?
+  // 1_300 navbar: bold "System Setup" + ?
   const systemSetupHeader = () => `
     <header class="navbar navbar-guide">
       <h1 class="navbar-title navbar-title-bold">System Setup</h1>
@@ -1524,7 +1524,7 @@
       get back() { return { single: 'internet-live', mesh: 'internet-live-mesh' }[FINISH] || 'mesh-3'; },
       code: '1_230',
       name: '設定摘要',
-      description: '設定摘要：列出剛設定好的 WiFi 名稱／密碼、登入帳號和 IoT 訪客網路；依前面的分支接到 FW 更新、AiMesh 拓撲、尚未連網或首頁',
+      description: '設定摘要：列出剛設定好的 WiFi 名稱／密碼、登入帳號和 IoT 訪客網路；依前面的分支接到啟用遠端連線、AiMesh 拓撲、尚未連網或首頁',
       figmaNode: '819:320',
       theme: 'light',
       render: () => {
@@ -1532,7 +1532,7 @@
         const wifi = band => row(SUMMARY_ICON.wifi(band, '#1b74e4'), [['WiFi Name', band === '2G' ? FORM.ssid : `${FORM.ssid}_${band}`], ['WiFi Password', FORM.wifiPassword]]);
         // Where Finish / Next goes depends on the branch that led here
         const [label, target] = {
-          single: ['Finish', 'data-decide="fw"'],
+          single: ['Finish', 'data-go="remote-access"'],
           mesh: ['Finish', 'data-go="aimesh-topology"'],
           mobile: ['Next', 'data-go="no-internet"'],
           offline: ['Finish', 'data-go="home-offline"'],
@@ -1562,48 +1562,6 @@
           <button class="btn-brand setup-next" ${target}>${label}</button>
         </div>
       `;
-      },
-    },
-    // Firmware update (FW 更新 = Yes): offer, then a timed update
-    {
-      id: 'fw-available',
-      back: 'summary',
-      code: '1_240',
-      name: '有新韌體',
-      description: 'FW 更新：有新版韌體，建議現在更新；Update 開始更新，Maybe Later 先跳過到啟用遠端連線',
-      figmaNode: '0:364',
-      theme: 'light',
-      render: () => `
-        ${systemSetupHeader()}
-        <div class="guide-body">
-          <img class="fw-device" src="assets/fw-router.jpg" alt="ZenWiFi 路由器" width="217" height="223">
-          <h2 class="guide-title fw-title">New Firmware Available</h2>
-          <p class="guide-desc fw-desc">We strongly recommend updating to the latest firmware now for a better and more secure experience, including the newest features and stability enhancements.</p>
-          <button class="pill-btn fw-update" data-go="fw-updating">Update</button>
-          <button class="guide-link fw-later" data-go="remote-access">Maybe Later</button>
-        </div>
-      `,
-    },
-    {
-      id: 'fw-updating',
-      back: 'fw-available',
-      code: '1_250',
-      name: '韌體更新中',
-      description: '韌體更新中：提醒路由器不要斷電、不要拔 WAN 線，更新完自動到啟用遠端連線',
-      figmaNode: '0:364',
-      theme: 'light',
-      render: () => `
-        ${systemSetupHeader()}
-        <div class="guide-body">
-          <img class="fw-device" src="assets/fw-router.jpg" alt="ZenWiFi 路由器" width="217" height="223">
-          <h2 class="guide-title guide-title-plain fw-title">Firmware Update</h2>
-          <div class="progress fw-progress" role="progressbar" aria-label="韌體更新"><span class="progress-fill"></span></div>
-          <p class="fw-note">Keep your router powered on and do not remove your WAN cable during the update process.</p>
-        </div>
-      `,
-      mount: () => {
-        const timer = setTimeout(() => location.replace('#remote-access'), 4200);
-        return () => clearTimeout(timer);
       },
     },
     // Remote access: sheets over the app home while it is still connecting
@@ -1948,15 +1906,6 @@
         { label: '0 台', short: '0 台', value: 'none', action: () => window.QIS_decide('mobile') },
         { label: '≥ 1 台 · 節點沒有回應', short: '≥1 台 沒回應', value: 'offline', to: 'node-status', action: () => { NODE_STATE = 'offline'; } },
         { label: '≥ 1 台 · 節點優化中', short: '≥1 台 優化中', value: 'optimising', to: 'node-status', action: () => { NODE_STATE = 'optimising'; } },
-      ],
-    },
-    fw: {
-      index: 4,
-      label: 'FW 更新',
-      title: 'FW 更新？（有沒有新版韌體）',
-      options: [
-        { label: 'Yes · 有新版韌體', short: 'Yes', value: 'yes', to: 'fw-available' },
-        { label: 'No · 已是最新版', short: 'No', value: 'no', to: 'remote-access' },
       ],
     },
     mobile: {

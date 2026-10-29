@@ -2696,40 +2696,6 @@ button {
 
 .summary-done + .summary-section { margin-top: 12px; }
 
-/* ── 1_240 / 1_250 韌體更新 ── */
-.fw-device { display: block; margin-top: 52px; }
-
-.guide-title.fw-title { margin-top: 54px; }
-
-.guide-desc.fw-desc {
-  width: 336px;
-  margin-top: 22px;
-  color: #555;
-}
-
-.pill-btn.fw-update {
-  width: 183px;
-  height: 50px;
-  margin-top: auto;
-  font-size: 17px;
-  color: var(--brand);
-}
-
-.guide-link.fw-later { margin: 22px 0 46px; }
-
-.progress.fw-progress { width: 280px; margin-top: 26px; }
-
-.fw-progress .progress-fill { animation-duration: 4s; }
-
-.fw-note {
-  width: 300px;
-  margin-top: 36px;
-  font-size: 16px;
-  line-height: 1.35;
-  text-align: center;
-  color: #444;
-}
-
 /* ── 1_260 / 1_270 啟用遠端連線（App 首頁上的底部面板） ── */
 .app-behind {
   flex: 1;
