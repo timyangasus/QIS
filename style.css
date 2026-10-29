@@ -2982,3 +2982,133 @@ button {
   color: #fff;
   font-size: 15px;
 }
+
+/* ── 1_370 網路診斷 (Network-Diagnostic, scaled ×1.12 from 393 wide) ── */
+.screen-diagnosis { padding-top: 0; }
+#device:has(.screen-diagnosis) { --statusbar-text: #fff; }
+
+.diag-hero {
+  --c1: #57b7ff; --c2: #5ec5ff; --c3: #cdf1ff; --diag-btn: #283745;
+  flex-shrink: 0;
+  padding: var(--safe-top) 0 83px;
+  background: radial-gradient(ellipse 125% 100% at 50% 0%, var(--c1) 0%, var(--c2) 42%, var(--c3) 78%, rgba(255, 255, 255, 0) 100%);
+  transition: background .5s;
+}
+.diag-hero[data-state="success"] { --c1: #40b9af; --c2: #38aea1; --c3: #d1f2ec; --diag-btn: #1e9d90; }
+.diag-hero[data-state="warn"] { --c1: #f6ab63; --c2: #ee9f55; --c3: #faecda; --diag-btn: #bc6f10; }
+.diag-hero[data-state="fail"] { --c1: #e47867; --c2: #e26b5a; --c3: #fce1db; --diag-btn: #d95b47; }
+
+.diag-navbar .navbar-title,
+[data-theme="light"] .diag-navbar .navbar-btn { color: #fff; }
+
+.diag-head {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  padding: 22px 31px 0 40px;
+}
+
+.diag-icon {
+  width: 76px;
+  height: 76px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .13);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.diag-title { font-size: 23px; font-weight: 500; color: #fff; line-height: 1.25; }
+.diag-sub { margin-top: 3px; font-size: 13px; line-height: 1.45; color: rgba(255, 255, 255, .95); }
+
+.diag-btn {
+  display: block;
+  width: 180px;
+  height: 49px;
+  margin: 27px auto 0;
+  border-radius: 25px;
+  background: #fff;
+  color: var(--diag-btn);
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  transition: opacity .2s;
+}
+.diag-btn:disabled { opacity: .55; }
+
+.diag-sec {
+  position: relative;
+  z-index: 1;
+  align-self: flex-start;
+  margin: -38px 0 0 34px;
+  font-size: 16px;
+  color: #283745;
+}
+
+.diag-steps { padding-top: 20px; }
+
+.diag-row { position: relative; display: flex; gap: 16px; padding: 16px 35px 16px 34px; }
+.diag-row:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 50px;
+  top: 50px;
+  bottom: -16px;
+  width: 1.5px;
+  background: #e3e7ea;
+}
+
+.diag-row-icon {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #f0f3f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.diag-row-main { flex: 1; min-width: 0; }
+
+.diag-row-top {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 18px;
+  font-weight: 500;
+  color: #283745;
+}
+
+.diag-badge { width: 29px; height: 29px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.diag-badge.ok { background: #65c4b9; }
+.diag-badge.warn { background: #ff9643; }
+.diag-badge.fail { background: #d95b47; }
+
+.diag-spin {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #d9dde1;
+  border-top-color: #7a828a;
+  animation: diag-spin .7s linear infinite;
+}
+@keyframes diag-spin { to { transform: rotate(360deg); } }
+
+.diag-dash { font-size: 16px; letter-spacing: 2px; color: #8b939a; }
+
+.diag-box {
+  margin: 8px 29px 0 0;
+  padding: 10px 13px;
+  border: 1px solid #d95b47;
+  border-radius: 9px;
+  background: #fcf0ee;
+}
+.diag-box.warn { border-color: #ff9643; background: #fff6ea; }
+.diag-part + .diag-part { margin-top: 9px; padding-top: 9px; border-top: 1px solid rgba(217, 91, 71, .3); }
+.diag-part b { display: block; margin-bottom: 3px; font-size: 13.5px; color: #d95b47; }
+.diag-box.warn .diag-part b { color: #e8821f; }
+.diag-part span { display: block; font-size: 12.5px; line-height: 1.5; color: #7c7c7c; }

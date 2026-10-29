@@ -568,6 +568,56 @@
 
 
 
+
+  // ── 1_370 網路診斷 (ported from Network-Diagnostic) ──
+  const DIAG_STEPS = [
+    { key: 'device', label: '您的裝置', icon: '<rect x="2.5" y="5" width="13" height="9" rx="1.5"/><path d="M1 17h16"/><rect x="15.5" y="8" width="6" height="10" rx="1.4"/>' },
+    { key: 'router', label: '華碩路由器', icon: '<rect x="3" y="13" width="18" height="6" rx="2"/><path d="M7 16h.01M11 16h.01"/><path d="M8 13V9M16 13V9"/><path d="M9.5 6.5a3.5 3.5 0 015 0"/>' },
+    { key: 'upstream', label: '上游網路設備', icon: '<rect x="9" y="7" width="6" height="12" rx="1.5"/><path d="M12 16h.01"/><path d="M6.5 9.5a4 4 0 000 5M17.5 9.5a4 4 0 010 5M4 7.5a7.5 7.5 0 000 9M20 7.5a7.5 7.5 0 010 9"/>' },
+    { key: 'internet', label: '網際網路', icon: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/>' },
+  ];
+  // DNS is folded into Router / Gateway / Internet (the device row is ping only)
+  const DIAG_PING_FAIL = {
+    device: { title: 'Wi‑Fi 已關閉。', lines: ['請啟用您行動裝置的 Wi‑Fi。'] },
+    router: { title: '華碩路由器似乎是離線狀態。', lines: ['請確認華碩路由器是電源開啟的狀態。', '請檢查是否訊號太遠或干擾。', '請重開路由器後再試一次。'] },
+    upstream: { title: '上游網路設備似乎是離線狀態。', lines: ['請確認您的上游網路設備是開啟的狀態。', '請重新插拔線路，並確認所有的線路都有正確連接。', '請嘗試重啟上游網路設備。', '請與您的網路服務供應商聯繫，以修正網路連線問題。'] },
+    internet: { title: '您的網路服務供應商似乎出了點問題。', lines: ['請與您的網路服務供應商聯繫，以修正網路連線問題。'] },
+  };
+  const DIAG_DNS_FAIL = {
+    router: { title: '路由器無法解析網站名稱。', lines: ['請重新啟動華碩路由器後再試一次。', '若問題持續，請檢查路由器的 DNS 設定，或變更其他 DNS 服務。'] },
+    upstream: { title: '網路服務供應商的 DNS 服務可能異常。', lines: ['請嘗試重啟您的上游網路設備。', '您可以嘗試在華碩路由器中改用其他 DNS 服務。', '若問題持續，請聯絡您的網路服務供應商。'] },
+    internet: { title: '網域名稱解析異常。', lines: ['部分網站暫時無法使用，請稍後再試。若問題持續，請聯絡網路服務供應商。'] },
+  };
+  const DIAG_WARN = { title: '此段連線不穩定。', lines: ['偵測到此段連線偶有中斷，可能影響上網穩定性。'] };
+  // Per-row result: ok | warn (ping partly failed) | fail (ping failed) | dns (ping ok, DNS failed)
+  // | warndns | faildns. Anything but ok/warn is ❌ and stops the run.
+  const DIAG_SCENARIOS = {
+    success: ['ok', 'ok', 'ok', 'ok'],
+    warn: ['ok', 'warn', 'ok', 'warn'],
+    fail: ['ok', 'fail', 'pending', 'pending'],
+    mixed: ['ok', 'warn', 'fail', 'pending'],
+    dns: ['ok', 'ok', 'dns', 'pending'],
+    warndns: ['ok', 'warndns', 'pending', 'pending'],
+    faildns: ['ok', 'ok', 'faildns', 'pending'],
+  };
+  let DIAG_SCENARIO = 'fail';
+  let diagRerun = null;
+  const diagSev = st => ['fail', 'dns', 'warndns', 'faildns'].includes(st) ? 'fail' : st;
+  const DIAG_HERO_ICON = {
+    search: '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg>',
+    success: '<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+    warn: '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="14"/><line x1="12" y1="18.6" x2="12.01" y2="18.6" stroke-width="4.2"/></svg>',
+    fail: '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>',
+  };
+  function diagStatusIcon(st) {
+    const sev = diagSev(st);
+    if (sev === 'ok') return '<span class="diag-badge ok"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>';
+    if (sev === 'warn') return '<span class="diag-badge warn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="13.5"/><line x1="12" y1="18.4" x2="12.01" y2="18.4" stroke-width="4"/></svg></span>';
+    if (sev === 'fail') return '<span class="diag-badge fail"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg></span>';
+    if (sev === 'checking') return '<span class="diag-spin"></span>';
+    return '<span class="diag-dash">--</span>';
+  }
+
   window.QIS_SCREENS = [
     {
       id: 'opening',
@@ -1818,6 +1868,100 @@
         ${homeTabs()}
       `,
     },
+    {
+      id: 'diagnosis',
+      back: 'home-offline',
+      code: '1_370',
+      name: '網路診斷',
+      description: '網路診斷：從 1_360「詳細診斷」進來直接開始檢查，依序檢查裝置 → 路由器 → 上游設備 → 網際網路，顯示正常／不穩／異常和排除建議',
+      theme: 'light',
+      render: () => `
+        <div class="diag-hero">
+          <header class="navbar diag-navbar">
+            <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
+            <h1 class="navbar-title">Network Diagnostic</h1>
+          </header>
+          <div class="diag-head">
+            <div class="diag-icon"></div>
+            <div><h2 class="diag-title"></h2><p class="diag-sub"></p></div>
+          </div>
+          <button class="diag-btn" type="button"></button>
+        </div>
+        <button class="diag-sec" data-decide="diagnosis">連線檢查</button>
+        <div class="diag-steps"></div>
+      `,
+      mount: el => {
+        const hero = el.querySelector('.diag-hero');
+        const btn = el.querySelector('.diag-btn');
+        let statuses = DIAG_STEPS.map(() => 'pending');
+        let timers = [];
+        const stop = () => { timers.forEach(clearTimeout); timers = []; };
+
+        function renderHero(state, o) {
+          hero.dataset.state = state;
+          el.querySelector('.diag-icon').innerHTML = DIAG_HERO_ICON[state] || DIAG_HERO_ICON.search;
+          el.querySelector('.diag-title').textContent = o.title;
+          el.querySelector('.diag-sub').textContent = o.sub;
+          btn.textContent = o.btn;
+          btn.disabled = !!o.disabled;
+        }
+
+        function renderSteps() {
+          el.querySelector('.diag-steps').innerHTML = DIAG_STEPS.map((s, i) => {
+            const st = statuses[i];
+            const pingFail = st === 'fail' || st === 'faildns';
+            const dnsFail = st === 'dns' || st === 'warndns' || st === 'faildns';
+            const parts = [];
+            if (st === 'warn' || st === 'warndns') parts.push(DIAG_WARN);
+            if (pingFail) parts.push(DIAG_PING_FAIL[s.key]);
+            if (dnsFail) parts.push(DIAG_DNS_FAIL[s.key]);
+            // Any error → red callout; ping-unstable alone → orange
+            const box = parts.length ? `<div class="diag-box${pingFail || dnsFail ? '' : ' warn'}">${parts.map(p => `
+              <div class="diag-part"><b>${p.title}</b>${p.lines.map(l => `<span>${p.lines.length > 1 ? '• ' : ''}${l}</span>`).join('')}</div>`).join('')}</div>` : '';
+            return `
+              <div class="diag-row">
+                <div class="diag-row-icon"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#5f6368" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${s.icon}</svg></div>
+                <div class="diag-row-main">
+                  <div class="diag-row-top"><span>${s.label}</span>${diagStatusIcon(st)}</div>
+                  ${box}
+                </div>
+              </div>`;
+          }).join('');
+        }
+
+        // Page-level state follows the worst row: fail > warn > success
+        function applyStatuses() {
+          if (statuses.some(x => diagSev(x) === 'fail')) renderHero('fail', { title: '網路連線異常', sub: '請依下方步驟排除問題後，再重新診斷', btn: '重新診斷' });
+          else if (statuses.includes('warn')) renderHero('warn', { title: '網路連線不穩定', sub: '目前仍可連線，但部分檢測顯示可能影響上網體驗', btn: '重新診斷' });
+          else renderHero('success', { title: '網路連線正常', sub: '網路連線正常運作中，好好享受網際網路吧', btn: '重新診斷' });
+          renderSteps();
+        }
+
+        // First row spins 4 s, then each next row reveals 1 s apart; a failed row (❌) stops the chain
+        function run() {
+          stop();
+          const plan = DIAG_SCENARIOS[DIAG_SCENARIO];
+          statuses = DIAG_STEPS.map(() => 'pending');
+          renderHero('running', { title: '診斷您的網路連線', sub: '診斷中，請稍候...', btn: '診斷中...', disabled: true });
+          statuses[0] = 'checking';
+          renderSteps();
+          let i = 0;
+          const reveal = () => {
+            statuses[i] = plan[i];
+            if (diagSev(plan[i]) === 'fail' || i >= DIAG_STEPS.length - 1) return applyStatuses();
+            statuses[++i] = 'checking';
+            renderSteps();
+            timers.push(setTimeout(reveal, 1000));
+          };
+          timers.push(setTimeout(reveal, 4000));
+        }
+
+        btn.addEventListener('click', run);
+        diagRerun = run;
+        run(); // 詳細診斷 from the alert bar goes straight into 診斷中
+        return () => { stop(); diagRerun = null; };
+      },
+    },
   ];
 
   // Demo-only branch points; see app.js (data-decide="<name>")
@@ -1887,6 +2031,24 @@
         { label: 'Yes', short: 'Yes', value: 'yes', to: 'summary', action: () => { FINISH = 'mobile'; } },
         { label: 'No', short: 'No', value: 'no', to: 'summary', action: () => { FINISH = 'offline'; } },
       ],
+    },
+    diagnosis: {
+      index: 5,
+      label: '診斷',
+      title: '網路診斷結果？',
+      options: [
+        ['success', '都正常'],
+        ['warn', '不穩'],
+        ['fail', '有錯誤'],
+        ['mixed', '錯誤＋不穩'],
+        ['dns', 'DNS 異常'],
+        ['warndns', 'Ping 不穩＋DNS 異常'],
+        ['faildns', 'Ping 異常＋DNS 異常'],
+      ].map(([value, label]) => ({
+        label, short: label, value,
+        to: 'diagnosis',
+        action: () => { DIAG_SCENARIO = value; if (diagRerun) diagRerun(); },
+      })),
     },
   };
 })();
