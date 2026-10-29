@@ -362,7 +362,15 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_140 | 建立 WiFi 網路 `setup-ssid` | `757:185` | WiFi 圖示；Create WiFi Network；SSID（可清除）、密碼（強度）、□ Separate WiFi network | Next → 1_150（SSID 空白或密碼太弱時不能按）；返回 → 1_120 |
 | 1_150 | 建立 IoT 網路 `setup-iot` | `757:182` | 房子+齒輪圖示；Create Iot Network；說明 IoT／舊裝置可能和 WiFi 7 不相容；IoT SSID、密碼 | Next → 1_160；Set Up Later（淺藍文字）→ 1_160 |
 | 1_160 | 設定登入帳號 `setup-account` | `757:179` | 人像圖示；Set up Local Login Account；Username、Password（強度）、Confirm Password | Next → 1_170；兩次密碼不一致時顯示紅字「Passwords do not match.」且不能按 |
-| 1_170 | 套用設定 `setup-apply` | `757:176` | ‹ 返回（→ 1_160）；裝置圖（同 1_040，166 × 202）；Setting up your network（`--brand`）；進度條 3 秒；Now applying your settings. | 約 3 秒後自動 → 1_180 |
+| 1_170 | 套用設定 `setup-apply` | `757:176` | ‹ 返回（→ 1_160）；裝置圖（同 1_040，166 × 202）；Setting up your network（`--brand`）；進度條 3 秒；Now applying your settings. | 約 3 秒後自動 → 1_175 |
+
+### 5.11a `1_175` 加入新的 Wi-Fi `join-wifi`
+- Figma node：`1867:1018`（原稿是截圖）。
+- 1_170 套用設定後，路由器的 WiFi 換成 1_140 設定的名稱，手機要重新加入。
+- 導覽列只有標題 System Setup（粗體，沒有返回和 ?）；下方是三入組產品圖（同 1_120）。
+- 畫面變暗，跳出模擬的 iOS 系統提示（沿用 1_060 的 `.ios-alert`）：“ASUS Router” Wants to Join Wi-Fi Network “<1_140 的 SSID>”?（原稿的範例是 asus1234）
+  - **Join** → 1_180 AiMesh 建立中
+  - **Cancel** → 待提供
 
 ### 5.12 `1_180`–`1_200` AiMesh 建立中 `mesh-1`～`mesh-3`
 - Figma node：`803:414`、`803:400`、`803:383`
@@ -516,6 +524,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_150 | 建立 IoT 網路 `setup-iot` | 為 IoT／舊裝置另建一個 WiFi，可稍後再設 |
 | 1_160 | 設定登入帳號 `setup-account` | 設定路由器管理介面的帳號和密碼 |
 | 1_170 | 套用設定 `setup-apply` | 路由器正在套用剛才的 WiFi 和帳號設定（約 3 秒後自動跳下一頁） |
+| 1_175 | 加入新的 Wi-Fi `join-wifi` | 設定套用後路由器換成新的 WiFi 名稱，系統詢問是否加入，按 Join 繼續建立 AiMesh |
 | 1_180 | AiMesh 建立中 1/3 `mesh-1` | 建立 AiMesh 網路：路由器和節點開始連線 |
 | 1_190 | AiMesh 建立中 2/3 `mesh-2` | AiMesh 最佳化：節點自動加入網路 |
 | 1_200 | AiMesh 建立中 3/3 `mesh-3` | AiMesh 最佳化：可以改到背景執行，先開始上網 |

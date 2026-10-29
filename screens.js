@@ -1303,9 +1303,37 @@
         </div>
       `,
       mount: () => {
-        const timer = setTimeout(() => location.replace('#mesh-1'), 3200);
+        const timer = setTimeout(() => location.replace('#join-wifi'), 3200);
         return () => clearTimeout(timer);
       },
+    },
+    {
+      id: 'join-wifi',
+      back: 'setup-apply',
+      code: '1_175',
+      name: '加入新的 Wi-Fi',
+      description: '加入新 Wi-Fi：設定套用後路由器換成新的 WiFi 名稱，系統詢問是否加入，按 Join 繼續建立 AiMesh',
+      figmaNode: '1867:1018',
+      theme: 'light',
+      render: () => `
+        <header class="navbar navbar-guide">
+          <h1 class="navbar-title navbar-title-bold">System Setup</h1>
+        </header>
+        <div class="welcome-body">
+          <img class="welcome-device" src="assets/bt8-3pack.jpg" alt="ZenWiFi BT8 三入組" width="276" height="176">
+        </div>
+
+        <!-- Simulated iOS system alert: the phone has to join the WiFi name set on 1_140 -->
+        <div class="ios-alert-layer">
+          <div class="ios-alert" role="alertdialog" aria-labelledby="join-new-wifi-title">
+            <p class="ios-alert-title" id="join-new-wifi-title">“ASUS Router” Wants to Join Wi-Fi Network “${esc(FORM.ssid)}”?</p>
+            <div class="ios-alert-buttons">
+              <button data-go="join-wifi-cancel" data-label="Cancel">Cancel</button>
+              <button data-go="mesh-1" data-label="Join">Join</button>
+            </div>
+          </div>
+        </div>
+      `,
     },
     // AiMesh build-up: one progress bar that carries on across the three steps
     ...[
