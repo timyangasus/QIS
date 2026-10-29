@@ -243,7 +243,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_052 | 拔下數據機和舊路由器的電源線 | **同 1_033**：兩張動畫輪播對應 2 條條列 | 同 1_033 | I am ready → 1_053 |
 | 1_053 | 插入您的裝置 | **同 1_036**：三張動畫輪播對應 3 條條列 | 同 1_036 | I am ready → 1_054 |
 | 1_054 | Prepare Another Node | 兩張動畫輪播（同 1_033 版型）：① 路由器（恆亮藍燈）在左，節點從右邊滑進來，接著出現藍色虛線雙箭頭和「≤ 3 m」標籤 ② 節點電源插頭（黃色箭頭推兩下）往上插進電源孔，燈號呼吸綠燈閃爍，約 2.5 秒後變恆亮藍燈並帶光暈 | 條列 1. Place your node(s) and router within a proper distance. 2. Power node(s) on and wait until you see a static blue light. … | Next → 1_055 |
-| 1_055 | **同 1_040** 燈號顯示頁 | 同 1_040 | 同 1_040（勾選確認恆亮藍燈） | Next → 回 1_050；It is not solid blue light → 同 1_040（`led-not-blue` 尚未加入） |
+| 1_055 | **同 1_040** 燈號顯示頁 | 同 1_040 | 同 1_040 的燈號說明（呼吸綠燈／恆亮藍燈），但拿掉勾選框「I confirm it is solid blue light on the router.」、Next 和「It is not solid blue light.」——指南只是說明，不用確認 | 只有一顆 **Done** → 回 1_050 |
 
 - **LED Guide 1_056**：導覽列只有標題 LED Guide；裝置圖；說明文字；7 列燈號（色塊 + 說明，列與列之間有分隔線）；白色膠囊 OK → 回上一頁。
   - 綠：starting up／藍：ready for setup／**藍色閃爍**：node syncing（原稿這格是空的，推測是截到閃爍熄滅的瞬間）／白：online／黃：連線弱／紅：沒有網路或節點斷線／**綠色呼吸**：mesh 最佳化中（含 DFS 雷達說明）。
@@ -574,7 +574,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_052 | Setup Guide 2/5 `setup-guide-2` | 同 1_033：拔掉數據機和舊路由器的電源（動畫輪播） |
 | 1_053 | Setup Guide 3/5 `setup-guide-3` | 同 1_036：數據機 LAN 埠接到路由器 WAN 埠，兩台都開機（動畫輪播） |
 | 1_054 | Setup Guide 4/5 `setup-guide-4` | 準備節點：放在 3 公尺內，開機等呼吸綠燈變恆亮藍燈（動畫輪播） |
-| 1_055 | Setup Guide 5/5 `setup-guide-5` | 同 1_040 燈號顯示頁：確認恆亮藍燈，Next 回 1_050 |
+| 1_055 | Setup Guide 5/5 `setup-guide-5` | 同 1_040 燈號說明（不用勾選確認），Done 回 1_050 |
 | 1_056 | LED Guide `led-guide` | 1_050 的 ? → LED Guide：路由器正面燈號顏色代表的狀態 |
 | 1_060 | 啟用相機掃描 `qr-scan` | 把相機對準路由器上的 QR Code，掃到後系統詢問是否加入路由器的 Wi-Fi |
 | 1_070 | 偵測路由器 `detecting` | 加入路由器的 Wi-Fi 後，App 正在搜尋 ASUS 路由器（約 2 秒後自動跳下一頁） |

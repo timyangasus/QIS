@@ -791,7 +791,8 @@
   ];
 
   // 1_040 (setup flow) and 1_055 (end of the 1_050 Setup Guide) are the same LED check page
-  function ledCheck(next) {
+  // guide: in the Setup Guide there is nothing to confirm, just one button back to 1_050
+  function ledCheck(next, guide = false) {
     return `
         <header class="navbar">
           <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
@@ -820,13 +821,15 @@
           </ol>
 
           <div class="led-actions">
-            <label class="checkbox">
-              <input type="checkbox">
-              <span class="checkbox-box"></span>
-              <span>I confirm it is solid blue light on the router.</span>
-            </label>
-            <button class="btn-primary" data-go="${next}">Next</button>
-            <button class="text-link" data-go="led-not-blue">It is not solid blue light.</button>
+            ${guide ? `<button class="btn-primary" data-go="${next}" data-label="Done">Done</button>` : `
+              <label class="checkbox">
+                <input type="checkbox">
+                <span class="checkbox-box"></span>
+                <span>I confirm it is solid blue light on the router.</span>
+              </label>
+              <button class="btn-primary" data-go="${next}">Next</button>
+              <button class="text-link" data-go="led-not-blue">It is not solid blue light.</button>
+            `}
           </div>
         </div>
     `;
@@ -1295,7 +1298,7 @@
       description: 'Setup Guide 5/5：同 1_040 燈號顯示頁，確認路由器恆亮藍燈，Next 回 1_050',
       figmaNode: '1867:1962',
       theme: 'light',
-      render: () => ledCheck('qr-intro'),
+      render: () => ledCheck('qr-intro', true),
     },
     {
       id: 'led-guide',

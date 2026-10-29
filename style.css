@@ -813,7 +813,7 @@ button {
 }
 
 /* Next stays disabled until the checkbox is ticked */
-.led-actions:not(:has(input:checked)) .btn-primary {
+.led-actions:has(.checkbox):not(:has(input:checked)) .btn-primary {
   background: var(--btn-disabled);
   pointer-events: none;
 }
