@@ -1355,6 +1355,83 @@ button {
 
 .modem-note svg { flex-shrink: 0; }
 
+/* ── 1_033 拔下數據機和舊路由器的電源線：圖片輪播對應條列 ── */
+.unplug-carousel { display: block; height: 340px; margin-top: 12px; }
+
+.unplug-track {
+  height: 100%;
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.unplug-track::-webkit-scrollbar { display: none; }
+
+.unplug-slide {
+  flex: 0 0 100%;
+  display: flex;
+  justify-content: center;
+  scroll-snap-align: center;
+}
+
+.unplug-slide svg { max-width: 100%; height: auto; }
+
+.unplug-dots { display: flex; gap: 10px; margin: 6px 0 18px; }
+
+.unplug-dots i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #c9dcf3;
+  cursor: pointer;
+  transition: background .2s;
+}
+
+.unplug-dots i.on { background: var(--brand); }
+
+.unplug-steps {
+  width: 327px;
+  margin-top: 24px;
+  padding-left: 0;
+  list-style: none;
+  counter-reset: unplug;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.unplug-steps li {
+  position: relative;
+  padding-left: 30px;
+  font-size: 17px;
+  line-height: 22px;
+  color: #b4b9c0;
+  counter-increment: unplug;
+  cursor: pointer;
+  transition: color .2s;
+}
+
+.unplug-steps li::before {
+  content: counter(unplug);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #d8dde3;
+  color: #fff;
+  font-size: 13px;
+  line-height: 22px;
+  text-align: center;
+  transition: background .2s;
+}
+
+.unplug-steps li.on { color: var(--guide-desc); }
+
+.unplug-steps li.on::before { background: var(--brand); }
+
 /* ── 1_034 / 1_037 未偵測到 WAN：等待數據機（倒數，DEMO 加速） ── */
 .guide-illust.wait-illust { align-items: flex-start; }
 
