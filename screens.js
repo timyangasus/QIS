@@ -497,17 +497,7 @@
 
   // 1_033 / 1_036 modem power-cycle illustration, drawn in the Setup Guide style
   // 1_033 flat illustrations in the 1_080–1_110 guide style (no background circle); one per step in the list
-  const UNPLUG_ARROW = (x, y, dir) => `
-    <g transform="translate(${x} ${y}) scale(${dir} 1)" class="unplug-arrow">
-      <path d="M0 0 H-34" stroke="#f5c84c" stroke-width="7" stroke-linecap="round"/>
-      <path d="M-26 -11 L-40 0 L-26 11" fill="none" stroke="#f5c84c" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-    </g>`;
-  const UNPLUG_PLUG = (x, y) => `
-    <g transform="translate(${x} ${y})">
-      <rect x="0" y="-13" width="30" height="26" rx="6" fill="#d3d7dd"/>
-      <rect x="30" y="-8" width="11" height="4" rx="1.5" fill="#a9b0b9"/>
-      <rect x="30" y="4" width="11" height="4" rx="1.5" fill="#a9b0b9"/>
-    </g>`;
+  // Each slide is its own <svg> with SMIL timed from 0, so showing a slide replays it via setCurrentTime(0)
   const UNPLUG_OUTLET = (x, y) => `
     <g transform="translate(${x} ${y})">
       <rect x="0" y="0" width="46" height="66" rx="9" fill="#f4f5f7" stroke="#d5d9de" stroke-width="2"/>
@@ -515,16 +505,39 @@
       <rect x="29" y="20" width="5" height="12" rx="2" fill="#b9bfc7"/>
       <circle cx="23" cy="46" r="4" fill="#b9bfc7"/>
     </g>`;
-  const UNPLUG_OFF_BADGE = (x, y) => `
-    <g transform="translate(${x} ${y})">
+  const UNPLUG_OFF_BADGE = (x, y, at) => `
+    <g transform="translate(${x} ${y})" opacity="0">
+      <animate attributeName="opacity" from="0" to="1" begin="${at}s" dur=".3s" fill="freeze"/>
       <circle r="19" fill="#fff" stroke="#e8eaee" stroke-width="2"/>
       <path d="M-6.5 -5.5 A9 9 0 1 0 6.5 -5.5" fill="none" stroke="#9aa2ac" stroke-width="3" stroke-linecap="round"/>
       <path d="M0 -11 V-1" stroke="#9aa2ac" stroke-width="3" stroke-linecap="round"/>
       <path d="M-12 -12 L12 12" stroke="#e5413b" stroke-width="3.5" stroke-linecap="round"/>
     </g>`;
+  // Green LED that blinks until the power is pulled at `off` s, then stays grey
+  const UNPLUG_LED = (cx, cy, r, off, i) => `
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="#5ee250">
+      <animate attributeName="opacity" values="1;.25;1" dur="${0.6 + i * 0.15}s" begin="0s" end="${off}s" repeatCount="indefinite"/>
+      <set attributeName="fill" to="#d0d4da" begin="${off}s" fill="freeze"/>
+    </circle>`;
+  // Plug pointing down into the power strip; lifts out at `at` s, its cord bending with it
+  const UNPLUG_STRIP_PLUG = (x, cord, at) => {
+    const d = top => cord(top);
+    return `
+      <path d="${d(298)}" fill="none" stroke="#aab1ba" stroke-width="3.5" stroke-linecap="round">
+        <animate attributeName="d" from="${d(298)}" to="${d(264)}" begin="${at}s" dur=".5s" fill="freeze" calcMode="spline" keySplines=".4 0 .2 1" keyTimes="0;1"/>
+      </path>
+      <g transform="translate(${x} 298)">
+        <animateTransform attributeName="transform" type="translate" from="${x} 298" to="${x} 264" begin="${at}s" dur=".5s" fill="freeze" calcMode="spline" keySplines=".4 0 .2 1" keyTimes="0;1"/>
+        <rect x="-11" y="0" width="22" height="20" rx="5" fill="#d3d7dd"/>
+        <rect x="-7" y="20" width="4" height="9" rx="1.5" fill="#a9b0b9"/>
+        <rect x="3" y="20" width="4" height="9" rx="1.5" fill="#a9b0b9"/>
+      </g>`;
+  };
   const UNPLUG_FLOOR = '<rect x="26" y="300" width="370" height="8" rx="4" fill="#ececef"/>';
+  // 1_033 step 1: plug starts in the wall; the arrow fades in and nudges left twice, then the plug pulls out
+  const PLUG_IN = 316, PLUG_OUT = 286;
+  const plugCord = x => `M205 276 C 236 276 238 296 262 296 C 290 296 ${x - 14} 238 ${x} 238`;
   const UNPLUG_ILLUST = [
-    // 1. Cable/DSL modem: power cord pulled from the wall, backup battery slid out
     `<svg viewBox="0 0 422 340" width="422" height="340" aria-hidden="true">
       ${UNPLUG_FLOOR}
       <rect x="208" y="98" width="20" height="200" rx="8" fill="#e6e8ec"/>
@@ -536,37 +549,59 @@
       <rect x="146" y="204" width="18" height="16" rx="3" fill="#3aa0e0"/>
       <rect x="140" y="240" width="46" height="26" rx="4" fill="#f2f3f5" stroke="#c9ced5" stroke-width="2" stroke-dasharray="4 3"/>
       <circle cx="198" cy="276" r="7" fill="#e4e6ea" stroke="#c4c9d0" stroke-width="2"/>
-      <path d="M205 276 C 236 276 238 296 262 296 C 290 296 284 238 296 238" fill="none" stroke="#c4c9d0" stroke-width="4" stroke-linecap="round"/>
-      ${UNPLUG_PLUG(292, 238)}
+      <path d="${plugCord(PLUG_IN)}" fill="none" stroke="#c4c9d0" stroke-width="4" stroke-linecap="round">
+        <animate attributeName="d" from="${plugCord(PLUG_IN)}" to="${plugCord(PLUG_OUT)}" begin="1.9s" dur=".6s" fill="freeze" calcMode="spline" keySplines=".4 0 .2 1" keyTimes="0;1"/>
+      </path>
+      <g transform="translate(${PLUG_IN} 238)">
+        <animateTransform attributeName="transform" type="translate" from="${PLUG_IN} 238" to="${PLUG_OUT} 238" begin="1.9s" dur=".6s" fill="freeze" calcMode="spline" keySplines=".4 0 .2 1" keyTimes="0;1"/>
+        <rect x="0" y="-13" width="30" height="26" rx="6" fill="#d3d7dd"/>
+        <rect x="30" y="-8" width="11" height="4" rx="1.5" fill="#a9b0b9"/>
+        <rect x="30" y="4" width="11" height="4" rx="1.5" fill="#a9b0b9"/>
+      </g>
       ${UNPLUG_OUTLET(346, 205)}
-      ${UNPLUG_ARROW(338, 186, 1)}
-      <g class="unplug-battery">
+      <g opacity="0">
+        <animate attributeName="opacity" from="0" to="1" begin=".2s" dur=".3s" fill="freeze"/>
+        <animate attributeName="opacity" from="1" to="0" begin="1.7s" dur=".3s" fill="freeze"/>
+        <g transform="translate(338 186)">
+          <animateTransform attributeName="transform" type="translate" values="338 186;326 186;338 186;326 186;338 186" begin=".5s" dur="1.1s" fill="freeze"/>
+          <path d="M0 0 H-34" stroke="#f5c84c" stroke-width="7" stroke-linecap="round"/>
+          <path d="M-26 -11 L-40 0 L-26 11" fill="none" stroke="#f5c84c" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+      </g>
+      <g>
         <rect x="46" y="240" width="56" height="28" rx="5" fill="#fff" stroke="#9aa2ac" stroke-width="2.5"/>
         <rect x="102" y="248" width="5" height="12" rx="1.5" fill="#9aa2ac"/>
         <rect x="51" y="245" width="16" height="18" rx="2" fill="#7fd36b"/>
         <rect x="70" y="245" width="16" height="18" rx="2" fill="#7fd36b"/>
       </g>
-      ${UNPLUG_ARROW(118, 216, 1)}
+      <g transform="translate(118 216)">
+        <path d="M0 0 H-34" stroke="#f5c84c" stroke-width="7" stroke-linecap="round"/>
+        <path d="M-26 -11 L-40 0 L-26 11" fill="none" stroke="#f5c84c" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
     </svg>`,
-    // 2. Other wireless devices hooked to the modem (old router, extender): power cords out too
+    // 1_033 step 2: old router and extender on the modem; lights blink, plugs lift out of the strip, lights go out
     `<svg viewBox="0 0 422 340" width="422" height="340" aria-hidden="true">
       ${UNPLUG_FLOOR}
-      <path d="M190 268 C 160 268 160 262 140 262" fill="none" stroke="#3aa0e0" stroke-width="4" stroke-linecap="round"/>
-      <path d="M244 268 C 270 268 272 260 296 260" fill="none" stroke="#3aa0e0" stroke-width="4" stroke-linecap="round"/>
-      <rect x="236" y="158" width="14" height="140" rx="6" fill="#e6e8ec"/>
-      <rect x="180" y="150" width="62" height="150" rx="12" fill="#fff" stroke="#d9dce1" stroke-width="2"/>
-      <rect x="194" y="170" width="14" height="12" rx="2.5" fill="#f5c84c"/>
-      <rect x="194" y="188" width="14" height="12" rx="2.5" fill="#f5c84c"/>
-      <rect x="194" y="206" width="14" height="12" rx="2.5" fill="#3aa0e0"/>
-      <rect x="54" y="160" width="7" height="70" rx="3.5" fill="#d3d7dd"/>
-      <rect x="126" y="160" width="7" height="70" rx="3.5" fill="#d3d7dd"/>
-      <rect x="36" y="228" width="114" height="64" rx="12" fill="#fff" stroke="#d9dce1" stroke-width="2"/>
-      <circle cx="58" cy="270" r="3.5" fill="#c9ced5"/><circle cx="72" cy="270" r="3.5" fill="#c9ced5"/><circle cx="86" cy="270" r="3.5" fill="#c9ced5"/>
-      <rect x="292" y="210" width="88" height="84" rx="16" fill="#fff" stroke="#d9dce1" stroke-width="2"/>
-      <path d="M318 246 a24 24 0 0 1 36 0 M324 254 a15 15 0 0 1 24 0" fill="none" stroke="#c9ced5" stroke-width="3.5" stroke-linecap="round"/>
-      <circle cx="336" cy="262" r="3.5" fill="#c9ced5"/>
-      ${UNPLUG_OFF_BADGE(150, 222)}
-      ${UNPLUG_OFF_BADGE(380, 206)}
+      <path d="M176 268 C 160 268 162 262 146 262" fill="none" stroke="#3aa0e0" stroke-width="4" stroke-linecap="round"/>
+      <path d="M236 268 C 262 268 264 262 290 262" fill="none" stroke="#3aa0e0" stroke-width="4" stroke-linecap="round"/>
+      <rect x="226" y="158" width="14" height="140" rx="6" fill="#e6e8ec"/>
+      <rect x="176" y="150" width="56" height="150" rx="12" fill="#fff" stroke="#d9dce1" stroke-width="2"/>
+      <rect x="188" y="170" width="14" height="12" rx="2.5" fill="#f5c84c"/>
+      <rect x="188" y="188" width="14" height="12" rx="2.5" fill="#f5c84c"/>
+      <rect x="188" y="206" width="14" height="12" rx="2.5" fill="#3aa0e0"/>
+      <rect x="58" y="164" width="7" height="70" rx="3.5" fill="#d3d7dd"/>
+      <rect x="122" y="164" width="7" height="70" rx="3.5" fill="#d3d7dd"/>
+      <rect x="40" y="230" width="106" height="62" rx="12" fill="#fff" stroke="#d9dce1" stroke-width="2"/>
+      ${UNPLUG_LED(62, 270, 4, 1.7, 0)}${UNPLUG_LED(77, 270, 4, 1.7, 1)}${UNPLUG_LED(92, 270, 4, 1.7, 2)}
+      <rect x="290" y="210" width="84" height="82" rx="16" fill="#fff" stroke="#d9dce1" stroke-width="2"/>
+      <path d="M314 244 a24 24 0 0 1 36 0 M320 252 a15 15 0 0 1 24 0" fill="none" stroke="#c9ced5" stroke-width="3.5" stroke-linecap="round"/>
+      ${UNPLUG_LED(332, 274, 4, 1.7, 1)}
+      ${UNPLUG_STRIP_PLUG(150, top => `M64 292 C 60 326 150 ${top - 40} 150 ${top}`, 1)}
+      ${UNPLUG_STRIP_PLUG(270, top => `M350 292 C 354 326 270 ${top - 40} 270 ${top}`, 1)}
+      <rect x="120" y="318" width="182" height="20" rx="7" fill="#f4f5f7" stroke="#d5d9de" stroke-width="2"/>
+      <circle cx="290" cy="328" r="3.5" fill="#e5413b"/>
+      ${UNPLUG_OFF_BADGE(146, 222, 2.1)}
+      ${UNPLUG_OFF_BADGE(374, 206, 2.1)}
     </svg>`,
   ];
 
@@ -860,23 +895,28 @@
         </div>
       `,
       // Picture carousel synced 1:1 with the numbered list: swipe the picture or tap a step;
-      // it also advances by itself every 3.5 s until the user touches it
+      // it also advances by itself every 5 s until the user touches it
       mount: el => {
         const track = el.querySelector('.unplug-track');
         const dots = [...el.querySelectorAll('.unplug-dots i')];
         const steps = [...el.querySelectorAll('.unplug-steps li')];
         let cur = 0;
+        const svgs = [...el.querySelectorAll('.unplug-slide svg')];
         const mark = i => {
           cur = i;
+          svgs[i].setCurrentTime(0); // replay this slide's unplug animation
           dots.forEach((d, j) => d.classList.toggle('on', j === i));
           steps.forEach((s, j) => s.classList.toggle('on', j === i));
         };
-        const show = i => track.scrollTo({ left: i * track.clientWidth, behavior: 'smooth' });
+        const show = i => {
+          if (i === cur) return mark(i);
+          track.scrollTo({ left: i * track.clientWidth, behavior: 'smooth' });
+        };
         track.addEventListener('scroll', () => {
           const i = Math.round(track.scrollLeft / track.clientWidth);
           if (i !== cur) mark(i);
         });
-        let auto = setInterval(() => show((cur + 1) % steps.length), 3500);
+        let auto = setInterval(() => show((cur + 1) % steps.length), 5000);
         const stopAuto = () => clearInterval(auto);
         track.addEventListener('pointerdown', stopAuto);
         steps.forEach((s, i) => s.addEventListener('click', () => { stopAuto(); show(i); }));
