@@ -403,15 +403,9 @@
   // WAN flow only (1_120 → 2): the user may have already restarted the modem back at 1_030,
   // so each step says why it is needed again
   const MODEM_WHY = {
-    unplug: 'Your router couldn’t get an Internet connection (IP address) from the modem. Many cable modems, common in the US, stay locked to the first device they were connected to. Restarting the modem clears that so it can work with your new ASUS router.',
     waitOff: 'The modem needs a few minutes without power to fully reset and forget the device it was locked to. Plugging it in too soon may keep the old connection.',
-    plug: 'Powering the modem back on lets it reconnect to your Internet provider and get ready to pair with your new router.',
     waitStart: 'Starting up and reconnecting to your Internet provider takes a few minutes. Once it finishes, your router can get an Internet address from it.',
   };
-
-  function modemWhy(key) {
-    return MODEM_FLOW === 'wan' ? `<p class="modem-why">${MODEM_WHY[key]}</p>` : '';
-  }
 
   // Small modem for the wait pages: 'off' = unplugged, all lights off; 'starting' = lights blinking
   function modemMini(mode) {
@@ -612,91 +606,135 @@
     </svg>`,
   ];
 
-  function modemIllust(state) {
-    const on = state === 'on';
-    // Each page plays one move once and stays there: 1_033 pulls the plug out, 1_036 pushes it in.
-    // An arrow first fades in and nudges the way to go, then the plug moves. SMIL so the cable can bend with it.
-    // IN sits over the outlet face so plug and outlet overlap like it is really plugged in
-    const IN = { x: 324, y: 168, r: 0, cable: 'M150 280 C170 334 252 330 252 244 C252 194 262 168 288 168' };
-    const OUT = { x: 236, y: 182, r: -10, cable: 'M150 280 C170 334 200 326 196 258 C193 214 186 184 200 182' };
-    const [from, to] = on ? [OUT, IN] : [IN, OUT];
-    const MOVE = 'begin="1.9s" dur="1.1s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.45 0 0.2 1"';
-    const LED_ON = '#34d86f', LED_OFF = '#4a525d';
+  // 1_036 step pictures, same flat style as 1_033: ZenWiFi router on the left, modem on the right
+  const PLUGIN_ROUTER = (ledOn) => `
+      <rect x="40" y="124" width="172" height="156" rx="20" fill="#fff" stroke="#d9dce1" stroke-width="2"/>
+      <rect x="48" y="130" width="156" height="14" rx="7" fill="#f2f3f5"/>
+      <rect x="116" y="200" width="20" height="5" rx="2.5" fill="#d0d4da">${ledOn || ''}</rect>
+      <rect x="92" y="242" width="104" height="24" rx="4" fill="#e9ebef"/>
+      <circle cx="106" cy="254" r="5.5" fill="#fff" stroke="#b9bfc7" stroke-width="2"/>
+      <rect x="120" y="248" width="14" height="12" rx="2" fill="#f5c84c"/>
+      <rect x="140" y="248" width="14" height="12" rx="2" fill="#f5c84c"/>
+      <rect x="166" y="247" width="16" height="14" rx="2" fill="#3aa0e0"/>`;
+  const PLUGIN_MODEM = (leds) => `
+      <rect x="352" y="98" width="16" height="202" rx="7" fill="#e6e8ec"/>
+      <rect x="290" y="88" width="66" height="212" rx="13" fill="#fff" stroke="#d9dce1" stroke-width="2"/>
+      <rect x="304" y="106" width="16" height="13" rx="2.5" fill="#c9ced5"/>
+      <rect x="304" y="126" width="16" height="13" rx="2.5" fill="#f5c84c"/>
+      <rect x="304" y="146" width="16" height="13" rx="2.5" fill="#f5c84c"/>
+      <rect x="304" y="166" width="16" height="13" rx="2.5" fill="#f5c84c"/>
+      <rect x="304" y="186" width="16" height="13" rx="2.5" fill="#3aa0e0"/>
+      <circle cx="312" cy="270" r="7" fill="#fff" stroke="#b9bfc7" stroke-width="2"/>
+      ${[0, 1, 2, 3].map(i => `<circle cx="338" cy="${112 + i * 14}" r="3.5" fill="#d0d4da">${leds ? leds(i) : ''}</circle>`).join('')}`;
+  // Modem LAN (3rd yellow port) → router WAN (blue), under the floor line
+  const PLUGIN_CABLE = 'M304 172 H274 Q264 172 264 182 V286 Q264 296 254 296 H184 Q174 296 174 286 V266';
+  const PLUGIN_HEADS = `
+      <rect x="292" y="167" width="14" height="10" rx="2" fill="#1f86d6"/>
+      <rect x="169" y="264" width="10" height="12" rx="2" fill="#1f86d6"/>`;
+  // Dark-blue round badge that pops in at `at` s (like the old app's callouts)
+  const PLUGIN_BADGE = (x, y, at, icon) => `
+    <g transform="translate(${x} ${y})">
+      <g transform="scale(0)">
+        <animateTransform attributeName="transform" type="scale" values="0;1.15;1" keyTimes="0;.7;1" begin="${at}s" dur=".45s" fill="freeze"/>
+        <circle r="30" fill="#0b4fb3"/>
+        ${icon}
+      </g>
+    </g>`;
+  const PLUGIN_PORT_ICON = `
+        <rect x="-15" y="-15" width="30" height="30" rx="3" fill="#06306e"/>
+        <path d="M-10 -10 H10 V4 H5 V9 H-5 V4 H-10 Z" fill="#3aa0e0"/>`;
+  const PLUGIN_PLUG_ICON = `
+        <path d="M-17 0 H-8" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+        <rect x="-9" y="-11" width="16" height="22" rx="6" fill="#fff"/>
+        <path d="M7 -6 H15 M7 6 H15" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+        <path d="M0 -7 L-5 1 H-1 L-2 7 L4 -1 H0 Z" fill="#0b4fb3"/>`;
+  const PLUGIN_ILLUST = [
+    // 1. Find the router's blue WAN port: a callout pops over it, then a ring keeps pulsing
+    `<svg viewBox="0 0 422 340" width="422" height="340" aria-hidden="true">
+      ${UNPLUG_FLOOR}
+      ${PLUGIN_ROUTER()}
+      ${PLUGIN_MODEM()}
+      <circle cx="174" cy="254" r="32" fill="none" stroke="#3aa0e0" stroke-width="3" opacity="0">
+        <animate attributeName="r" values="32;48" begin="1s" dur="1.2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values=".8;0" begin="1s" dur="1.2s" repeatCount="indefinite"/>
+      </circle>
+      ${PLUGIN_BADGE(174, 254, 0.4, PLUGIN_PORT_ICON)}
+    </svg>`,
+    // 2. Cable draws itself from the modem's LAN port to the router's WAN port
+    `<svg viewBox="0 0 422 340" width="422" height="340" aria-hidden="true">
+      ${UNPLUG_FLOOR}
+      ${PLUGIN_ROUTER()}
+      ${PLUGIN_MODEM()}
+      <path d="${PLUGIN_CABLE}" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" fill="none" stroke="#1f86d6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+        <animate attributeName="stroke-dashoffset" from="1" to="0" begin=".5s" dur="1.4s" fill="freeze" calcMode="spline" keySplines=".4 0 .2 1" keyTimes="0;1"/>
+      </path>
+      <g opacity="0"><set attributeName="opacity" to="1" begin=".5s" fill="freeze"/><rect x="292" y="167" width="14" height="10" rx="2" fill="#1f86d6"/></g>
+      <g opacity="0"><set attributeName="opacity" to="1" begin="1.9s" fill="freeze"/><rect x="169" y="264" width="10" height="12" rx="2" fill="#1f86d6"/></g>
+    </svg>`,
+    // 3. Power on both at once: plug callouts pop in, then the router LED and modem lights come on
+    `<svg viewBox="0 0 422 340" width="422" height="340" aria-hidden="true">
+      ${UNPLUG_FLOOR}
+      ${PLUGIN_ROUTER('<set attributeName="fill" to="#3aa0e0" begin="1.4s" fill="freeze"/>')}
+      ${PLUGIN_MODEM(i => `
+        <set attributeName="fill" to="#5ee250" begin="${1.4 + i * 0.2}s" fill="freeze"/>
+        <animate attributeName="opacity" values="1;.25;1" dur="${0.6 + i * 0.15}s" begin="${1.4 + i * 0.2}s" repeatCount="indefinite"/>`)}
+      <path d="${PLUGIN_CABLE}" fill="none" stroke="#1f86d6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      ${PLUGIN_HEADS}
+      ${PLUGIN_BADGE(80, 254, 0.3, PLUGIN_PLUG_ICON)}
+      ${PLUGIN_BADGE(318, 262, 0.5, PLUGIN_PLUG_ICON)}
+    </svg>`,
+  ];
 
-    const leds = ['POWER', 'DS', 'US', 'ONLINE'].map((name, i) => {
-      const y = 156 + i * 24;
-      // Right after the move, lights quickly go off one by one (1_033), or come on and keep
-      // blinking like a modem starting up (1_036), each with a glow; each light blinks at its own pace
-      const begin = `begin="${(3.0 + i * 0.12).toFixed(2)}s"`;
-      const off = `${begin} dur="0.2s" fill="freeze"`;
-      const blink = `${begin} dur="${(0.7 + i * 0.16).toFixed(2)}s" repeatCount="indefinite" calcMode="discrete" keyTimes="0;0.55"`;
-      return `
-        <text x="112" y="${y + 3}" text-anchor="end" class="modem-led-label">${name}</text>
-        <circle cx="127" cy="${y}" r="9.5" fill="${LED_ON}" opacity="${on ? 0 : 0.28}">
-          <animate attributeName="opacity" ${on ? `${blink} values="0.28;0"` : `${off} values="0.28;0"`}/>
-        </circle>
-        <circle cx="127" cy="${y}" r="5" fill="${on ? LED_OFF : LED_ON}">
-          <animate attributeName="fill" ${on ? `${blink} values="${LED_ON};${LED_OFF}"` : `${off} values="${LED_ON};${LED_OFF}"`}/>
-        </circle>`;
-    }).join('');
-
+  // Guide page whose top picture is a carousel synced 1:1 with a numbered list (1_033, 1_036)
+  function stepCarousel({ illust, title, steps, next }) {
     return `
-      <svg class="modem-svg" viewBox="0 0 400 330" width="400" height="330" aria-hidden="true">
-        <defs>
-          <radialGradient id="modem-halo-${state}">
-            <stop offset="0" stop-color="#d6e6fb"/>
-            <stop offset="0.65" stop-color="#e9f1fc"/>
-            <stop offset="1" stop-color="#f4f8fe" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-        <circle cx="120" cy="196" r="118" fill="url(#modem-halo-${state})"/>
-        <ellipse cx="120" cy="290" rx="100" ry="9" fill="#eceef2"/>
+      <header class="navbar navbar-guide">
+        <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
+        <h1 class="navbar-title">Setup Guide</h1>
+        <button class="navbar-btn navbar-btn-right" data-go="help" data-label="說明" aria-label="說明">${ICON.helpOutline}</button>
+      </header>
 
-        <!-- Dark modem body so it reads as a modem, not a power strip -->
-        <rect x="78" y="90" width="84" height="198" rx="16" fill="#2b323b"/>
-        <rect x="80" y="92" width="80" height="6" rx="3" fill="#3a434e"/>
-        <rect x="90" y="104" width="60" height="172" rx="10" fill="#353d47"/>
-        <rect x="98" y="112" width="1.5" height="156" rx="0.75" fill="#424b56"/>
-        <text x="120" y="128" text-anchor="middle" class="modem-name">MODEM</text>
-        ${leds}
+      <div class="guide-body">
+        <div class="guide-illust unplug-carousel">
+          <div class="unplug-track">${illust.map(svg => `<div class="unplug-slide">${svg}</div>`).join('')}</div>
+        </div>
+        <div class="unplug-dots">${illust.map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div>
+        <h2 class="guide-title">${title}</h2>
+        <ol class="unplug-steps">${steps.map((t, i) => `<li class="${i ? '' : 'on'}">${t}</li>`).join('')}</ol>
+        <button class="btn-brand" data-go="${next}" data-label="I am ready">I am ready</button>
+      </div>
+    `;
+  }
 
-        <rect x="292" y="118" width="88" height="100" rx="14" fill="#fff" stroke="#d5dae1" stroke-width="2"/>
-        <circle cx="336" cy="168" r="30" fill="#f0f3f7"/>
-        <rect x="326" y="155" width="4" height="17" rx="2" fill="#5b6573"/>
-        <rect x="342" y="155" width="4" height="17" rx="2" fill="#5b6573"/>
-        <circle cx="336" cy="183" r="2.6" fill="#5b6573"/>
-
-        <path fill="none" stroke="#6f7780" stroke-width="6" stroke-linecap="round" d="${from.cable}">
-          <animate attributeName="d" ${MOVE} values="${from.cable};${to.cable}"/>
-        </path>
-        <g transform="translate(${from.x} ${from.y})">
-          <animateTransform attributeName="transform" type="translate" ${MOVE} values="${from.x} ${from.y};${to.x} ${to.y}"/>
-          <g transform="rotate(${from.r})">
-            <animateTransform attributeName="transform" type="rotate" ${MOVE} values="${from.r};${to.r}"/>
-            <rect x="-36" y="-11" width="30" height="22" rx="5" fill="#3a4452"/>
-            <rect x="-8" y="-8" width="8" height="16" rx="2" fill="#5b6573"/>
-            <rect x="0" y="-6" width="14" height="3.2" rx="1.2" fill="#a3abb5"/>
-            <rect x="0" y="2.8" width="14" height="3.2" rx="1.2" fill="#a3abb5"/>
-          </g>
-        </g>
-        <g opacity="0">
-          <animate attributeName="opacity" begin="0.4s" dur="0.3s" fill="freeze" values="0;1"/>
-          <animate attributeName="opacity" begin="1.9s" dur="0.25s" fill="freeze" values="1;0"/>
-          <g class="modem-arrow ${on ? 'is-right' : 'is-left'}">
-            <path transform="${on ? 'translate(270 242)' : 'translate(318 242) scale(-1 1)'}"
-              d="M-30 -6 H4 V-16 L30 0 L4 16 V6 H-30 Z" fill="var(--brand)" stroke="var(--brand)" stroke-width="5" stroke-linejoin="round"/>
-          </g>
-        </g>
-        ${on ? '' : `
-          <g stroke="var(--brand)" stroke-width="3.5" stroke-linecap="round" opacity="0">
-            <animate attributeName="opacity" begin="2.8s" dur="0.3s" fill="freeze" values="0;1"/>
-            <path d="M262 112 L265 132"/><path d="M272 146 L286 132"/><path d="M280 160 L298 155"/>
-          </g>
-        `}
-
-        <text x="120" y="322" text-anchor="middle" class="modem-caption">${on ? 'CABLE MODEM' : 'ALL LIGHTS OFF'}</text>
-        <text x="336" y="322" text-anchor="middle" class="modem-caption modem-caption-brand">${on ? 'POWER' : 'POWER PLUG'}</text>
-      </svg>`;
+  // Swipe the picture or tap a step/dot; it also advances by itself every `every` ms until the user touches it
+  function mountStepCarousel(el, every) {
+    const track = el.querySelector('.unplug-track');
+    const dots = [...el.querySelectorAll('.unplug-dots i')];
+    const steps = [...el.querySelectorAll('.unplug-steps li')];
+    const slides = [...el.querySelectorAll('.unplug-slide')];
+    let cur = 0;
+    const mark = i => {
+      cur = i;
+      // A fresh copy restarts SMIL everywhere (setCurrentTime alone doesn't reliably rewind in Safari)
+      const svg = slides[i].querySelector('svg');
+      svg.replaceWith(svg.cloneNode(true));
+      dots.forEach((d, j) => d.classList.toggle('on', j === i));
+      steps.forEach((s, j) => s.classList.toggle('on', j === i));
+    };
+    const show = i => {
+      if (i === cur) return mark(i);
+      track.scrollTo({ left: i * track.clientWidth, behavior: 'smooth' });
+    };
+    track.addEventListener('scroll', () => {
+      const i = Math.round(track.scrollLeft / track.clientWidth);
+      if (i !== cur) mark(i);
+    });
+    const auto = setInterval(() => show((cur + 1) % steps.length), every);
+    const stopAuto = () => clearInterval(auto);
+    track.addEventListener('pointerdown', stopAuto);
+    steps.forEach((s, i) => s.addEventListener('click', () => { stopAuto(); show(i); }));
+    dots.forEach((d, i) => d.addEventListener('click', () => { stopAuto(); show(i); }));
+    return stopAuto;
   }
 
 
@@ -881,82 +919,35 @@
       name: '拔下數據機和舊路由器的電源線',
       description: '重新啟動數據機（1/2）：拔下數據機電源線、取出備用電池，連到數據機的其他無線設備也要拔電，上方圖片跟著條列輪播',
       theme: 'light',
-      render: () => `
-        <header class="navbar navbar-guide">
-          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
-          <h1 class="navbar-title">Setup Guide</h1>
-          <button class="navbar-btn navbar-btn-right" data-go="help" data-label="說明" aria-label="說明">${ICON.helpOutline}</button>
-        </header>
-
-        <div class="guide-body">
-          <div class="guide-illust unplug-carousel">
-            <div class="unplug-track">${UNPLUG_ILLUST.map(svg => `<div class="unplug-slide">${svg}</div>`).join('')}</div>
-          </div>
-          <div class="unplug-dots">${UNPLUG_ILLUST.map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div>
-          <h2 class="guide-title">拔下數據機和舊路由器的電源線</h2>
-          <ol class="unplug-steps">
-            <li class="on">拔下纜線／DSL 數據機電源線。如有備用電池，請取出電池。</li>
-            <li>如果有其他無線設備連接到數據機，也請拔掉設備的電源。</li>
-          </ol>
-          <button class="btn-brand" data-go="${MODEM_FLOW === 'wan' ? 'modem-wait-off' : 'modem-plug'}" data-label="I am ready">I am ready</button>
-        </div>
-      `,
-      // Picture carousel synced 1:1 with the numbered list: swipe the picture or tap a step;
-      // it also advances by itself every 6.5 s until the user touches it
-      mount: el => {
-        const track = el.querySelector('.unplug-track');
-        const dots = [...el.querySelectorAll('.unplug-dots i')];
-        const steps = [...el.querySelectorAll('.unplug-steps li')];
-        let cur = 0;
-        const slides = [...el.querySelectorAll('.unplug-slide')];
-        const mark = i => {
-          cur = i;
-          // A fresh copy restarts SMIL everywhere (setCurrentTime alone doesn't reliably rewind in Safari)
-          const svg = slides[i].querySelector('svg');
-          svg.replaceWith(svg.cloneNode(true));
-          dots.forEach((d, j) => d.classList.toggle('on', j === i));
-          steps.forEach((s, j) => s.classList.toggle('on', j === i));
-        };
-        const show = i => {
-          if (i === cur) return mark(i);
-          track.scrollTo({ left: i * track.clientWidth, behavior: 'smooth' });
-        };
-        track.addEventListener('scroll', () => {
-          const i = Math.round(track.scrollLeft / track.clientWidth);
-          if (i !== cur) mark(i);
-        });
-        let auto = setInterval(() => show((cur + 1) % steps.length), 6500);
-        const stopAuto = () => clearInterval(auto);
-        track.addEventListener('pointerdown', stopAuto);
-        steps.forEach((s, i) => s.addEventListener('click', () => { stopAuto(); show(i); }));
-        dots.forEach((d, i) => d.addEventListener('click', () => { stopAuto(); show(i); }));
-        return stopAuto;
-      },
+      render: () => stepCarousel({
+        illust: UNPLUG_ILLUST,
+        title: '拔下數據機和舊路由器的電源線',
+        steps: [
+          '拔下纜線／DSL 數據機電源線。如有備用電池，請取出電池。',
+          '如果有其他無線設備連接到數據機，也請拔掉設備的電源。',
+        ],
+        next: MODEM_FLOW === 'wan' ? 'modem-wait-off' : 'modem-plug',
+      }),
+      mount: el => mountStepCarousel(el, 6500),
     },
     {
       id: 'modem-plug',
       get back() { return MODEM_FLOW === 'wan' ? 'modem-wait-off' : 'modem-unplug'; },
       code: '1_036',
-      name: '插回數據機電源',
-      description: '重新啟動數據機（2/2）：把電源線插回數據機，燈號重新亮起後再繼續',
+      name: '插入您的裝置',
+      description: '重新啟動數據機（2/2）：找到路由器的 WAN 埠、用網路線接到數據機的 LAN 埠，再同時打開兩台電源，上方圖片跟著條列輪播',
       theme: 'light',
-      render: () => `
-        <header class="navbar navbar-guide">
-          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
-          <h1 class="navbar-title">Setup Guide</h1>
-          <button class="navbar-btn navbar-btn-right" data-go="help" data-label="說明" aria-label="說明">${ICON.helpOutline}</button>
-        </header>
-
-        <div class="guide-body">
-          <div class="guide-illust modem-illust">
-            <p class="modem-hint">Reconnect the power cable</p>
-            ${modemIllust('on')}
-          </div>
-          <h2 class="guide-title">Plug the modem back in.</h2>
-          ${modemWhy('plug')}
-          <button class="btn-brand" data-go="${MODEM_FLOW === 'wan' ? 'modem-wait-start' : 'led-check'}" data-label="I am ready">I am ready</button>
-        </div>
-      `,
+      render: () => stepCarousel({
+        illust: PLUGIN_ILLUST,
+        title: '插入您的裝置',
+        steps: [
+          '找到路由器上的 WAN 網路埠（藍色）。',
+          '用網路線將數據機的 LAN 網路埠連接到路由器的 WAN 網路埠。',
+          '同時打開數據機和路由器的電源。',
+        ],
+        next: MODEM_FLOW === 'wan' ? 'modem-wait-start' : 'led-check',
+      }),
+      mount: el => mountStepCarousel(el, 4500),
     },
     {
       id: 'modem-wait-off',
