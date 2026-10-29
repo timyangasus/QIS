@@ -436,7 +436,7 @@
   }
 
   // Wait page countdown. Demo runs the real minutes fast (a few seconds) so the flow stays quick.
-  function startCountdown(el, totalSec, demoMs) {
+  function startCountdown(el, totalSec) {
     const timeEl = el.querySelector('.wait-time');
     const fill = el.querySelector('.wait-progress .progress-fill');
     const btn = el.querySelector('.wait-continue');
@@ -444,7 +444,7 @@
     const t0 = performance.now();
     let raf;
     const tick = now => {
-      const p = Math.min(1, (now - t0) / demoMs);
+      const p = Math.min(1, (now - t0) / (totalSec * 1000));
       timeEl.textContent = fmt(Math.ceil(totalSec * (1 - p)));
       fill.style.width = `${Math.max(3, p * 100)}%`;
       if (p < 1) raf = requestAnimationFrame(tick);
@@ -798,7 +798,7 @@
       back: 'modem-unplug',
       code: '1_034',
       name: '等待 3 分鐘（拔電）',
-      description: '未偵測到 WAN：數據機保持拔電 3 分鐘，倒數結束 Continue 才能按（DEMO 加速倒數）',
+      description: '未偵測到 WAN：數據機保持拔電 3 分鐘，Continue 倒數中灰色（demo 時也可按），倒數結束變藍',
       theme: 'light',
       render: () => waitPage({
         title: 'Keep the modem unplugged.',
@@ -809,14 +809,14 @@
         next: 'modem-plug',
         why: 'waitOff',
       }),
-      mount: el => { MODEM_FLOW = 'wan'; return startCountdown(el, 180, 5000); },
+      mount: el => { MODEM_FLOW = 'wan'; return startCountdown(el, 180); },
     },
     {
       id: 'modem-wait-start',
       back: 'modem-plug',
       code: '1_037',
       name: '等待數據機啟動 3½ 分鐘',
-      description: '未偵測到 WAN：插回電源後等數據機啟動 3½ 分鐘，燈可能會閃，倒數結束 Continue 才能按（DEMO 加速倒數），按 Continue 到 1_140',
+      description: '未偵測到 WAN：插回電源後等數據機啟動 3½ 分鐘，燈可能會閃，Continue 倒數中灰色（demo 時也可按），倒數結束變藍，按 Continue 到 1_140',
       theme: 'light',
       render: () => waitPage({
         title: 'Wait for the modem to start.',
@@ -827,7 +827,7 @@
         next: 'setup-ssid',
         why: 'waitStart',
       }),
-      mount: el => { MODEM_FLOW = 'wan'; return startCountdown(el, 210, 5500); },
+      mount: el => { MODEM_FLOW = 'wan'; return startCountdown(el, 210); },
     },
     {
       id: 'led-check',
