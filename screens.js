@@ -296,7 +296,7 @@
     ? `${(kbps / 1000).toFixed(kbps >= 10000 ? 1 : 2)}<small>Mbps</small>`
     : `${kbps >= 100 ? kbps.toFixed(0) : kbps >= 10 ? kbps.toFixed(1) : kbps.toFixed(2)}<small>Kbps</small>`;
 
-  // ── App pages after setup (1_260–1_290, 1_360): shared top bar, router card, shortcuts, tab bar ──
+  // ── App pages after setup (1_280, 1_290, 1_360): shared top bar, router card, shortcuts, tab bar ──
   const homeTop = () => `
     <header class="home-top">
       <button class="home-back" data-go="back" aria-label="返回">${ICON.back}</button>
@@ -340,16 +340,6 @@
       <button class="tab" data-go="family" data-label="家庭">${HOME_ICON.tabFamily}<span>家庭</span></button>
       <button class="tab" data-go="settings" data-label="設定">${HOME_ICON.tabSettings}<span>設定</span></button>
     </nav>`;
-
-  // The app home right after setup (still connecting), dimmed behind the 1_260 / 1_270 sheets
-  const homeConnecting = () => `
-    <div class="app-behind" aria-hidden="true">
-      ${homeTop()}
-      <div class="home-body">
-        ${routerCard(true)}
-        <h2 class="home-welcome">歡迎使用</h2>
-      </div>
-    </div>`;
 
   // 1_300 navbar: bold "System Setup" + ?
   const systemSetupHeader = () => `
@@ -1524,7 +1514,7 @@
       get back() { return { single: 'internet-live', mesh: 'internet-live-mesh' }[FINISH] || 'mesh-3'; },
       code: '1_230',
       name: '設定摘要',
-      description: '設定摘要：列出剛設定好的 WiFi 名稱／密碼、登入帳號和 IoT 訪客網路；依前面的分支接到啟用遠端連線、AiMesh 拓撲、尚未連網或首頁',
+      description: '設定摘要：列出剛設定好的 WiFi 名稱／密碼、登入帳號和 IoT 訪客網路；依前面的分支接到首頁、AiMesh 拓撲或尚未連網',
       figmaNode: '819:320',
       theme: 'light',
       render: () => {
@@ -1532,7 +1522,7 @@
         const wifi = band => row(SUMMARY_ICON.wifi(band, '#1b74e4'), [['WiFi Name', band === '2G' ? FORM.ssid : `${FORM.ssid}_${band}`], ['WiFi Password', FORM.wifiPassword]]);
         // Where Finish / Next goes depends on the branch that led here
         const [label, target] = {
-          single: ['Finish', 'data-go="remote-access"'],
+          single: ['Finish', 'data-go="home"'],
           mesh: ['Finish', 'data-go="aimesh-topology"'],
           mobile: ['Next', 'data-go="no-internet"'],
           offline: ['Finish', 'data-go="home-offline"'],
@@ -1564,56 +1554,9 @@
       `;
       },
     },
-    // Remote access: sheets over the app home while it is still connecting
-    {
-      id: 'remote-access',
-      back: 'summary',
-      code: '1_260',
-      name: '啟用遠端連線',
-      description: '啟用遠端連線：進入 App 首頁時跳出提示，啟用後可以從外面安全地管理路由器；略過直接到首頁',
-      figmaNode: '0:71',
-      theme: 'light',
-      render: () => `
-        ${homeConnecting()}
-        <div class="app-sheet-layer">
-          <div class="app-sheet remote-sheet" role="dialog" aria-labelledby="remote-title">
-            <span class="app-sheet-grabber"></span>
-            <img class="remote-icon" src="assets/remote-access-icon.jpg" alt="" width="134" height="129">
-            <h2 class="remote-title" id="remote-title">啟用遠端連線</h2>
-            <p class="remote-desc">透過安全加密通道遠端管理裝置，獲得更多軟體功能。</p>
-            <button class="btn-brand remote-enable" data-go="remote-wait">啟用</button>
-            <button class="remote-skip" data-go="home">略過</button>
-          </div>
-        </div>
-      `,
-    },
-    {
-      id: 'remote-wait',
-      back: 'remote-access',
-      code: '1_270',
-      name: '啟用遠端連線中',
-      description: '啟用遠端連線中：Wait a few seconds（實際約 1 分 10 秒，原型縮短），完成後到首頁',
-      figmaNode: '0:76',
-      theme: 'light',
-      render: () => `
-        ${homeConnecting()}
-        <div class="app-sheet-layer">
-          <div class="app-sheet remote-wait-sheet" role="dialog" aria-label="啟用遠端連線中">
-            <span class="app-sheet-grabber"></span>
-            <img class="remote-wait-icon" src="assets/remote-wait-icon.jpg" alt="" width="170" height="181">
-            <p class="remote-wait-text">Wait a few seconds...</p>
-            <div class="progress remote-wait-progress" role="progressbar" aria-label="啟用遠端連線"><span class="progress-fill"></span></div>
-          </div>
-        </div>
-      `,
-      mount: () => {
-        const timer = setTimeout(() => location.replace('#home'), 3600);
-        return () => clearTimeout(timer);
-      },
-    },
     {
       id: 'home',
-      back: 'remote-access',
+      back: 'summary',
       code: '1_280',
       name: '首頁',
       description: '首頁：設定完成後進入 App 首頁，顯示路由器資訊和即時上傳／下載流量',

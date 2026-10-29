@@ -2696,13 +2696,7 @@ button {
 
 .summary-done + .summary-section { margin-top: 12px; }
 
-/* ── 1_260 / 1_270 啟用遠端連線（App 首頁上的底部面板） ── */
-.app-behind {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
+/* ── 1_360 首頁（尚未連網）：歡迎文字、連線中轉圈 ── */
 .home-welcome {
   margin-top: 40px;
   font-size: 24px;
@@ -2727,89 +2721,6 @@ button {
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
-
-.app-sheet-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 6; /* above the fake status bar so it dims too */
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  background: rgba(0, 0, 0, .4);
-  animation: sheet-fade .25s ease-out both;
-}
-
-.app-sheet {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-bottom: var(--safe-bottom);
-  border-radius: 14px 14px 0 0;
-  background: #fff;
-  animation: sheet-up .3s cubic-bezier(.2, .8, .2, 1) both;
-}
-
-@keyframes sheet-fade { from { opacity: 0; } }
-@keyframes sheet-up { from { transform: translateY(100%); } }
-
-.app-sheet-grabber {
-  width: 48px;
-  height: 5px;
-  margin-top: 10px;
-  border-radius: 3px;
-  background: #c7c7cc;
-}
-
-.remote-sheet { height: 600px; }
-
-.remote-icon { display: block; margin-top: 28px; }
-
-.remote-title {
-  margin-top: 16px;
-  font-size: 19px;
-  font-weight: 500;
-  color: #222;
-}
-
-.remote-desc {
-  width: 390px;
-  margin-top: 112px;
-  font-size: 15px;
-  text-align: center;
-  color: #333;
-}
-
-.btn-brand.remote-enable {
-  width: 249px;
-  height: 49px;
-  margin-bottom: 0;
-  font-size: 19px;
-}
-
-.remote-skip {
-  margin: 18px 0 22px;
-  font-size: 17px;
-  color: var(--brand);
-}
-
-.remote-wait-sheet { height: calc(100% - 76px); }
-
-.remote-wait-icon { display: block; margin-top: 190px; }
-
-.remote-wait-text {
-  margin-top: 110px;
-  font-size: 17px;
-  color: #222;
-}
-
-.progress.remote-wait-progress {
-  width: 350px;
-  height: 6px;
-  margin-top: 40px;
-  border-radius: 3px;
-}
-
-.remote-wait-progress .progress-fill { animation-duration: 3.4s; }
 
 /* ── 1_290 AiMesh 拓撲 ── */
 .aimesh-title {
