@@ -184,7 +184,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 ### 5.3b 未偵測到 WAN：`1_034` / `1_037` 等待數據機 `modem-wait-off` / `modem-wait-start`
 - 來源：使用者提供的參考圖。版型沿用 Setup Guide（導覽列 ‹ 返回、Setup Guide、?）。
-- 流程：1_120 Get Started → DEMO 判斷 WAN 選 **2 沒有偵測到 WAN、要不到 IP、US SKU** → 1_033 拔電 → **1_034 等 3 分鐘** → 1_036 插回 → **1_037 等 3½ 分鐘** → 倒數一結束就自動跳出 **DEMO 流程判斷：重啟後 WAN**（關掉後按 Continue 可再打開）（是否已偵測到 WAN、要到 IP？）。**Yes、No 都會進到 1_140**，接著照常走 1_150 → 1_160 → 1_170 → AiMesh 1_180–1_200；差別在最後：**Yes** 在 1_200 之後照常跳出「Internet Connected?」判斷；**No** 等於確定沒連上網路，1_200 之後跳過這個判斷，直接問「node 台數」（見 5.13）。
+- 流程：1_120 Get Started → DEMO 判斷 WAN 選 **2 沒有偵測到 WAN、要不到 IP、US SKU** → 1_033 拔電 → **1_034 等 3 分鐘** → 1_036 插回 → **1_037 等 3½ 分鐘** → 倒數結束按 Continue 直接到 1_140（不再判斷重啟後是否偵測到 WAN），接著照常走 1_150 → 1_160 → 1_170 → AiMesh 1_180–1_200，1_200 之後照常問「Internet Connected?」（見 5.13）。
 - 插圖區放一張淺灰圓角卡片：上方藍色小字（WAIT 3 MINUTES / WAIT AT LEAST 3½ MINUTES）、68 pt 藍色粗體倒數（3:00 / 3:30）、藍色進度條、灰色提示（Continue unlocks when the timer ends. / Blinking lights? Keep waiting.）、小數據機圖。
   - 1_034：燈全滅、插頭拔在旁邊，標籤 POWER OFF。
   - 1_037：電源線插著，燈號綠色閃爍，標籤 STARTING UP / LIGHTS MAY BLINK。
@@ -383,7 +383,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_190 | AiMesh Network optimization | The AiMesh node(s) are now automatically joining the network, no manual setup is needed. | 一台節點、窗戶、花瓶（`mesh-2.jpg` 21 KB） |
 | 1_200 | AiMesh Network optimization | We could run the optimization in the background so you can start browsing instantly. | 節點在櫃子上、沙發、立燈（`mesh-3.jpg` 23 KB） |
 
-- 1_200 下方有「Run in background」藍色底線連結（`#007bfe`），效果和等 1_200 自動跑完一樣：留在 1_200 並跳出 DEMO 判斷「Internet Connected?」（「重啟後 WAN」選 No 時直接跳「node 台數」），見 5.13。
+- 1_200 下方有「Run in background」藍色底線連結（`#007bfe`），效果和等 1_200 自動跑完一樣：留在 1_200 並跳出 DEMO 判斷「Internet Connected?」，見 5.13。
 
 ### 5.13 1_200 之後的流程（Internet Connected?）
 - 來源：Figma `b6i9sXOWaZ4TQnSlif6iu7`（Untitled）Page 1 的流程圖；下面各頁的 Figma node 指這個檔案（1_210、1_230、1_280 沿用原本 QIS_Prelink 的頁面）。
@@ -404,7 +404,6 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
                                                  └ No ── 1_230 Finish → 1_360
 ```
 
-- 「數據機重啟後」選 No（5.3b）時，Internet Connected? 直接當成 No，不會跳出來。
 - 1_230 設定摘要是同一頁，**按鈕和去向跟著分支變**：單台 Finish → 1_280；多台 Finish → 1_290；行動網路 Yes：Next → 1_340；行動網路 No：Finish → 1_360。單台以外標題列下方多一行「Setup complete」（照 Figma）。
 - 1_300 的節點狀態依「node 台數」選的是「節點沒有回應」或「節點優化中」顯示不同圖文；從 1_220 Trouble shooting 進來時沿用上次選的狀態（預設優化中）。
 - Figma 上的線狀態／燈號狀態說明（洋紅色註解）：綠線／白燈 = good connection（AiMesh Node is ready）；動態藍線／藍燈 = 節點正在優化（AiMesh Node is optimising）；黃線／黃燈 = 連線品質需要優化（weak，connection quality can be improved）；灰線 = 節點 offline（no response，沒有 MAC address）。
@@ -541,10 +540,9 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 |---|---|---|---|---|
 | 0 | `wan` | 1_120 按 Get Started | WAN 偵測結果？ | 1 正常 → `wan-detecting` 1_130；2 沒有偵測到 WAN、要不到 IP、US SKU → `modem-unplug` 1_033（WAN 流程，見 5.3b）；3 沒有偵測到 WAN → `wan-type` 1_125 |
 | 1 | `wanDetect` | 1_125 按 Auto Detect（Detecting... 轉約 1.8 秒後跳出） | Auto Detect：這次有偵測到 WAN 嗎？ | Yes → `setup-ssid` 1_140；No → 留在 1_125，跳出「連線無線路由器」提示，按確定關閉 |
-| 1 | `wanRestart` | 1_037 倒數結束自動跳出（按 Continue 也會開） | 數據機重啟後：是否已偵測到 WAN、要到 IP？ | Yes → `setup-ssid` 1_140（1_200 之後問 Internet Connected?）；No → `setup-ssid` 1_140（1_200 之後直接問 node 台數） |
 | 2 | `internet` | 1_200 跑完或按 Run in background | Internet Connected?（link internet = 2 & ping 通 internet） | Yes → 判斷 `prelink`；No → 判斷 `nodeCount` |
 | 3 | `prelink` | 接在 `internet` Yes 後面 | node Prelink 台數？ | 單台 → `internet-live` 1_210；單台／多台（>1 台未連回）→ `internet-live-mesh` 1_220 |
-| 3 | `nodeCount` | 接在 `internet` No 後面（或重啟後 WAN 選 No 時 1_200 直接跳） | node 台數？ | 0 台 → 判斷 `mobile`；≥ 1 台 · 節點沒有回應 / 節點優化中 → `node-status` 1_300 |
+| 3 | `nodeCount` | 接在 `internet` No 後面 | node 台數？ | 0 台 → 判斷 `mobile`；≥ 1 台 · 節點沒有回應 / 節點優化中 → `node-status` 1_300 |
 | 4 | `mobile` | 1_330 按 Next（沒網路），或 node 台數選 0 台 | Mobile 行動網路？ | Yes → `summary` 1_230（Next → 1_340）；No → `summary` 1_230（Finish → 1_360） |
 | 5 | `diagnosis` | 1_370 點「連線檢查」 | 網路診斷結果？ | 7 種情境（都正常／不穩／有錯誤／錯誤＋不穩／DNS 異常／Ping 不穩＋DNS 異常／Ping 異常＋DNS 異常），選完在 1_370 重新診斷 |
 
@@ -560,7 +558,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_033 | 拔掉數據機電源 `modem-unplug` | 重新啟動數據機（1/2）：只拔數據機的電源線，等所有燈都熄滅，不要按 Reset |
 | 1_034 | 等待 3 分鐘（拔電）`modem-wait-off` | 未偵測到 WAN：數據機保持拔電 3 分鐘，倒數結束 Continue 才能按（DEMO 加速） |
 | 1_036 | 插回數據機電源 `modem-plug` | 重新啟動數據機（2/2）：把電源線插回數據機，燈號重新亮起後再繼續 |
-| 1_037 | 等待數據機啟動 3½ 分鐘 `modem-wait-start` | 未偵測到 WAN：插回電源後等 3½ 分鐘，倒數結束 Continue 才能按（DEMO 加速），之後判斷是否偵測到 WAN、要到 IP，兩種都接 1_140 |
+| 1_037 | 等待數據機啟動 3½ 分鐘 `modem-wait-start` | 未偵測到 WAN：插回電源後等 3½ 分鐘，倒數結束 Continue 才能按（DEMO 加速），按 Continue 到 1_140 |
 | 1_040 | 燈號顯示頁 `led-check` | 請使用者看路由器的燈，從呼吸綠燈變成恆亮藍燈才能開始設定 |
 | 1_050 | QR Code 找裝置 `qr-intro` | 說明路由器上的 QR Code 在哪裡，選擇用相機掃描或手動連 WiFi |
 | 1_051 | Setup Guide 1/5 `setup-guide` | 1_050 的 ? → Setup Guide：準備物品（數據機、路由器、電源線、網路線） |

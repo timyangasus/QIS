@@ -366,21 +366,13 @@
   // when picked again from the demo bar on another page)
   let WAN_ALERT_PENDING = false;
 
-  // After the 1_037 modem restart the flow always continues to 1_140; when the router still has
-  // no Internet (no WAN / no IP), the "Internet Connected?" check after AiMesh setup is a known No
-  let WAN_OK = true;
-
   // After AiMesh (1_200): Internet Connected? → Yes: node Prelink count; No: node count → mobile data.
   // INTERNET: answer to Internet Connected?; FINISH: which branch the 1_230 summary closes;
   // NODE_STATE: which 1_300 node status is shown (node not responding / optimising)
   let INTERNET = true;
   let FINISH = 'single';
   let NODE_STATE = 'optimising';
-  const meshDecision = () => WAN_OK ? 'internet' : 'nodeCount';
-  function afterMesh() {
-    if (!WAN_OK) INTERNET = false;
-    window.QIS_decide(meshDecision());
-  }
+  const afterMesh = () => window.QIS_decide('internet');
   function showWanAlert() {
     const alert = document.querySelector('.wan-type-alert');
     if (alert) return alert.classList.add('show');
@@ -448,18 +440,13 @@
       timeEl.textContent = fmt(Math.ceil(totalSec * (1 - p)));
       fill.style.width = `${Math.max(3, p * 100)}%`;
       if (p < 1) raf = requestAnimationFrame(tick);
-      else {
-        btn.disabled = false;
-        el.querySelector('.wait-card').classList.add('is-done');
-        // A wait page that ends in a decision (1_037) asks it as soon as the timer ends; Continue reopens it
-        if (btn.dataset.decide) window.QIS_decide(btn.dataset.decide);
-      }
+      else { btn.disabled = false; el.querySelector('.wait-card').classList.add('is-done'); }
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }
 
-  function waitPage({ title, label, totalSec, hint, mode, next, decide, why }) {
+  function waitPage({ title, label, totalSec, hint, mode, next, why }) {
     return `
       <header class="navbar navbar-guide">
         <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
@@ -479,7 +466,7 @@
         </div>
         <h2 class="guide-title">${title}</h2>
         <p class="modem-why">${MODEM_WHY[why]}</p>
-        <button class="btn-brand wait-continue" ${decide ? `data-decide="${decide}"` : `data-go="${next}"`} data-label="Continue" disabled>Continue</button>
+        <button class="btn-brand wait-continue" data-go="${next}" data-label="Continue" disabled>Continue</button>
       </div>`;
   }
 
@@ -822,7 +809,7 @@
       back: 'modem-plug',
       code: '1_037',
       name: '等待數據機啟動 3½ 分鐘',
-      description: '未偵測到 WAN：插回電源後等數據機啟動 3½ 分鐘，燈可能會閃，倒數結束 Continue 才能按（DEMO 加速倒數），之後判斷是否偵測到 WAN、要到 IP，兩種都接 1_140',
+      description: '未偵測到 WAN：插回電源後等數據機啟動 3½ 分鐘，燈可能會閃，倒數結束 Continue 才能按（DEMO 加速倒數），按 Continue 到 1_140',
       theme: 'light',
       render: () => waitPage({
         title: 'Wait for the modem to start.',
@@ -830,7 +817,7 @@
         totalSec: 210,
         hint: 'Blinking lights? Keep waiting.',
         mode: 'starting',
-        decide: 'wanRestart',
+        next: 'setup-ssid',
         why: 'waitStart',
       }),
       mount: el => { MODEM_FLOW = 'wan'; return startCountdown(el, 210, 5500); },
@@ -1976,9 +1963,9 @@
       label: 'WAN',
       title: 'WAN 偵測結果？',
       options: [
-        { label: '1 · 正常', short: '正常', value: 'ok', to: 'wan-detecting', action: () => { WAN_OK = true; } },
+        { label: '1 · 正常', short: '正常', value: 'ok', to: 'wan-detecting' },
         { label: '2 · 沒有偵測到 WAN、要不到 IP、US SKU', short: '沒有 WAN、要不到 IP、US SKU', value: 'no-ip-us', to: 'modem-unplug' },
-        { label: '3 · 沒有偵測到 WAN', short: '沒有 WAN', value: 'no-wan', to: 'wan-type', action: () => { WAN_OK = true; } },
+        { label: '3 · 沒有偵測到 WAN', short: '沒有 WAN', value: 'no-wan', to: 'wan-type' },
       ],
     },
     wanDetect: {
@@ -1988,15 +1975,6 @@
       options: [
         { label: 'Yes · WAN Detected', short: 'Yes', value: 'yes', to: 'setup-ssid' },
         { label: 'No · 仍未偵測到 WAN（跳出提示，留在 1_125）', short: 'No', value: 'no', action: showWanAlert },
-      ],
-    },
-    wanRestart: {
-      index: 1,
-      label: '重啟後 WAN',
-      title: '數據機重啟後：是否已偵測到 WAN、要到 IP？',
-      options: [
-        { label: 'Yes · 已偵測到 WAN、要到 IP', short: 'Yes', value: 'yes', to: 'setup-ssid', action: () => { WAN_OK = true; } },
-        { label: 'No · 仍沒有偵測到 WAN、要不到 IP', short: 'No', value: 'no', to: 'setup-ssid', action: () => { WAN_OK = false; } },
       ],
     },
     // After AiMesh (1_200). Picked again from the demo bar, each one also replays the step it decides
