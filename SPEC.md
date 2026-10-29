@@ -424,7 +424,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 ### 5.14 `1_230` 設定摘要 `summary`
 - Figma node：`819:320`
 - **淺色頁面**；導覽列：‹ 返回（單台 → 1_210；多台 → 1_220；沒網路 → 1_200）+「System Setup」
-- 由上而下：產品圖（單台 → 一台 BT8 `home-offline-device.jpg`，139 × 169；其他分支 → 三入組 `bt8-3pack.jpg`，264 × 169，兩張同高）→ 分隔線 → **Summary** → 分隔線 → **Guest Network** → Finish
+- 由上而下：產品圖（只有路由器一台時 → 一台 BT8 `home-offline-device.jpg`，139 × 169：Prelink 選「單台」，或 node 台數選「0 台」後的行動網路 Yes／No；有節點的分支 → 三入組 `bt8-3pack.jpg`，264 × 169，兩張同高）→ 分隔線 → **Summary** → 分隔線 → **Guest Network** → Finish
 
 | 區塊 | 圖示 | 內容（**帶入 1_140～1_160 填的值**） |
 |---|---|---|

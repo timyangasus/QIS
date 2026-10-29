@@ -373,6 +373,8 @@
   let INTERNET = true;
   let FINISH = 'single';
   let NODE_STATE = 'optimising';
+  // 1_230 product image: one BT8 when only the router is set up (Prelink 單台, or node 台數 0), else the 3-pack
+  let SINGLE_DEVICE = true;
   // Each node state has its own light guide after 1_300: optimising → 1_310 (blinking blue),
   // weak → 1_320 (yellow), not responding → 1_330 (power on)
   const NODE_STATUS = {
@@ -1590,7 +1592,7 @@
         </header>
 
         <div class="summary-body">
-          ${FINISH === 'single'
+          ${SINGLE_DEVICE
             ? '<img class="summary-device" src="assets/home-offline-device.jpg" alt="ZenWiFi BT8" width="139" height="169">'
             : '<img class="summary-device" src="assets/bt8-3pack.jpg" alt="ZenWiFi BT8 三入組" width="264" height="169">'}
           ${FINISH === 'single' ? '' : '<p class="summary-done">Setup complete</p>'}
@@ -2005,8 +2007,8 @@
       label: 'Prelink 台數',
       title: 'node Prelink 台數？',
       options: [
-        { label: '單台', short: '單台', value: 'single', to: 'internet-live', action: () => { FINISH = 'single'; } },
-        { label: '單台／多台（>1 台未連回）', short: '>1 台未連回', value: 'multi', to: 'internet-live-mesh', action: () => { FINISH = 'mesh'; } },
+        { label: '單台', short: '單台', value: 'single', to: 'internet-live', action: () => { FINISH = 'single'; SINGLE_DEVICE = true; } },
+        { label: '單台／多台（>1 台未連回）', short: '>1 台未連回', value: 'multi', to: 'internet-live-mesh', action: () => { FINISH = 'mesh'; SINGLE_DEVICE = false; } },
       ],
     },
     nodeCount: {
@@ -2014,10 +2016,10 @@
       label: '節點台數',
       title: 'node 台數？',
       options: [
-        { label: '0 台', short: '0 台', value: 'none', action: () => window.QIS_decide('mobile') },
-        { label: '≥ 1 台 · 節點優化中（藍線）', short: '≥1 台 優化中', value: 'optimising', to: 'node-status', action: () => { NODE_STATE = 'optimising'; } },
-        { label: '≥ 1 台 · 連線品質待優化（黃線）', short: '≥1 台 品質待優化', value: 'weak', to: 'node-status', action: () => { NODE_STATE = 'weak'; } },
-        { label: '≥ 1 台 · 節點沒有回應（灰線）', short: '≥1 台 沒回應', value: 'offline', to: 'node-status', action: () => { NODE_STATE = 'offline'; } },
+        { label: '0 台', short: '0 台', value: 'none', action: () => { SINGLE_DEVICE = true; window.QIS_decide('mobile'); } },
+        { label: '≥ 1 台 · 節點優化中（藍線）', short: '≥1 台 優化中', value: 'optimising', to: 'node-status', action: () => { NODE_STATE = 'optimising'; SINGLE_DEVICE = false; } },
+        { label: '≥ 1 台 · 連線品質待優化（黃線）', short: '≥1 台 品質待優化', value: 'weak', to: 'node-status', action: () => { NODE_STATE = 'weak'; SINGLE_DEVICE = false; } },
+        { label: '≥ 1 台 · 節點沒有回應（灰線）', short: '≥1 台 沒回應', value: 'offline', to: 'node-status', action: () => { NODE_STATE = 'offline'; SINGLE_DEVICE = false; } },
       ],
     },
     mobile: {
