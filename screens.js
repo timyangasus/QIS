@@ -448,7 +448,7 @@
       timeEl.textContent = fmt(Math.ceil(totalSec * (1 - p)));
       fill.style.width = `${Math.max(3, p * 100)}%`;
       if (p < 1) raf = requestAnimationFrame(tick);
-      else { btn.disabled = false; el.querySelector('.wait-card').classList.add('is-done'); }
+      else { btn.classList.remove('is-waiting'); el.querySelector('.wait-card').classList.add('is-done'); }
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
@@ -474,7 +474,7 @@
         </div>
         <h2 class="guide-title">${title}</h2>
         <p class="modem-why">${MODEM_WHY[why]}</p>
-        <button class="btn-brand wait-continue" data-go="${next}" data-label="Continue" disabled>Continue</button>
+        <button class="btn-brand wait-continue is-waiting" data-go="${next}" data-label="Continue">Continue</button>
       </div>`;
   }
 

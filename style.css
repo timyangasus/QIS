@@ -1436,8 +1436,8 @@ button {
 .modem-mini-tag.is-brand { fill: var(--brand); }
 .modem-mini-dash { stroke: #b7c0cc; stroke-width: 1.5; stroke-dasharray: 3 3; }
 
-/* Light-page disabled state for the timed Continue */
-.btn-brand.wait-continue:disabled {
+/* Timed Continue looks disabled until the timer ends, but stays tappable for the demo */
+.btn-brand.wait-continue.is-waiting {
   background: #e3e8ee;
   color: #9aa3ad;
   box-shadow: none;
@@ -1786,8 +1786,10 @@ button {
 
 .screen-setup-iot .btn-brand.setup-next { margin-bottom: 0; }
 
+/* Set Up Later fills the 62px under Next, so Next sits at the same height as on 1_140 */
 .setup-later {
-  margin: 34px 0 30px;
+  height: 62px;
+  padding: 0 16px;
   font-size: 15px;
   color: var(--guide-title);
 }
