@@ -235,7 +235,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 ### 5.5a `1_050` 的 ? 說明：選單、Setup Guide `1_051`–`1_055`、LED Guide `1_056`
 - Figma node：`1867:942`（選單）、`1891:1333`（Setup Guide 5 頁 + LED Guide；原稿是 App 截圖）。LED Guide 插圖從原稿裁成小 JPG（`led-guide-device.jpg`）；Setup Guide 插圖已改成和 1_033 同風格的 inline SVG（原本的 `sg-*.jpg` 已刪除）。
 - **? 選單**：iOS action sheet，畫面（含狀態列）變暗，從下往上滑出。上方一組：Setup Guide → 1_051、LED Guide → 1_056；下方獨立的 Cancel（粗體）。按 Cancel 或暗色區域關閉。
-- **Setup Guide**：改成和 1_033／1_036 一樣的扁平插畫風格（沒有背景圓圈），導覽列 ‹ 返回 + Setup Guide，沒有 ?；原本按鈕下方的 5 顆頁碼點拿掉（輪播頁自己有圓點）。
+- **Setup Guide**：改成和 1_033／1_036 一樣的扁平插畫風格（沒有背景圓圈），導覽列 ‹ 返回 + Setup Guide，沒有 ?；原本按鈕下方的 5 顆頁碼點拿掉（輪播頁自己有圓點）。插圖比 1_080 系列小一點：輪播圖寬 360 pt（1_033／1_036 共用同一尺寸），1_051 四樣物品各 96 pt。
 
 | 頁碼 | 標題 | 插圖 | 說明 | 按鈕 |
 |---|---|---|---|---|

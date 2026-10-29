@@ -1286,7 +1286,7 @@ button {
 .btn-brand:active { background: var(--brand-pressed); }
 
 /* ── 1_033 / 1_036 設定指南：圖片輪播對應條列 ── */
-.unplug-carousel { display: block; height: 340px; margin-top: 12px; }
+.unplug-carousel { display: block; height: 290px; margin-top: 30px; }
 
 .unplug-track {
   height: 100%;
@@ -1302,10 +1302,11 @@ button {
   flex: 0 0 100%;
   display: flex;
   justify-content: center;
+  align-items: flex-end;
   scroll-snap-align: center;
 }
 
-.unplug-slide svg { max-width: 100%; height: auto; }
+.unplug-slide svg { width: 360px; max-width: 100%; height: auto; }
 
 .unplug-dots { display: flex; gap: 10px; margin: 6px 0 18px; }
 
@@ -2384,7 +2385,9 @@ button {
   color: var(--brand);
 }
 
-.sg-need { margin-top: 14px; gap: 10px 40px; }
+.sg-need { margin-top: 40px; gap: 14px 56px; grid-template-columns: repeat(2, 104px); }
+
+.sg-need svg { width: 96px; height: 96px; }
 
 .sg-need li { animation: sg-need-in .45s ease-out both; animation-delay: calc(var(--i) * .25s + .15s); }
 
