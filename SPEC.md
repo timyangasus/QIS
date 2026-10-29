@@ -233,17 +233,17 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 設定指南 | 小文字連結 | → `setup-guide` 1_051 |
 
 ### 5.5a `1_050` 的 ? 說明：選單、Setup Guide `1_051`–`1_055`、LED Guide `1_056`
-- Figma node：`1867:942`（選單）、`1891:1333`（Setup Guide 5 頁 + LED Guide；原稿是 App 截圖）。插圖從原稿裁成小 JPG（`sg-*.jpg`、`led-guide-device.jpg`，每張 20 KB 以內）。
+- Figma node：`1867:942`（選單）、`1891:1333`（Setup Guide 5 頁 + LED Guide；原稿是 App 截圖）。LED Guide 插圖從原稿裁成小 JPG（`led-guide-device.jpg`）；Setup Guide 插圖已改成和 1_033 同風格的 inline SVG（原本的 `sg-*.jpg` 已刪除）。
 - **? 選單**：iOS action sheet，畫面（含狀態列）變暗，從下往上滑出。上方一組：Setup Guide → 1_051、LED Guide → 1_056；下方獨立的 Cancel（粗體）。按 Cancel 或暗色區域關閉。
-- **Setup Guide**：版型沿用 1_080 設定指南（導覽列 ‹ 返回 + Setup Guide，沒有 ?），按鈕下方加 5 顆頁碼點。按鈕沿用本專案的藍色 `btn-brand`（原稿是白色膠囊）。
+- **Setup Guide**：改成和 1_033／1_036 一樣的扁平插畫風格（沒有背景圓圈），導覽列 ‹ 返回 + Setup Guide，沒有 ?；原本按鈕下方的 5 顆頁碼點拿掉（輪播頁自己有圓點）。
 
 | 頁碼 | 標題 | 插圖 | 說明 | 按鈕 |
 |---|---|---|---|---|
-| 1_051 | What we’ll need | 2×2 圓形：Modem、Router、Power cord、Ethernet cord | Find these in your ASUS router’s packaging. … More can be set up later. | Next → 1_052 |
-| 1_052 | Unplug Modem and Older Router from Power | 數據機拔電 | Unplug your cable/DSL modem. … please unplug it as well. | Next → 1_053 |
-| 1_053 | Plug in Your Devices | 數據機 LAN → 路由器 WAN | Connect your modem’s LAN port to WAN port on router and power them both on. | Next → 1_054 |
-| 1_054 | Prepare Another Node | 兩台節點 | 1. 放在適當距離內 2. 開機等恆亮藍燈，節點會自動連到路由器 | Next → 1_055 |
-| 1_055 | Check LED Lights | 兩台節點 | Wait for one minute until you see a static blue light on the router and node(s). | I’m ready → 回 1_050 |
+| 1_051 | What we’ll need | 2×2 重畫的扁平圖（沒有圓形底）：Modem、Router、Power cord、Ethernet cord，進頁時四樣依序往上浮現 | Find these in your ASUS router’s packaging. … More can be set up later. | Next → 1_052 |
+| 1_052 | 拔下數據機和舊路由器的電源線 | **同 1_033**：兩張動畫輪播對應 2 條條列 | 同 1_033 | I am ready → 1_053 |
+| 1_053 | 插入您的裝置 | **同 1_036**：三張動畫輪播對應 3 條條列 | 同 1_036 | I am ready → 1_054 |
+| 1_054 | Prepare Another Node | 兩張動畫輪播（同 1_033 版型）：① 路由器（恆亮藍燈）在左，節點從右邊滑進來，接著出現藍色虛線雙箭頭和「≤ 3 m」標籤 ② 節點電源插頭（黃色箭頭推兩下）往上插進電源孔，燈號呼吸綠燈閃爍，約 2.5 秒後變恆亮藍燈並帶光暈 | 條列 1. Place your node(s) and router within a proper distance. 2. Power node(s) on and wait until you see a static blue light. … | Next → 1_055 |
+| 1_055 | **同 1_040** 燈號顯示頁 | 同 1_040 | 同 1_040（勾選確認恆亮藍燈） | Next → 回 1_050；It is not solid blue light → 同 1_040（`led-not-blue` 尚未加入） |
 
 - **LED Guide 1_056**：導覽列只有標題 LED Guide；裝置圖；說明文字；7 列燈號（色塊 + 說明，列與列之間有分隔線）；白色膠囊 OK → 回上一頁。
   - 綠：starting up／藍：ready for setup／**藍色閃爍**：node syncing（原稿這格是空的，推測是截到閃爍熄滅的瞬間）／白：online／黃：連線弱／紅：沒有網路或節點斷線／**綠色呼吸**：mesh 最佳化中（含 DFS 雷達說明）。
@@ -570,11 +570,11 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_037 | 等待數據機啟動 3½ 分鐘 `modem-wait-start` | 未偵測到 WAN：插回電源後等 3½ 分鐘，Continue 倒數中是灰色、倒數結束變藍色，但為了 demo 灰色時也能按（前 10 秒正常、之後加速），按 Continue 到 1_140 |
 | 1_040 | 燈號顯示頁 `led-check` | 請使用者看路由器的燈，從呼吸綠燈變成恆亮藍燈才能開始設定 |
 | 1_050 | QR Code 找裝置 `qr-intro` | 說明路由器上的 QR Code 在哪裡，選擇用相機掃描或手動連 WiFi |
-| 1_051 | Setup Guide 1/5 `setup-guide` | 1_050 的 ? → Setup Guide：準備物品（數據機、路由器、電源線、網路線） |
-| 1_052 | Setup Guide 2/5 `setup-guide-2` | 拔掉數據機和舊路由器的電源 |
-| 1_053 | Setup Guide 3/5 `setup-guide-3` | 數據機 LAN 埠接到路由器 WAN 埠，兩台都開機 |
-| 1_054 | Setup Guide 4/5 `setup-guide-4` | 準備節點：放在適當距離內，開機等恆亮藍燈 |
-| 1_055 | Setup Guide 5/5 `setup-guide-5` | 等一分鐘，路由器和節點都亮恆亮藍燈；I’m ready 回 1_050 |
+| 1_051 | Setup Guide 1/5 `setup-guide` | 1_050 的 ? → Setup Guide：準備物品（數據機、路由器、電源線、網路線），扁平重畫圖依序浮現 |
+| 1_052 | Setup Guide 2/5 `setup-guide-2` | 同 1_033：拔掉數據機和舊路由器的電源（動畫輪播） |
+| 1_053 | Setup Guide 3/5 `setup-guide-3` | 同 1_036：數據機 LAN 埠接到路由器 WAN 埠，兩台都開機（動畫輪播） |
+| 1_054 | Setup Guide 4/5 `setup-guide-4` | 準備節點：放在 3 公尺內，開機等呼吸綠燈變恆亮藍燈（動畫輪播） |
+| 1_055 | Setup Guide 5/5 `setup-guide-5` | 同 1_040 燈號顯示頁：確認恆亮藍燈，Next 回 1_050 |
 | 1_056 | LED Guide `led-guide` | 1_050 的 ? → LED Guide：路由器正面燈號顏色代表的狀態 |
 | 1_060 | 啟用相機掃描 `qr-scan` | 把相機對準路由器上的 QR Code，掃到後系統詢問是否加入路由器的 Wi-Fi |
 | 1_070 | 偵測路由器 `detecting` | 加入路由器的 Wi-Fi 後，App 正在搜尋 ASUS 路由器（約 2 秒後自動跳下一頁） |

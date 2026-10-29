@@ -723,13 +723,122 @@
     </svg>`,
   ];
 
+  // 1_054: router (left, solid blue) and a node, both ZenWiFi cubes scaled from PLUGIN_ROUTER
+  const NODE_CUBE = (x, led = '', extra = '') => `
+      <g transform="translate(${x} 76)"><g transform="scale(.8)">${PLUGIN_ROUTER(led)}${extra}</g></g>`;
+  const NODE_BLUE = '<set attributeName="fill" to="#3aa0e0" begin="0s" fill="freeze"/>';
+  const NODE_ILLUST = [
+    // 1. Node slides in next to the router, then a "within 3 m" distance marker appears
+    `<svg viewBox="0 0 422 340" width="422" height="340" aria-hidden="true">
+      ${UNPLUG_FLOOR}
+      ${NODE_CUBE(-22, NODE_BLUE)}
+      <g transform="translate(330 0)" opacity=".4">
+        <animateTransform attributeName="transform" type="translate" from="330 0" to="230 0" begin=".3s" dur=".9s" fill="freeze" calcMode="spline" keySplines=".4 0 .2 1" keyTimes="0;1"/>
+        <animate attributeName="opacity" from=".4" to="1" begin=".3s" dur=".9s" fill="freeze"/>
+        ${NODE_CUBE(0)}
+      </g>
+      <g opacity="0">
+        <animate attributeName="opacity" from="0" to="1" begin="1.4s" dur=".4s" fill="freeze"/>
+        <path d="M160 176 H252" stroke="#0b4fb3" stroke-width="3" stroke-dasharray="7 6" stroke-linecap="round"/>
+        <path d="M168 168 L158 176 L168 184 M244 168 L254 176 L244 184" fill="none" stroke="#0b4fb3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="178" y="138" width="56" height="26" rx="13" fill="#0b4fb3"/>
+        <text x="206" y="156" text-anchor="middle" font-size="14" font-weight="600" fill="#fff">≤ 3 m</text>
+      </g>
+    </svg>`,
+    // 2. Plug the node in: it breathes green while starting up, then turns solid blue
+    `<svg viewBox="0 0 422 340" width="422" height="340" aria-hidden="true">
+      <defs><filter id="node-glow" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="4"/></filter></defs>
+      ${UNPLUG_FLOOR}
+      ${NODE_CUBE(-22, NODE_BLUE)}
+      ${NODE_CUBE(230, `
+        <set attributeName="fill" to="#5ee250" begin="2.1s" fill="freeze"/>
+        <animate attributeName="opacity" values="1;.25;1" dur="1.2s" begin="2.1s" end="4.5s" repeatCount="indefinite"/>
+        <set attributeName="fill" to="#3aa0e0" begin="4.5s" fill="freeze"/>`, `
+        <ellipse cx="126" cy="202" rx="26" ry="9" fill="#5ee250" opacity="0" filter="url(#node-glow)">
+          <animate attributeName="opacity" values=".9;.15;.9" dur="1.2s" begin="2.1s" end="4.5s" repeatCount="indefinite"/>
+          <set attributeName="fill" to="#3aa0e0" begin="4.5s" fill="freeze"/>
+          <set attributeName="opacity" to=".75" begin="4.5s" fill="freeze"/>
+        </ellipse>
+        ${PLUGIN_POWER_PLUG(106, 259)}`)}
+    </svg>`,
+  ];
+
+  // 1_051 What we'll need: flat drawings of the four items, popping in one by one
+  const NEED_ITEMS = [
+    ['Modem', `
+      <rect x="66" y="16" width="10" height="94" rx="5" fill="#e6e8ec"/>
+      <rect x="40" y="10" width="32" height="102" rx="8" fill="#fff" stroke="#d9dce1" stroke-width="2"/>
+      <rect x="47" y="22" width="10" height="8" rx="2" fill="#c9ced5"/>
+      <rect x="47" y="34" width="10" height="8" rx="2" fill="#f5c84c"/>
+      <rect x="47" y="46" width="10" height="8" rx="2" fill="#f5c84c"/>
+      <rect x="47" y="58" width="10" height="8" rx="2" fill="#3aa0e0"/>
+      <circle cx="52" cy="96" r="4" fill="#fff" stroke="#b9bfc7" stroke-width="2"/>`],
+    ['Router', `
+      <rect x="14" y="26" width="92" height="84" rx="13" fill="#fff" stroke="#d9dce1" stroke-width="2"/>
+      <rect x="20" y="31" width="80" height="9" rx="4.5" fill="#f2f3f5"/>
+      <rect x="51" y="68" width="18" height="4" rx="2" fill="#3aa0e0"/>`],
+    ['Power cord', `
+      <rect x="18" y="36" width="44" height="48" rx="9" fill="#fff" stroke="#d9dce1" stroke-width="2"/>
+      <rect x="28" y="26" width="5" height="11" rx="1.5" fill="#a9b0b9"/>
+      <rect x="47" y="26" width="5" height="11" rx="1.5" fill="#a9b0b9"/>
+      <path d="M40 84 C 40 104 70 104 76 84 S 96 56 96 40" fill="none" stroke="#aab1ba" stroke-width="4" stroke-linecap="round"/>
+      <rect x="90" y="24" width="12" height="18" rx="3" fill="#d3d7dd"/>
+      <rect x="94" y="16" width="4" height="9" rx="1" fill="#a9b0b9"/>`],
+    ['Ethernet cord', `
+      <path d="M26 92 C 10 60 44 34 60 52 S 74 94 92 72 S 104 40 96 30" fill="none" stroke="#1f86d6" stroke-width="5" stroke-linecap="round"/>
+      <rect x="18" y="90" width="16" height="20" rx="3" fill="#1f86d6"/><rect x="21" y="104" width="10" height="6" fill="#0b4fb3"/>
+      <rect x="88" y="12" width="16" height="20" rx="3" fill="#1f86d6"/><rect x="91" y="12" width="10" height="6" fill="#0b4fb3"/>`],
+  ];
+
+  // 1_040 (setup flow) and 1_055 (end of the 1_050 Setup Guide) are the same LED check page
+  function ledCheck(next) {
+    return `
+        <header class="navbar">
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
+          <h1 class="navbar-title navbar-title-plain">系統設定</h1>
+        </header>
+
+        <div class="led-body">
+          <img class="led-device" src="assets/zenwifi-device.png" alt="ZenWiFi 路由器" width="120" height="146">
+          <h2 class="led-heading">Please check the indicator lights on your router.</h2>
+
+          <ol class="led-steps">
+            <li class="led-step">
+              <span class="led-swatch led-swatch-green led-breathing"></span>
+              <span class="led-text">
+                <span class="led-name">Breathing Green</span>
+                <span class="led-desc">Your router is starting up. Please wait until the light becomes solid.</span>
+              </span>
+            </li>
+            <li class="led-step">
+              <span class="led-swatch led-swatch-blue"></span>
+              <span class="led-text">
+                <span class="led-name">Solid Blue</span>
+                <span class="led-desc">Ready for setup.</span>
+              </span>
+            </li>
+          </ol>
+
+          <div class="led-actions">
+            <label class="checkbox">
+              <input type="checkbox">
+              <span class="checkbox-box"></span>
+              <span>I confirm it is solid blue light on the router.</span>
+            </label>
+            <button class="btn-primary" data-go="${next}">Next</button>
+            <button class="text-link" data-go="led-not-blue">It is not solid blue light.</button>
+          </div>
+        </div>
+    `;
+  }
+
   // Guide page whose top picture is a carousel synced 1:1 with a numbered list (1_033, 1_036)
-  function stepCarousel({ illust, title, steps, next }) {
+  function stepCarousel({ illust, title, steps, next, label = 'I am ready', help = true }) {
     return `
       <header class="navbar navbar-guide">
         <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
         <h1 class="navbar-title">Setup Guide</h1>
-        <button class="navbar-btn navbar-btn-right" data-go="help" data-label="說明" aria-label="說明">${ICON.helpOutline}</button>
+        ${help ? `<button class="navbar-btn navbar-btn-right" data-go="help" data-label="說明" aria-label="說明">${ICON.helpOutline}</button>` : ''}
       </header>
 
       <div class="guide-body">
@@ -739,7 +848,7 @@
         <div class="unplug-dots">${illust.map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div>
         <h2 class="guide-title">${title}</h2>
         <ol class="unplug-steps">${steps.map((t, i) => `<li class="${i ? '' : 'on'}">${t}</li>`).join('')}</ol>
-        <button class="btn-brand" data-go="${next}" data-label="I am ready">I am ready</button>
+        <button class="btn-brand" data-go="${next}" data-label="${label}">${label}</button>
       </div>
     `;
   }
@@ -1031,44 +1140,7 @@
       description: '確認燈號：請使用者看路由器的燈，從呼吸綠燈變成恆亮藍燈才能開始設定',
       figmaNode: '1867:1962',
       theme: 'light',
-      render: () => `
-        <header class="navbar">
-          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
-          <h1 class="navbar-title navbar-title-plain">系統設定</h1>
-        </header>
-
-        <div class="led-body">
-          <img class="led-device" src="assets/zenwifi-device.png" alt="ZenWiFi 路由器" width="120" height="146">
-          <h2 class="led-heading">Please check the indicator lights on your router.</h2>
-
-          <ol class="led-steps">
-            <li class="led-step">
-              <span class="led-swatch led-swatch-green led-breathing"></span>
-              <span class="led-text">
-                <span class="led-name">Breathing Green</span>
-                <span class="led-desc">Your router is starting up. Please wait until the light becomes solid.</span>
-              </span>
-            </li>
-            <li class="led-step">
-              <span class="led-swatch led-swatch-blue"></span>
-              <span class="led-text">
-                <span class="led-name">Solid Blue</span>
-                <span class="led-desc">Ready for setup.</span>
-              </span>
-            </li>
-          </ol>
-
-          <div class="led-actions">
-            <label class="checkbox">
-              <input type="checkbox">
-              <span class="checkbox-box"></span>
-              <span>I confirm it is solid blue light on the router.</span>
-            </label>
-            <button class="btn-primary" data-go="qr-intro">Next</button>
-            <button class="text-link" data-go="led-not-blue">It is not solid blue light.</button>
-          </div>
-        </div>
-      `,
+      render: () => ledCheck('qr-intro'),
     },
     {
       id: 'qr-intro',
@@ -1130,54 +1202,12 @@
         return () => el.removeEventListener('click', onClick);
       },
     },
-    ...[
-      {
-        code: '1_051',
-        title: 'What we’ll need',
-        desc: 'Find these in your ASUS router’s packaging. You’ll only need one router for now if you have more than one device. More can be set up later.',
-        summary: '準備物品：數據機、路由器、電源線、網路線',
-        illust: `
-          <ul class="sg-need">
-            ${[['modem', 'Modem'], ['router', 'Router'], ['power', 'Power cord'], ['ethernet', 'Ethernet cord']].map(([k, label]) => `
-              <li><img src="assets/sg-need-${k}.jpg" alt="" width="148" height="148"><span>${label}</span></li>`).join('')}
-          </ul>`,
-      },
-      {
-        code: '1_052',
-        title: 'Unplug Modem and Older Router from Power',
-        desc: 'Unplug your cable/DSL modem. If it has a battery backup, remove the battery.<br>If you have other wireless equipment connected to your modem, please unplug it as well.',
-        summary: '拔掉數據機和舊路由器的電源',
-        illust: '<img src="assets/sg-unplug.jpg" alt="" width="318" height="318" style="margin-top:24px">',
-      },
-      {
-        code: '1_053',
-        title: 'Plug in Your Devices',
-        desc: 'Connect your modem’s LAN port to WAN port on router and power them both on.',
-        summary: '接上裝置：數據機 LAN 埠接到路由器 WAN 埠，兩台都開機',
-        illust: '<img src="assets/sg-plug.jpg" alt="" width="318" height="318" style="margin-top:24px">',
-      },
-      {
-        code: '1_054',
-        title: 'Prepare Another Node',
-        desc: '1. Place your node(s) and router within a proper distance.<br><br>2. Power node(s) on and wait until you see a static blue light. Your node(s) will automatically connect to your router afterwards.',
-        summary: '準備節點：放在適當距離內，開機等恆亮藍燈',
-        illust: '<img src="assets/sg-nodes.jpg" alt="" width="293" height="246" style="margin-top:70px">',
-      },
-      {
-        code: '1_055',
-        title: 'Check LED Lights',
-        desc: 'Wait for one minute until you see a static blue light on the router and node(s).',
-        summary: '確認燈號：等一分鐘，路由器和節點都亮恆亮藍燈',
-        illust: '<img src="assets/sg-nodes.jpg" alt="" width="293" height="246" style="margin-top:70px">',
-        button: 'I’m ready',
-      },
-    ].map((g, i, all) => ({
-      id: i === 0 ? 'setup-guide' : `setup-guide-${i + 1}`,
-      back: i === 0 ? 'qr-intro' : i === 1 ? 'setup-guide' : `setup-guide-${i}`,
-      code: g.code,
-      name: `Setup Guide ${i + 1}/${all.length}`,
-      description: `1_050 的 ? → Setup Guide ${i + 1}/${all.length}：${g.summary}`,
-      figmaNode: '1891:1333',
+    {
+      id: 'setup-guide',
+      back: 'qr-intro',
+      code: '1_051',
+      name: 'Setup Guide 1/5',
+      description: '1_050 的 ? → Setup Guide 1/5：準備物品（數據機、路由器、電源線、網路線），四樣東西依序浮現',
       theme: 'light',
       render: () => `
         <header class="navbar navbar-guide">
@@ -1186,14 +1216,87 @@
         </header>
 
         <div class="guide-body">
-          <div class="guide-illust">${g.illust}</div>
-          <h2 class="guide-title">${g.title}</h2>
-          <p class="guide-desc">${g.desc}</p>
-          <button class="btn-brand sg-next" data-go="${i + 1 < all.length ? `setup-guide-${i + 2}` : 'qr-intro'}">${g.button || 'Next'}</button>
-          <div class="sg-dots" aria-hidden="true">${all.map((_, j) => `<span${j === i ? ' class="is-on"' : ''}></span>`).join('')}</div>
+          <div class="guide-illust">
+            <ul class="sg-need">
+              ${NEED_ITEMS.map(([label, art], i) => `
+                <li style="--i:${i}"><svg viewBox="0 0 120 120" width="120" height="120" aria-hidden="true">${art}</svg><span>${label}</span></li>`).join('')}
+            </ul>
+          </div>
+          <h2 class="guide-title">What we’ll need</h2>
+          <p class="guide-desc">Find these in your ASUS router’s packaging. You’ll only need one router for now if you have more than one device. More can be set up later.</p>
+          <button class="btn-brand" data-go="setup-guide-2" data-label="Next">Next</button>
         </div>
       `,
-    })),
+    },
+    {
+      id: 'setup-guide-2',
+      back: 'setup-guide',
+      code: '1_052',
+      name: 'Setup Guide 2/5',
+      description: 'Setup Guide 2/5：同 1_033，拔下數據機電源線、取出備用電池，其他無線設備也拔電',
+      theme: 'light',
+      render: () => stepCarousel({
+        illust: UNPLUG_ILLUST,
+        title: '拔下數據機和舊路由器的電源線',
+        steps: [
+          '拔下纜線／DSL 數據機電源線。如有備用電池，請取出電池。',
+          '如果有其他無線設備連接到數據機，也請拔掉設備的電源。',
+        ],
+        next: 'setup-guide-3',
+        help: false,
+      }),
+      mount: el => mountStepCarousel(el, 6500),
+    },
+    {
+      id: 'setup-guide-3',
+      back: 'setup-guide-2',
+      code: '1_053',
+      name: 'Setup Guide 3/5',
+      description: 'Setup Guide 3/5：同 1_036，找到 WAN 埠、數據機 LAN 接路由器 WAN，兩台同時開電',
+      theme: 'light',
+      render: () => stepCarousel({
+        illust: PLUGIN_ILLUST,
+        title: '插入您的裝置',
+        steps: [
+          '找到路由器上的 WAN 網路埠（藍色）。',
+          '用網路線將數據機的 LAN 網路埠連接到路由器的 WAN 網路埠。',
+          '同時打開數據機和路由器的電源。',
+        ],
+        next: 'setup-guide-4',
+        help: false,
+      }),
+      mount: el => mountStepCarousel(el, 5000),
+    },
+    {
+      id: 'setup-guide-4',
+      back: 'setup-guide-3',
+      code: '1_054',
+      name: 'Setup Guide 4/5',
+      description: 'Setup Guide 4/5：準備節點，放在路由器 3 公尺內，開機等呼吸綠燈變恆亮藍燈',
+      theme: 'light',
+      render: () => stepCarousel({
+        illust: NODE_ILLUST,
+        title: 'Prepare Another Node',
+        steps: [
+          'Place your node(s) and router within a proper distance.',
+          'Power node(s) on and wait until you see a static blue light. Your node(s) will automatically connect to your router afterwards.',
+        ],
+        next: 'setup-guide-5',
+        label: 'Next',
+        help: false,
+      }),
+      mount: el => mountStepCarousel(el, 6000),
+    },
+    {
+      id: 'setup-guide-5',
+      back: 'setup-guide-4',
+      code: '1_055',
+      name: 'Setup Guide 5/5',
+      description: 'Setup Guide 5/5：同 1_040 燈號顯示頁，確認路由器恆亮藍燈，Next 回 1_050',
+      figmaNode: '1867:1962',
+      theme: 'light',
+      render: () => ledCheck('qr-intro'),
+    },
     {
       id: 'led-guide',
       back: 'qr-intro',
