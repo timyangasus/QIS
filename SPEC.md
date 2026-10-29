@@ -394,9 +394,9 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
  ├ Yes ─ node Prelink 台數？
  │   ├ 單台 ─ 1_210 → 1_230 Finish → 1_280 首頁
  │   └ 單台／多台（>1 台未連回）─ 1_220 ─ Next → 1_230 Finish → 1_290 AiMesh 拓撲
- │                                   └ Trouble shooting → 1_300 → 1_310–1_330 → 1_230
+ │                                   └ Trouble shooting → 1_300 → 1_310 → 1_320 → 1_230
  └ No ─ node 台數？
-     ├ ≥ 1 台（節點沒有回應／優化中）─ 1_300 → 1_310 → 1_320 → 1_330 ─┐
+     ├ ≥ 1 台（優化中 1_310 → 1_320／沒有回應 1_330）─ 1_300 → … ─┐
      └ 0 台 ──────────────────────────────────────────────────────┤
                                                 Mobile 行動網路？ ┘
                                                  ├ Yes ─ 1_230 Next → 1_340 ─ 完成設定 → 1_360
@@ -471,7 +471,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 ### 5.17 `1_300`–`1_330` AiMesh 節點連線狀態與燈號排除 `node-status`、`node-guide-1`～`node-guide-3`
 - Figma node：`0:182`（沒有回應）、`0:252`（優化中）、`0:85`、`0:97`、`0:109`
-- **1_300**：導覽列 ‹ 返回（有網路 → 1_220；沒網路 → 1_200；原稿沒有，依返回規則加上）+ 粗體「System Setup」+ ?；三台節點連線圖（`node-status-offline.jpg` 灰線＋黃色 2／`node-status-optimising.jpg` 藍線）→「AiMesh Node(s) Connection Status」→ 編號清單：① AiMesh Node is ready.；② AiMesh Node is not responding. (No MAC address)（黃色圓圈）或 AiMesh Node is optimising. → Next → 1_310
+- **1_300**：導覽列 ‹ 返回（有網路 → 1_220；沒網路 → 1_200；原稿沒有，依返回規則加上）+ 粗體「System Setup」+ ?；三台節點連線圖（`node-status-offline.jpg` 灰線＋黃色 2／`node-status-optimising.jpg` 藍線）→「AiMesh Node(s) Connection Status」→ 編號清單：① AiMesh Node is ready.；② AiMesh Node is not responding. (No MAC address)（黃色圓圈）或 AiMesh Node is optimising. → Next → 依節點狀態進燈號頁（見下）
   - Figma 原文「is no respondse. (No mac adress)」修正拼字
 - **1_310–1_330**：版型同設定指南（‹ 返回、Setup Guide、?；插圖區 340 pt），標題 19 pt semibold `#2f86e0`、沒有分隔線；說明 15 pt `#666`
 
@@ -481,7 +481,8 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_320 | Improve connection quality when the light is yellow | 兩台節點黃線（`node-guide-yellow.jpg`） |
 | 1_330 | Power on the node if indicator remains off | 開電源的節點（`node-guide-power.jpg`），說明下方有綠色／藍色燈號圖例 |
 
-- 1_330 的 Next：沒網路時 → DEMO 判斷「Mobile 行動網路？」；從 1_220 Trouble shooting 進來（有網路）→ 1_230
+- **依節點狀態只顯示相關的燈號頁**：節點優化中 → 1_310（藍燈閃爍）→ 1_320（黃燈）；節點沒有回應（沒有 MAC address，可能沒開電源）→ 只有 1_330（打開電源）。返回也照這個順序（1_330、1_310 返回 → 1_300）。從 1_220 Trouble shooting 進來時當作優化中。
+- 各狀態最後一頁的 Next（優化中是 1_320，沒有回應是 1_330）：沒網路時 → DEMO 判斷「Mobile 行動網路？」；從 1_220 Trouble shooting 進來（有網路）→ 1_230
 - Figma 原文「please enure」修正為「please ensure」
 
 ### 5.18 `1_340`–`1_360` 尚未連上網際網路 `no-internet`、`feedback`、`home-offline`
@@ -543,7 +544,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 2 | `internet` | 1_200 跑完或按 Run in background | Internet Connected?（link internet = 2 & ping 通 internet） | Yes → 判斷 `prelink`；No → 判斷 `nodeCount` |
 | 3 | `prelink` | 接在 `internet` Yes 後面 | node Prelink 台數？ | 單台 → `internet-live` 1_210；單台／多台（>1 台未連回）→ `internet-live-mesh` 1_220 |
 | 3 | `nodeCount` | 接在 `internet` No 後面 | node 台數？ | 0 台 → 判斷 `mobile`；≥ 1 台 · 節點沒有回應 / 節點優化中 → `node-status` 1_300 |
-| 4 | `mobile` | 1_330 按 Next（沒網路），或 node 台數選 0 台 | Mobile 行動網路？ | Yes → `summary` 1_230（Next → 1_340）；No → `summary` 1_230（Finish → 1_360） |
+| 4 | `mobile` | 燈號最後一頁（1_320／1_330）按 Next（沒網路），或 node 台數選 0 台 | Mobile 行動網路？ | Yes → `summary` 1_230（Next → 1_340）；No → `summary` 1_230（Finish → 1_360） |
 | 5 | `diagnosis` | 1_370 點「連線檢查」 | 網路診斷結果？ | 7 種情境（都正常／不穩／有錯誤／錯誤＋不穩／DNS 異常／Ping 不穩＋DNS 異常／Ping 異常＋DNS 異常），選完在 1_370 重新診斷 |
 
 - 正式 App 會自動偵測，不會有這個面板；它只是讓展示時可以切換不同情況。

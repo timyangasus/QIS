@@ -372,6 +372,9 @@
   let INTERNET = true;
   let FINISH = 'single';
   let NODE_STATE = 'optimising';
+  // 1_310–1_330 light guides shown after 1_300: optimising → blue / yellow light (1_310, 1_320);
+  // not responding (no MAC address, likely powered off) → power on (1_330)
+  const nodeGuides = () => NODE_STATE === 'offline' ? [3] : [1, 2];
   const afterMesh = () => window.QIS_decide('internet');
   function showWanAlert() {
     const alert = document.querySelector('.wan-type-alert');
@@ -1680,7 +1683,7 @@
             <li><span class="node-num">1</span>AiMesh Node is ready.</li>
             <li><span class="node-num${off ? ' node-num-warn' : ''}">2</span>${off ? 'AiMesh Node is not responding. (No MAC address)' : 'AiMesh Node is optimising.'}</li>
           </ul>
-          <button class="btn-brand setup-next" data-go="node-guide-1">Next</button>
+          <button class="btn-brand setup-next" data-go="node-guide-${nodeGuides()[0]}">Next</button>
         </div>
       `;
       },
@@ -1718,15 +1721,21 @@
       },
     ].map((g, i, all) => ({
       id: `node-guide-${i + 1}`,
-      back: i ? `node-guide-${i}` : 'node-status',
+      get back() {
+        const seq = nodeGuides();
+        const k = seq.indexOf(i + 1);
+        return k > 0 ? `node-guide-${seq[k - 1]}` : 'node-status';
+      },
       code: g.code,
       name: `節點燈號排除 ${i + 1}/${all.length}`,
       description: g.summary,
       figmaNode: g.figmaNode,
       theme: 'light',
       render: () => {
-        // Last step: with Internet (Trouble shooting) back to the summary, without it the mobile data check
-        const next = i + 1 < all.length ? `data-go="node-guide-${i + 2}"` : INTERNET ? 'data-go="summary"' : 'data-decide="mobile"';
+        // Last guide for this node state: with Internet (Trouble shooting) back to the summary, without it the mobile data check
+        const seq = nodeGuides();
+        const k = seq.indexOf(i + 1);
+        const next = k >= 0 && k + 1 < seq.length ? `data-go="node-guide-${seq[k + 1]}"` : INTERNET ? 'data-go="summary"' : 'data-decide="mobile"';
         return `
         <header class="navbar navbar-guide">
           <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
