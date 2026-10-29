@@ -2886,19 +2886,15 @@ button {
 .consent-body {
   flex: 1;
   overflow-y: auto;
-  padding: 20px 28px 12px;
+  padding: 14px 28px 12px;
   font-size: 16px;
   line-height: 1.4;
   color: #222;
 }
 
-.consent-title {
-  margin-bottom: 22px;
-  text-align: center;
-  font-size: 18px;
-  font-weight: 600;
-  color: #4a90e2;
-}
+.consent-navbar .navbar-btn { color: #4a90e2; }
+
+.navbar-title.consent-title { font-size: 18px; color: #4a90e2; }
 
 .consent-body > p { margin-bottom: 12px; }
 

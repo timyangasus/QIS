@@ -1805,8 +1805,11 @@
       description: '協助改善使用體驗：問題回報會附上裝置資訊，按同意才進 1_350 問題回報，拒絕回上一頁',
       theme: 'light',
       render: () => `
+        <header class="navbar consent-navbar">
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
+          <h1 class="navbar-title consent-title">協助改善使用體驗</h1>
+        </header>
         <div class="consent-body">
-          <h1 class="consent-title">協助改善使用體驗</h1>
           <p>當您提交回饋時，系統將包含裝置資訊以協助我們診斷問題並提升使用體驗。點擊同意，即表示我同意華碩以下事項：</p>
           <p><b class="consent-head">- 華碩隱私權聲明</b>: 我同意「<a class="consent-link">華碩隱私權保護政策</a>」並提供我的華碩路由器之型號、韌體版本、手機型號、OS與APP版本、MAC位址、IP地址、網際網路狀態、路由器系統資訊、提交此表單的時間—供華碩診斷及改善您的路由器問題與使用者經驗調查及分析，用來開發、評估華碩的新服務及新功能。</p>
           <p><b class="consent-head">- 華碩歐盟數據法聲明（適用於歐盟產品）</b></p>
