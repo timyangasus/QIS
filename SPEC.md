@@ -184,7 +184,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 ### 5.3b 未偵測到 WAN：`1_034` / `1_037` 等待數據機 `modem-wait-off` / `modem-wait-start`
 - 來源：使用者提供的參考圖。版型沿用 Setup Guide（導覽列 ‹ 返回、Setup Guide、?）。
-- 流程：1_120 Get Started → DEMO 判斷 WAN 選 **2 沒有偵測到 WAN、要不到 IP、US SKU** → 1_033 拔電 → **1_034 等 3 分鐘** → 1_036 插回 → **1_037 等 3½ 分鐘** → 按 Continue 跳出 **DEMO 流程判斷：重啟後 WAN**（是否已偵測到 WAN、要到 IP？）。**Yes、No 都會進到 1_140**，接著照常走 1_150 → 1_160 → 1_170 → AiMesh 1_180–1_200；差別在最後：**Yes** 在 1_200 之後照常跳出「Internet Connected?」判斷；**No** 等於確定沒連上網路，1_200 之後跳過這個判斷，直接問「node 台數」（見 5.13）。
+- 流程：1_120 Get Started → DEMO 判斷 WAN 選 **2 沒有偵測到 WAN、要不到 IP、US SKU** → 1_033 拔電 → **1_034 等 3 分鐘** → 1_036 插回 → **1_037 等 3½ 分鐘** → 倒數一結束就自動跳出 **DEMO 流程判斷：重啟後 WAN**（關掉後按 Continue 可再打開）（是否已偵測到 WAN、要到 IP？）。**Yes、No 都會進到 1_140**，接著照常走 1_150 → 1_160 → 1_170 → AiMesh 1_180–1_200；差別在最後：**Yes** 在 1_200 之後照常跳出「Internet Connected?」判斷；**No** 等於確定沒連上網路，1_200 之後跳過這個判斷，直接問「node 台數」（見 5.13）。
 - 插圖區放一張淺灰圓角卡片：上方藍色小字（WAIT 3 MINUTES / WAIT AT LEAST 3½ MINUTES）、68 pt 藍色粗體倒數（3:00 / 3:30）、藍色進度條、灰色提示（Continue unlocks when the timer ends. / Blinking lights? Keep waiting.）、小數據機圖。
   - 1_034：燈全滅、插頭拔在旁邊，標籤 POWER OFF。
   - 1_037：電源線插著，燈號綠色閃爍，標籤 STARTING UP / LIGHTS MAY BLINK。
@@ -541,7 +541,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 |---|---|---|---|---|
 | 0 | `wan` | 1_120 按 Get Started | WAN 偵測結果？ | 1 正常 → `wan-detecting` 1_130；2 沒有偵測到 WAN、要不到 IP、US SKU → `modem-unplug` 1_033（WAN 流程，見 5.3b）；3 沒有偵測到 WAN → `wan-type` 1_125 |
 | 1 | `wanDetect` | 1_125 按 Auto Detect（Detecting... 轉約 1.8 秒後跳出） | Auto Detect：這次有偵測到 WAN 嗎？ | Yes → `setup-ssid` 1_140；No → 留在 1_125，跳出「連線無線路由器」提示，按確定關閉 |
-| 1 | `wanRestart` | 1_037 倒數結束按 Continue | 數據機重啟後：是否已偵測到 WAN、要到 IP？ | Yes → `setup-ssid` 1_140（1_200 之後問 Internet Connected?）；No → `setup-ssid` 1_140（1_200 之後直接問 node 台數） |
+| 1 | `wanRestart` | 1_037 倒數結束自動跳出（按 Continue 也會開） | 數據機重啟後：是否已偵測到 WAN、要到 IP？ | Yes → `setup-ssid` 1_140（1_200 之後問 Internet Connected?）；No → `setup-ssid` 1_140（1_200 之後直接問 node 台數） |
 | 2 | `internet` | 1_200 跑完或按 Run in background | Internet Connected?（link internet = 2 & ping 通 internet） | Yes → 判斷 `prelink`；No → 判斷 `nodeCount` |
 | 3 | `prelink` | 接在 `internet` Yes 後面 | node Prelink 台數？ | 單台 → `internet-live` 1_210；單台／多台（>1 台未連回）→ `internet-live-mesh` 1_220 |
 | 3 | `nodeCount` | 接在 `internet` No 後面（或重啟後 WAN 選 No 時 1_200 直接跳） | node 台數？ | 0 台 → 判斷 `mobile`；≥ 1 台 · 節點沒有回應 / 節點優化中 → `node-status` 1_300 |

@@ -448,7 +448,12 @@
       timeEl.textContent = fmt(Math.ceil(totalSec * (1 - p)));
       fill.style.width = `${Math.max(3, p * 100)}%`;
       if (p < 1) raf = requestAnimationFrame(tick);
-      else { btn.disabled = false; el.querySelector('.wait-card').classList.add('is-done'); }
+      else {
+        btn.disabled = false;
+        el.querySelector('.wait-card').classList.add('is-done');
+        // A wait page that ends in a decision (1_037) asks it as soon as the timer ends; Continue reopens it
+        if (btn.dataset.decide) window.QIS_decide(btn.dataset.decide);
+      }
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
