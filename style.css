@@ -2892,7 +2892,7 @@ button {
 .fb-label {
   margin-top: 18px;
   font-size: 14px;
-  color: #666;
+  color: #444;
 }
 
 .fb-field {
@@ -2921,7 +2921,23 @@ button {
   outline: none;
 }
 
-.fb-field ::placeholder { color: #999; }
+.fb-field ::placeholder { color: #8e8e93; }
+
+/* Editable fields: white box with a border, so they read as inputs (not like the grey select rows) */
+.fb-input {
+  background: #fff;
+  border: 1px solid #c7c7cc;
+  border-radius: 8px;
+}
+.fb-input:focus-within { border-color: #4a90e2; box-shadow: 0 0 0 3px rgba(74, 144, 226, .18); }
+.fb-input.invalid { border-color: #e5413b; box-shadow: 0 0 0 3px rgba(229, 65, 59, .14); }
+
+.fb-required { margin-left: 6px; color: #e5413b; font-weight: 500; }
+
+.fb-email-clear { display: none; padding: 0; }
+.fb-email.filled .fb-email-clear { display: flex; }
+
+.fb-error { margin-top: 6px; font-size: 13px; color: #e5413b; }
 
 .fb-clear { display: flex; color: #8e8e93; }
 

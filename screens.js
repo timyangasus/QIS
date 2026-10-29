@@ -1745,14 +1745,15 @@
         <div class="fb-body">
           <p class="fb-label">您所在的地區</p>
           <div class="fb-field">台灣${FB_CLEAR}</div>
-          <label class="fb-label" for="fb-email">您的電子郵件地址 (必要的)</label>
-          <div class="fb-field"><input id="fb-email" type="email" placeholder="電子郵件" autocomplete="off">${FB_CLEAR}</div>
+          <label class="fb-label" for="fb-email">您的電子郵件地址<span class="fb-required">* 必填</span></label>
+          <div class="fb-field fb-input fb-email"><input id="fb-email" type="email" placeholder="例如 name@example.com" autocomplete="off" required><button class="fb-email-clear" type="button" aria-label="清除">${FB_CLEAR}</button></div>
+          <p class="fb-error" hidden>請輸入有效的電子郵件地址</p>
           <p class="fb-label">問題回報類型</p>
           <button class="fb-field fb-select" data-go="feedback-type" data-label="問題回報類型">設定問題${ICON.chevron}</button>
           <p class="fb-label">問題回報描述</p>
           <button class="fb-field fb-select" data-go="feedback-topic" data-label="問題回報描述">網路設定精靈${ICON.chevron}</button>
           <label class="fb-label" for="fb-comment">評論 / 建議</label>
-          <div class="fb-field fb-comment">
+          <div class="fb-field fb-input fb-comment">
             <textarea id="fb-comment" placeholder="在此輸入" maxlength="2000"></textarea>
             <span class="fb-count">0/2000</span>
           </div>
@@ -1763,6 +1764,30 @@
         const text = el.querySelector('#fb-comment');
         const count = el.querySelector('.fb-count');
         text.addEventListener('input', () => { count.textContent = `${text.value.length}/2000`; });
+
+        // Email is required: show the clear button only when filled, and block 發送 until it is valid
+        const email = el.querySelector('#fb-email');
+        const box = el.querySelector('.fb-email');
+        const error = el.querySelector('.fb-error');
+        const valid = () => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim());
+        const showError = on => { box.classList.toggle('invalid', on); error.hidden = !on; };
+        email.addEventListener('input', () => {
+          box.classList.toggle('filled', email.value !== '');
+          if (valid()) showError(false);
+        });
+        el.querySelector('.fb-email-clear').addEventListener('click', () => {
+          email.value = '';
+          box.classList.remove('filled');
+          email.focus();
+        });
+        const onSend = e => {
+          if (!e.target.closest('.fb-send') || valid()) return;
+          e.stopPropagation();
+          showError(true);
+          email.focus();
+        };
+        el.addEventListener('click', onSend, true);
+        return () => el.removeEventListener('click', onSend, true);
       },
     },
     {
