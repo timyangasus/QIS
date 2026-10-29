@@ -403,9 +403,15 @@
   // WAN flow only (1_120 → 2): the user may have already restarted the modem back at 1_030,
   // so each step says why it is needed again
   const MODEM_WHY = {
+    unplug: 'Your router couldn’t get an Internet connection (IP address) from the modem. Many cable modems, common in the US, stay locked to the first device they were connected to. Restarting the modem clears that so it can work with your new ASUS router.',
     waitOff: 'The modem needs a few minutes without power to fully reset and forget the device it was locked to. Plugging it in too soon may keep the old connection.',
+    plug: 'Powering the modem back on lets it reconnect to your Internet provider and get ready to pair with your new router.',
     waitStart: 'Starting up and reconnecting to your Internet provider takes a few minutes. Once it finishes, your router can get an Internet address from it.',
   };
+
+  function modemWhy(key) {
+    return MODEM_FLOW === 'wan' ? `<p class="modem-why">${MODEM_WHY[key]}</p>` : '';
+  }
 
   // Small modem for the wait pages: 'off' = unplugged, all lights off; 'starting' = lights blinking
   function modemMini(mode) {
@@ -722,6 +728,94 @@
       }).join('')}
     </svg>`,
   ];
+
+  // WAN flow (1_120 → 2) keeps the original 1_033 / 1_036 modem restart pages
+  function modemIllust(state) {
+    const on = state === 'on';
+    // Each page plays one move once and stays there: 1_033 pulls the plug out, 1_036 pushes it in.
+    // An arrow first fades in and nudges the way to go, then the plug moves. SMIL so the cable can bend with it.
+    // IN sits over the outlet face so plug and outlet overlap like it is really plugged in
+    const IN = { x: 324, y: 168, r: 0, cable: 'M150 280 C170 334 252 330 252 244 C252 194 262 168 288 168' };
+    const OUT = { x: 236, y: 182, r: -10, cable: 'M150 280 C170 334 200 326 196 258 C193 214 186 184 200 182' };
+    const [from, to] = on ? [OUT, IN] : [IN, OUT];
+    const MOVE = 'begin="1.9s" dur="1.1s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.45 0 0.2 1"';
+    const LED_ON = '#34d86f', LED_OFF = '#4a525d';
+
+    const leds = ['POWER', 'DS', 'US', 'ONLINE'].map((name, i) => {
+      const y = 156 + i * 24;
+      // Right after the move, lights quickly go off one by one (1_033), or come on and keep
+      // blinking like a modem starting up (1_036), each with a glow; each light blinks at its own pace
+      const begin = `begin="${(3.0 + i * 0.12).toFixed(2)}s"`;
+      const off = `${begin} dur="0.2s" fill="freeze"`;
+      const blink = `${begin} dur="${(0.7 + i * 0.16).toFixed(2)}s" repeatCount="indefinite" calcMode="discrete" keyTimes="0;0.55"`;
+      return `
+        <text x="112" y="${y + 3}" text-anchor="end" class="modem-led-label">${name}</text>
+        <circle cx="127" cy="${y}" r="9.5" fill="${LED_ON}" opacity="${on ? 0 : 0.28}">
+          <animate attributeName="opacity" ${on ? `${blink} values="0.28;0"` : `${off} values="0.28;0"`}/>
+        </circle>
+        <circle cx="127" cy="${y}" r="5" fill="${on ? LED_OFF : LED_ON}">
+          <animate attributeName="fill" ${on ? `${blink} values="${LED_ON};${LED_OFF}"` : `${off} values="${LED_ON};${LED_OFF}"`}/>
+        </circle>`;
+    }).join('');
+
+    return `
+      <svg class="modem-svg" viewBox="0 0 400 330" width="400" height="330" aria-hidden="true">
+        <defs>
+          <radialGradient id="modem-halo-${state}">
+            <stop offset="0" stop-color="#d6e6fb"/>
+            <stop offset="0.65" stop-color="#e9f1fc"/>
+            <stop offset="1" stop-color="#f4f8fe" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <circle cx="120" cy="196" r="118" fill="url(#modem-halo-${state})"/>
+        <ellipse cx="120" cy="290" rx="100" ry="9" fill="#eceef2"/>
+
+        <!-- Dark modem body so it reads as a modem, not a power strip -->
+        <rect x="78" y="90" width="84" height="198" rx="16" fill="#2b323b"/>
+        <rect x="80" y="92" width="80" height="6" rx="3" fill="#3a434e"/>
+        <rect x="90" y="104" width="60" height="172" rx="10" fill="#353d47"/>
+        <rect x="98" y="112" width="1.5" height="156" rx="0.75" fill="#424b56"/>
+        <text x="120" y="128" text-anchor="middle" class="modem-name">MODEM</text>
+        ${leds}
+
+        <rect x="292" y="118" width="88" height="100" rx="14" fill="#fff" stroke="#d5dae1" stroke-width="2"/>
+        <circle cx="336" cy="168" r="30" fill="#f0f3f7"/>
+        <rect x="326" y="155" width="4" height="17" rx="2" fill="#5b6573"/>
+        <rect x="342" y="155" width="4" height="17" rx="2" fill="#5b6573"/>
+        <circle cx="336" cy="183" r="2.6" fill="#5b6573"/>
+
+        <path fill="none" stroke="#6f7780" stroke-width="6" stroke-linecap="round" d="${from.cable}">
+          <animate attributeName="d" ${MOVE} values="${from.cable};${to.cable}"/>
+        </path>
+        <g transform="translate(${from.x} ${from.y})">
+          <animateTransform attributeName="transform" type="translate" ${MOVE} values="${from.x} ${from.y};${to.x} ${to.y}"/>
+          <g transform="rotate(${from.r})">
+            <animateTransform attributeName="transform" type="rotate" ${MOVE} values="${from.r};${to.r}"/>
+            <rect x="-36" y="-11" width="30" height="22" rx="5" fill="#3a4452"/>
+            <rect x="-8" y="-8" width="8" height="16" rx="2" fill="#5b6573"/>
+            <rect x="0" y="-6" width="14" height="3.2" rx="1.2" fill="#a3abb5"/>
+            <rect x="0" y="2.8" width="14" height="3.2" rx="1.2" fill="#a3abb5"/>
+          </g>
+        </g>
+        <g opacity="0">
+          <animate attributeName="opacity" begin="0.4s" dur="0.3s" fill="freeze" values="0;1"/>
+          <animate attributeName="opacity" begin="1.9s" dur="0.25s" fill="freeze" values="1;0"/>
+          <g class="modem-arrow ${on ? 'is-right' : 'is-left'}">
+            <path transform="${on ? 'translate(270 242)' : 'translate(318 242) scale(-1 1)'}"
+              d="M-30 -6 H4 V-16 L30 0 L4 16 V6 H-30 Z" fill="var(--brand)" stroke="var(--brand)" stroke-width="5" stroke-linejoin="round"/>
+          </g>
+        </g>
+        ${on ? '' : `
+          <g stroke="var(--brand)" stroke-width="3.5" stroke-linecap="round" opacity="0">
+            <animate attributeName="opacity" begin="2.8s" dur="0.3s" fill="freeze" values="0;1"/>
+            <path d="M262 112 L265 132"/><path d="M272 146 L286 132"/><path d="M280 160 L298 155"/>
+          </g>
+        `}
+
+        <text x="120" y="322" text-anchor="middle" class="modem-caption">${on ? 'CABLE MODEM' : 'ALL LIGHTS OFF'}</text>
+        <text x="336" y="322" text-anchor="middle" class="modem-caption modem-caption-brand">${on ? 'POWER' : 'POWER PLUG'}</text>
+      </svg>`;
+  }
 
   // 1_054: router (left, solid blue) and a node, both ZenWiFi cubes scaled from PLUGIN_ROUTER
   const NODE_CUBE = (x, led = '', extra = '') => `
@@ -1069,16 +1163,35 @@
       name: '拔下數據機和舊路由器的電源線',
       description: '重新啟動數據機（1/2）：拔下數據機電源線、取出備用電池，連到數據機的其他無線設備也要拔電，上方圖片跟著條列輪播',
       theme: 'light',
-      render: () => stepCarousel({
+      // WAN flow keeps the original page (modem-only animation, why text, then the 3-min wait 1_034)
+      render: () => MODEM_FLOW === 'wan' ? `
+        <header class="navbar navbar-guide">
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
+          <h1 class="navbar-title">Setup Guide</h1>
+          <button class="navbar-btn navbar-btn-right" data-go="help" data-label="說明" aria-label="說明">${ICON.helpOutline}</button>
+        </header>
+
+        <div class="guide-body">
+          <div class="guide-illust modem-illust">
+            <p class="modem-hint">Unplug the power cable only</p>
+            ${modemIllust('off')}
+          </div>
+          <h2 class="guide-title">Unplug the modem’s power.</h2>
+          <p class="guide-desc">Wait until all lights are off.</p>
+          <p class="modem-note"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="currentColor"/><rect x="11" y="10" width="2" height="7" rx="1" fill="#fff"/><circle cx="12" cy="7" r="1.3" fill="#fff"/></svg>Do not press the Reset button.</p>
+          ${modemWhy('unplug')}
+          <button class="btn-brand" data-go="${MODEM_FLOW === 'wan' ? 'modem-wait-off' : 'modem-plug'}" data-label="I am ready">I am ready</button>
+        </div>
+      ` : stepCarousel({
         illust: UNPLUG_ILLUST,
         title: '拔下數據機和舊路由器的電源線',
         steps: [
           '拔下纜線／DSL 數據機電源線。如有備用電池，請取出電池。',
           '如果有其他無線設備連接到數據機，也請拔掉設備的電源。',
         ],
-        next: MODEM_FLOW === 'wan' ? 'modem-wait-off' : 'modem-plug',
+        next: 'modem-plug',
       }),
-      mount: el => mountStepCarousel(el, 6500),
+      mount: el => MODEM_FLOW === 'wan' ? null : mountStepCarousel(el, 6500),
     },
     {
       id: 'modem-plug',
@@ -1087,7 +1200,24 @@
       name: '插入您的裝置',
       description: '重新啟動數據機（2/2）：找到路由器的 WAN 埠、用網路線接到數據機的 LAN 埠，再同時打開兩台電源，上方圖片跟著條列輪播',
       theme: 'light',
-      render: () => stepCarousel({
+      // WAN flow keeps the original page (plug the modem back in, then the 3.5-min wait 1_037)
+      render: () => MODEM_FLOW === 'wan' ? `
+        <header class="navbar navbar-guide">
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
+          <h1 class="navbar-title">Setup Guide</h1>
+          <button class="navbar-btn navbar-btn-right" data-go="help" data-label="說明" aria-label="說明">${ICON.helpOutline}</button>
+        </header>
+
+        <div class="guide-body">
+          <div class="guide-illust modem-illust">
+            <p class="modem-hint">Reconnect the power cable</p>
+            ${modemIllust('on')}
+          </div>
+          <h2 class="guide-title">Plug the modem back in.</h2>
+          ${modemWhy('plug')}
+          <button class="btn-brand" data-go="${MODEM_FLOW === 'wan' ? 'modem-wait-start' : 'led-check'}" data-label="I am ready">I am ready</button>
+        </div>
+      ` : stepCarousel({
         illust: PLUGIN_ILLUST,
         title: '插入您的裝置',
         steps: [
@@ -1095,9 +1225,9 @@
           '用網路線將數據機的 LAN 網路埠連接到路由器的 WAN 網路埠。',
           '同時打開數據機和路由器的電源。',
         ],
-        next: MODEM_FLOW === 'wan' ? 'modem-wait-start' : 'led-check',
+        next: 'led-check',
       }),
-      mount: el => mountStepCarousel(el, 5000),
+      mount: el => MODEM_FLOW === 'wan' ? null : mountStepCarousel(el, 5000),
     },
     {
       id: 'modem-wait-off',
