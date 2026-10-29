@@ -1796,7 +1796,7 @@
           <p class="fb-label">您所在的地區</p>
           <div class="fb-field">台灣${FB_CLEAR}</div>
           <label class="fb-label" for="fb-email">您的電子郵件地址<span class="fb-required">* 必填</span></label>
-          <div class="fb-field fb-input fb-email"><input id="fb-email" type="email" placeholder="例如 name@example.com" autocomplete="off" required><button class="fb-email-clear" type="button" aria-label="清除">${FB_CLEAR}</button></div>
+          <div class="fb-field fb-input fb-email filled"><input id="fb-email" type="email" value="asus1234@asus.com" placeholder="例如 name@example.com" autocomplete="off" required><button class="fb-email-clear" type="button" aria-label="清除">${FB_CLEAR}</button></div>
           <p class="fb-error" hidden>請輸入有效的電子郵件地址</p>
           <p class="fb-label">問題回報類型</p>
           <button class="fb-field fb-select" data-go="feedback-type" data-label="問題回報類型">設定問題${ICON.chevron}</button>
