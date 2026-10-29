@@ -368,13 +368,18 @@
 
   // After AiMesh (1_200): Internet Connected? → Yes: node Prelink count; No: node count → mobile data.
   // INTERNET: answer to Internet Connected?; FINISH: which branch the 1_230 summary closes;
-  // NODE_STATE: which 1_300 node status is shown (node not responding / optimising)
+  // NODE_STATE: which 1_300 node status is shown — 'optimising' (moving blue line), 'weak' (yellow line,
+  // connection quality can be improved) or 'offline' (grey line, not responding / no MAC address)
   let INTERNET = true;
   let FINISH = 'single';
   let NODE_STATE = 'optimising';
-  // 1_310–1_330 light guides shown after 1_300: optimising → blue / yellow light (1_310, 1_320);
-  // not responding (no MAC address, likely powered off) → power on (1_330)
-  const nodeGuides = () => NODE_STATE === 'offline' ? [3] : [1, 2];
+  // Each node state has its own light guide after 1_300: optimising → 1_310 (blinking blue),
+  // weak → 1_320 (yellow), not responding → 1_330 (power on)
+  const NODE_STATUS = {
+    optimising: { guide: 1, text: 'AiMesh Node is optimising.' },
+    weak: { guide: 2, text: 'AiMesh Node connection quality can be improved.', warn: true },
+    offline: { guide: 3, text: 'AiMesh Node is not responding. (No MAC address)', warn: true },
+  };
   const afterMesh = () => window.QIS_decide('internet');
   function showWanAlert() {
     const alert = document.querySelector('.wan-type-alert');
@@ -596,7 +601,6 @@
     faildns: ['ok', 'ok', 'faildns', 'pending'],
   };
   let DIAG_SCENARIO = 'fail';
-  let diagRerun = null;
   const diagSev = st => ['fail', 'dns', 'warndns', 'faildns'].includes(st) ? 'fail' : st;
   const DIAG_HERO_ICON = {
     search: '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg>',
@@ -1669,21 +1673,21 @@
       get back() { return INTERNET ? 'internet-live-mesh' : 'mesh-3'; },
       code: '1_300',
       name: 'AiMesh 節點連線狀態',
-      description: 'AiMesh 節點連線狀態：列出每台節點的狀況（已就緒／優化中／沒有回應），接著看燈號排除問題',
+      description: 'AiMesh 節點連線狀態：列出每台節點的狀況（已就緒／優化中／連線品質待優化／沒有回應），接著看對應的燈號頁',
       figmaNode: '0:182',
       theme: 'light',
       render: () => {
-        const off = NODE_STATE === 'offline';
+        const st = NODE_STATUS[NODE_STATE];
         return `
         ${systemSetupHeader()}
         <div class="guide-body">
-          <img class="node-status-illust" src="assets/node-status-${off ? 'offline' : 'optimising'}.jpg" alt="" width="370" height="317">
+          <img class="node-status-illust" src="assets/node-status-${NODE_STATE}.jpg" alt="" width="370" height="317">
           <h2 class="guide-title node-status-title">AiMesh Node(s) Connection Status</h2>
           <ul class="node-status-list">
             <li><span class="node-num">1</span>AiMesh Node is ready.</li>
-            <li><span class="node-num${off ? ' node-num-warn' : ''}">2</span>${off ? 'AiMesh Node is not responding. (No MAC address)' : 'AiMesh Node is optimising.'}</li>
+            <li><span class="node-num${st.warn ? ' node-num-warn' : ''}">2</span>${st.text}</li>
           </ul>
-          <button class="btn-brand setup-next" data-go="node-guide-${nodeGuides()[0]}">Next</button>
+          <button class="btn-brand setup-next" data-go="node-guide-${st.guide}">Next</button>
         </div>
       `;
       },
@@ -1692,7 +1696,7 @@
       {
         code: '1_310', figmaNode: '0:85', img: 'node-guide-white.jpg',
         title: 'Stand by the blinking blue light turns white',
-        summary: '節點燈號 1/3：藍燈閃爍代表正在優化，完成後變白燈；一直閃藍燈就用網路線連接',
+        summary: '節點優化中（藍線）：藍燈閃爍代表正在優化，完成後變白燈；一直閃藍燈就用網路線連接',
         body: `
           <p>The blinking blue light indicates connection optimization. Once it is complete, it will turn solid white.</p>
           <p>The device supports MLO connection may take longer.</p>
@@ -1701,7 +1705,7 @@
       {
         code: '1_320', figmaNode: '0:97', img: 'node-guide-yellow.jpg',
         title: 'Improve connection quality when the light is yellow',
-        summary: '節點燈號 2/3：黃燈代表連線品質不佳，調整擺放位置',
+        summary: '連線品質待優化（黃線）：黃燈代表連線品質不佳，調整擺放位置',
         body: `
           <p>To improve the connection quality, please ensure:</p>
           <p>1. Make sure your node is in an open area and on a flat hard surface.</p>
@@ -1711,7 +1715,7 @@
       {
         code: '1_330', figmaNode: '0:109', img: 'node-guide-power.jpg',
         title: 'Power on the node if indicator remains off',
-        summary: '節點燈號 3/3：燈不亮就打開節點電源，綠燈啟動中、藍燈同步中',
+        summary: '節點沒有回應（灰線）：燈不亮就打開節點電源，綠燈啟動中、藍燈同步中',
         body: `
           <p>Turn on the node. It will automatically look for the AiMesh router, and the light will blink blue while connecting.</p>
           <ul class="guide-legend node-guide-legend">
@@ -1719,23 +1723,17 @@
             <li><span class="led-swatch-sm led-swatch-brand"></span>AiMesh node is syncing with the AiMesh router.</li>
           </ul>`,
       },
-    ].map((g, i, all) => ({
+    ].map((g, i) => ({
       id: `node-guide-${i + 1}`,
-      get back() {
-        const seq = nodeGuides();
-        const k = seq.indexOf(i + 1);
-        return k > 0 ? `node-guide-${seq[k - 1]}` : 'node-status';
-      },
+      back: 'node-status',
       code: g.code,
-      name: `節點燈號排除 ${i + 1}/${all.length}`,
+      name: `節點燈號排除：${['優化中', '連線品質待優化', '沒有回應'][i]}`,
       description: g.summary,
       figmaNode: g.figmaNode,
       theme: 'light',
       render: () => {
-        // Last guide for this node state: with Internet (Trouble shooting) back to the summary, without it the mobile data check
-        const seq = nodeGuides();
-        const k = seq.indexOf(i + 1);
-        const next = k >= 0 && k + 1 < seq.length ? `data-go="node-guide-${seq[k + 1]}"` : INTERNET ? 'data-go="summary"' : 'data-decide="mobile"';
+        // With Internet (Trouble shooting) back to the summary, without it the mobile data check
+        const next = INTERNET ? 'data-go="summary"' : 'data-decide="mobile"';
         return `
         <header class="navbar navbar-guide">
           <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
@@ -1958,9 +1956,8 @@
         }
 
         btn.addEventListener('click', run);
-        diagRerun = run;
         run(); // 詳細診斷 from the alert bar goes straight into 診斷中
-        return () => { stop(); diagRerun = null; };
+        return stop;
       },
     },
   ];
@@ -2011,8 +2008,9 @@
       title: 'node 台數？',
       options: [
         { label: '0 台', short: '0 台', value: 'none', action: () => window.QIS_decide('mobile') },
-        { label: '≥ 1 台 · 節點沒有回應', short: '≥1 台 沒回應', value: 'offline', to: 'node-status', action: () => { NODE_STATE = 'offline'; } },
-        { label: '≥ 1 台 · 節點優化中', short: '≥1 台 優化中', value: 'optimising', to: 'node-status', action: () => { NODE_STATE = 'optimising'; } },
+        { label: '≥ 1 台 · 節點優化中（藍線）', short: '≥1 台 優化中', value: 'optimising', to: 'node-status', action: () => { NODE_STATE = 'optimising'; } },
+        { label: '≥ 1 台 · 連線品質待優化（黃線）', short: '≥1 台 品質待優化', value: 'weak', to: 'node-status', action: () => { NODE_STATE = 'weak'; } },
+        { label: '≥ 1 台 · 節點沒有回應（灰線）', short: '≥1 台 沒回應', value: 'offline', to: 'node-status', action: () => { NODE_STATE = 'offline'; } },
       ],
     },
     mobile: {
@@ -2039,7 +2037,7 @@
       ].map(([value, label]) => ({
         label, short: label, value,
         to: 'diagnosis',
-        action: () => { DIAG_SCENARIO = value; if (diagRerun) diagRerun(); },
+        action: () => { DIAG_SCENARIO = value; },
       })),
     },
   };

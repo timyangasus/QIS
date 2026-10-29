@@ -193,6 +193,8 @@
       return;
     }
     if (!screens[id]) return toast(`「${label}」頁面尚未加入`);
+    // Same page (e.g. a decision re-picked on it): redraw so the new choice shows
+    if (id === currentId()) return render();
     const depth = (history.state?.qis || 0) + 1;
     location.hash = id;
     history.replaceState({ qis: depth }, '');
