@@ -643,11 +643,30 @@
   const PLUGIN_PORT_ICON = `
         <rect x="-15" y="-15" width="30" height="30" rx="3" fill="#06306e"/>
         <path d="M-10 -10 H10 V4 H5 V9 H-5 V4 H-10 Z" fill="#3aa0e0"/>`;
-  const PLUGIN_PLUG_ICON = `
-        <path d="M-17 0 H-8" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
-        <rect x="-9" y="-11" width="16" height="22" rx="6" fill="#fff"/>
-        <path d="M7 -6 H15 M7 6 H15" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
-        <path d="M0 -7 L-5 1 H-1 L-2 7 L4 -1 H0 Z" fill="#0b4fb3"/>`;
+  // Power plug pointing up at a power jack: starts 40 below, nudge arrow beside it, pushes in at 1.5 s
+  const PLUGIN_POWER_PLUG = (x, y) => `
+    <g transform="translate(${x} ${y + 40})">
+      <animateTransform attributeName="transform" type="translate" from="${x} ${y + 40}" to="${x} ${y}" begin="1.5s" dur=".5s" fill="freeze" calcMode="spline" keySplines=".4 0 .2 1" keyTimes="0;1"/>
+      <path d="M0 22 V120" stroke="#aab1ba" stroke-width="4" stroke-linecap="round"/>
+      <rect x="-4" y="-9" width="3" height="10" rx="1" fill="#a9b0b9"/>
+      <rect x="1" y="-9" width="3" height="10" rx="1" fill="#a9b0b9"/>
+      <rect x="-11" y="0" width="22" height="24" rx="6" fill="#d3d7dd"/>
+    </g>
+    <g opacity="0">
+      <animate attributeName="opacity" from="0" to="1" begin=".2s" dur=".3s" fill="freeze"/>
+      <animate attributeName="opacity" from="1" to="0" begin="1.4s" dur=".3s" fill="freeze"/>
+      <g transform="translate(${x - 30} ${y + 52})">
+        <animateTransform attributeName="transform" type="translate" values="${x - 30} ${y + 52};${x - 30} ${y + 42};${x - 30} ${y + 52};${x - 30} ${y + 42};${x - 30} ${y + 52}" begin=".3s" dur="1.1s" fill="freeze"/>
+        <path d="M0 0 V-30" stroke="#f5c84c" stroke-width="6" stroke-linecap="round"/>
+        <path d="M-10 -22 L0 -34 L10 -22" fill="none" stroke="#f5c84c" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+    </g>`;
+  // Little yellow flash at a jack the moment the plug goes in
+  const PLUGIN_SPARK = (x, y) => `
+    <g transform="translate(${x} ${y})" opacity="0" stroke="#f5c84c" stroke-width="3" stroke-linecap="round">
+      <animate attributeName="opacity" values="0;1;0" begin="2s" dur=".5s" fill="freeze"/>
+      <path d="M-12 -12 L-18 -18 M12 -12 L18 -18 M0 -15 V-23 M-15 0 H-23 M15 0 H23"/>
+    </g>`;
   const PLUGIN_ILLUST = [
     // 1. Find the router's blue WAN port: a callout pops over it, then a ring keeps pulsing
     `<svg viewBox="0 0 422 340" width="422" height="340" aria-hidden="true">
@@ -671,17 +690,35 @@
       <g opacity="0"><set attributeName="opacity" to="1" begin=".5s" fill="freeze"/><rect x="292" y="167" width="14" height="10" rx="2" fill="#1f86d6"/></g>
       <g opacity="0"><set attributeName="opacity" to="1" begin="1.9s" fill="freeze"/><rect x="169" y="264" width="10" height="12" rx="2" fill="#1f86d6"/></g>
     </svg>`,
-    // 3. Power on both at once: plug callouts pop in, then the router LED and modem lights come on
+    // 3. Power on both: arrows nudge up twice, plugs push into both power jacks with a spark,
+    // then the router LED and the modem lights come on one by one with a glow (modem keeps blinking)
     `<svg viewBox="0 0 422 340" width="422" height="340" aria-hidden="true">
+      <defs><filter id="plugin-glow" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="4"/></filter></defs>
       ${UNPLUG_FLOOR}
-      ${PLUGIN_ROUTER('<set attributeName="fill" to="#3aa0e0" begin="1.4s" fill="freeze"/>')}
-      ${PLUGIN_MODEM(i => `
-        <set attributeName="fill" to="#5ee250" begin="${1.4 + i * 0.2}s" fill="freeze"/>
-        <animate attributeName="opacity" values="1;.25;1" dur="${0.6 + i * 0.15}s" begin="${1.4 + i * 0.2}s" repeatCount="indefinite"/>`)}
+      ${PLUGIN_ROUTER()}
+      ${PLUGIN_MODEM()}
       <path d="${PLUGIN_CABLE}" fill="none" stroke="#1f86d6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
       ${PLUGIN_HEADS}
-      ${PLUGIN_BADGE(80, 254, 0.3, PLUGIN_PLUG_ICON)}
-      ${PLUGIN_BADGE(318, 262, 0.5, PLUGIN_PLUG_ICON)}
+      ${PLUGIN_POWER_PLUG(106, 259)}
+      ${PLUGIN_POWER_PLUG(312, 275)}
+      ${PLUGIN_SPARK(106, 254)}${PLUGIN_SPARK(312, 270)}
+      <ellipse cx="126" cy="202" rx="26" ry="9" fill="#3aa0e0" opacity="0" filter="url(#plugin-glow)">
+        <animate attributeName="opacity" values="0;.9;.55" keyTimes="0;.5;1" begin="2.1s" dur=".6s" fill="freeze"/>
+      </ellipse>
+      <rect x="110" y="199" width="32" height="6" rx="3" fill="#d0d4da">
+        <set attributeName="fill" to="#3aa0e0" begin="2.1s" fill="freeze"/>
+      </rect>
+      ${[0, 1, 2, 3].map(i => {
+        const at = 2.3 + i * 0.25, y = 112 + i * 14;
+        return `
+      <circle cx="338" cy="${y}" r="10" fill="#5ee250" opacity="0" filter="url(#plugin-glow)">
+        <animate attributeName="opacity" values="0;.8;.2;.8" dur="${0.7 + i * 0.15}s" begin="${at}s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="338" cy="${y}" r="4.5" fill="#d0d4da">
+        <set attributeName="fill" to="#3ccf3a" begin="${at}s" fill="freeze"/>
+        <animate attributeName="opacity" values="1;.35;1" dur="${0.7 + i * 0.15}s" begin="${at}s" repeatCount="indefinite"/>
+      </circle>`;
+      }).join('')}
     </svg>`,
   ];
 
@@ -947,7 +984,7 @@
         ],
         next: MODEM_FLOW === 'wan' ? 'modem-wait-start' : 'led-check',
       }),
-      mount: el => mountStepCarousel(el, 4500),
+      mount: el => mountStepCarousel(el, 5000),
     },
     {
       id: 'modem-wait-off',
