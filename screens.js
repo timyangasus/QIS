@@ -366,14 +366,14 @@
   // when picked again from the demo bar on another page)
   let WAN_ALERT_PENDING = false;
 
-  // After AiMesh (1_200): Internet Connected? → Yes: node Prelink count; No: node count → mobile data.
+  // After AiMesh (1_200): Internet Connected? → node 台數 (same options either way; see nodeCountAction).
   // INTERNET: answer to Internet Connected?; FINISH: which branch the 1_230 summary closes;
   // NODE_STATE: which 1_300 node status is shown — 'optimising' (moving blue line), 'weak' (yellow line,
   // connection quality can be improved) or 'offline' (grey line, not responding / no MAC address)
   let INTERNET = true;
   let FINISH = 'single';
   let NODE_STATE = 'optimising';
-  // 1_230 product image: one BT8 when only the router is set up (Prelink 單台, or node 台數 0), else the 3-pack
+  // 1_230 product image: one BT8 when only the router is set up (node 台數 0), else the 3-pack
   let SINGLE_DEVICE = true;
   // Each node state has its own light guide after 1_300: optimising → 1_310 (blinking blue),
   // weak → 1_320 (yellow), not responding → 1_330 (power on)
@@ -383,6 +383,16 @@
     offline: { guide: 3, text: 'AiMesh Node is not responding. (No MAC address)', warn: true },
   };
   const afterMesh = () => window.QIS_decide('internet');
+  // node 台數？ is asked after Internet Connected? either way.
+  // With Internet: 0 台 → 1_210 (single); ≥ 1 台 → 1_220 (its Trouble shooting shows this node state).
+  // Without: 0 台 → mobile data check; ≥ 1 台 → 1_300 node status.
+  const nodeCountTarget = () => INTERNET ? 'internet-live-mesh' : 'node-status';
+  const nodeCountAction = state => () => {
+    SINGLE_DEVICE = !state;
+    if (state) NODE_STATE = state;
+    if (INTERNET) FINISH = state ? 'mesh' : 'single';
+    else if (!state) window.QIS_decide('mobile');
+  };
   function showWanAlert() {
     const alert = document.querySelector('.wan-type-alert');
     if (alert) return alert.classList.add('show');
@@ -1523,18 +1533,18 @@
         return () => clearTimeout(timer);
       },
     })),
-    // Internet is live: 單台 Prelink (1_210), or 單台／多台 with >1 node not back yet (1_220),
+    // Internet is live: node 台數 0 (1_210), or ≥ 1 node (1_220),
     // which adds a note and a Trouble shooting link to the node status pages
     ...[
       {
         id: 'internet-live', code: '1_210', figmaNode: '1867:2040',
         name: '完成：網路已連線',
-        description: '網路已連線（單台）：Prelink 單台時，顯示 Internet Connection is Live!，按 Next 看設定摘要',
+        description: '網路已連線（單台）：node 台數 0 台時，顯示 Internet Connection is Live!，按 Next 看設定摘要',
       },
       {
         id: 'internet-live-mesh', code: '1_220', figmaNode: '0:377', mesh: true,
         name: '網路已連線：繼續檢查節點',
-        description: '網路已連線（單台／多台，>1 台未連回）：提示接下來繼續檢查 AiMesh 節點；Next 看設定摘要，Trouble shooting 看節點連線狀態',
+        description: '網路已連線（有節點）：node 台數 ≥ 1 台時，提示接下來繼續檢查 AiMesh 節點；Next 看設定摘要，Trouble shooting 看節點連線狀態',
       },
     ].map(p => ({
       id: p.id,
@@ -1998,17 +2008,8 @@
       label: 'Internet',
       title: 'Internet Connected?（link internet = 2 & ping 通 internet）',
       options: [
-        { label: 'Yes · 已連上網際網路', short: 'Yes', value: 'yes', action: () => { INTERNET = true; window.QIS_decide('prelink'); } },
+        { label: 'Yes · 已連上網際網路', short: 'Yes', value: 'yes', action: () => { INTERNET = true; window.QIS_decide('nodeCount'); } },
         { label: 'No · 沒有連上網際網路', short: 'No', value: 'no', action: () => { INTERNET = false; window.QIS_decide('nodeCount'); } },
-      ],
-    },
-    prelink: {
-      index: 3,
-      label: 'Prelink 台數',
-      title: 'node Prelink 台數？',
-      options: [
-        { label: '單台', short: '單台', value: 'single', to: 'internet-live', action: () => { FINISH = 'single'; SINGLE_DEVICE = true; } },
-        { label: '單台／多台（>1 台未連回）', short: '>1 台未連回', value: 'multi', to: 'internet-live-mesh', action: () => { FINISH = 'mesh'; SINGLE_DEVICE = false; } },
       ],
     },
     nodeCount: {
@@ -2016,10 +2017,10 @@
       label: '節點台數',
       title: 'node 台數？',
       options: [
-        { label: '0 台', short: '0 台', value: 'none', action: () => { SINGLE_DEVICE = true; window.QIS_decide('mobile'); } },
-        { label: '≥ 1 台 · 節點優化中（藍線）', short: '≥1 台 優化中', value: 'optimising', to: 'node-status', action: () => { NODE_STATE = 'optimising'; SINGLE_DEVICE = false; } },
-        { label: '≥ 1 台 · 連線品質待優化（黃線）', short: '≥1 台 品質待優化', value: 'weak', to: 'node-status', action: () => { NODE_STATE = 'weak'; SINGLE_DEVICE = false; } },
-        { label: '≥ 1 台 · 節點沒有回應（灰線）', short: '≥1 台 沒回應', value: 'offline', to: 'node-status', action: () => { NODE_STATE = 'offline'; SINGLE_DEVICE = false; } },
+        { label: '0 台', short: '0 台', value: 'none', get to() { return INTERNET ? 'internet-live' : null; }, action: nodeCountAction(null) },
+        { label: '≥ 1 台 · 節點優化中（藍線）', short: '≥1 台 優化中', value: 'optimising', get to() { return nodeCountTarget(); }, action: nodeCountAction('optimising') },
+        { label: '≥ 1 台 · 連線品質待優化（黃線）', short: '≥1 台 品質待優化', value: 'weak', get to() { return nodeCountTarget(); }, action: nodeCountAction('weak') },
+        { label: '≥ 1 台 · 節點沒有回應（灰線）', short: '≥1 台 沒回應', value: 'offline', get to() { return nodeCountTarget(); }, action: nodeCountAction('offline') },
       ],
     },
     mobile: {

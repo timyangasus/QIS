@@ -391,10 +391,10 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 ```
 1_200 ─ Internet Connected?（link internet = 2 & ping 通 internet）
- ├ Yes ─ node Prelink 台數？
- │   ├ 單台 ─ 1_210 → 1_230 Finish → 1_280 首頁
- │   └ 單台／多台（>1 台未連回）─ 1_220 ─ Next → 1_230 Finish → 1_290 AiMesh 拓撲
- │                                   └ Trouble shooting → 1_300 → 1_310 → 1_230
+ ├ Yes ─ node 台數？
+ │   ├ 0 台 ─ 1_210 → 1_230 Finish → 1_280 首頁
+ │   └ ≥ 1 台（優化中／品質待優化／沒有回應）─ 1_220 ─ Next → 1_230 Finish → 1_290 AiMesh 拓撲
+ │                                   └ Trouble shooting → 1_300 → 對應的燈號頁 → 1_230
  └ No ─ node 台數？
      ├ ≥ 1 台（優化中 1_310／品質待優化 1_320／沒有回應 1_330）─ 1_300 → … ─┐
      └ 0 台 ──────────────────────────────────────────────────────┤
@@ -405,7 +405,8 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 ```
 
 - 1_230 設定摘要是同一頁，**按鈕和去向跟著分支變**：單台 Finish → 1_280；多台 Finish → 1_290；行動網路 Yes：Next → 1_340；行動網路 No：Finish → 1_360。單台以外標題列下方多一行「Setup complete」（照 Figma）。
-- 1_300 的節點狀態依「node 台數」選的狀態（節點優化中／連線品質待優化／節點沒有回應）顯示不同圖文；從 1_220 Trouble shooting 進來時沿用上次選的狀態（預設優化中）。
+- 1_300 的節點狀態依「node 台數」選的狀態（節點優化中／連線品質待優化／節點沒有回應）顯示不同圖文；有網路時從 1_220 Trouble shooting 進來，也是看「node 台數」選的狀態。
+- 「node 台數？」在 Internet Connected? 選 Yes 或 No 後都會問，選項一樣（0 台／≥ 1 台三種狀態）。原本 Yes 後的「node Prelink 台數？」已併進來：0 台 = 原本的單台，≥ 1 台 = 原本的單台／多台（>1 台未連回）。
 - Figma 上的線狀態／燈號狀態說明（洋紅色註解）：綠線／白燈 = good connection（AiMesh Node is ready）；動態藍線／藍燈 = 節點正在優化（AiMesh Node is optimising）；黃線／黃燈 = 連線品質需要優化（weak，connection quality can be improved）；灰線 = 節點 offline（no response，沒有 MAC address）。
 
 ### 5.13a `1_210` / `1_220` 網路已連線 `internet-live` / `internet-live-mesh`
@@ -424,7 +425,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 ### 5.14 `1_230` 設定摘要 `summary`
 - Figma node：`819:320`
 - **淺色頁面**；導覽列：‹ 返回（單台 → 1_210；多台 → 1_220；沒網路 → 1_200）+「System Setup」
-- 由上而下：產品圖（只有路由器一台時 → 一台 BT8 `home-offline-device.jpg`，139 × 169：Prelink 選「單台」，或 node 台數選「0 台」後的行動網路 Yes／No；有節點的分支 → 三入組 `bt8-3pack.jpg`，264 × 169，兩張同高）→ 分隔線 → **Summary** → 分隔線 → **Guest Network** → Finish
+- 由上而下：產品圖（只有路由器一台時 → 一台 BT8 `home-offline-device.jpg`，139 × 169：node 台數選「0 台」（有網路，或沒網路後的行動網路 Yes／No）；有節點的分支 → 三入組 `bt8-3pack.jpg`，264 × 169，兩張同高）→ 分隔線 → **Summary** → 分隔線 → **Guest Network** → Finish
 
 | 區塊 | 圖示 | 內容（**帶入 1_140～1_160 填的值**） |
 |---|---|---|
@@ -488,7 +489,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_320 | Improve connection quality when the light is yellow | 兩台節點黃線（`node-guide-yellow.jpg`） |
 | 1_330 | Power on the node if indicator remains off | 開電源的節點（`node-guide-power.jpg`），說明下方有綠色／藍色燈號圖例 |
 
-- **每個節點狀態只顯示對應的一頁燈號頁**：優化中 → 1_310（藍燈閃爍）；連線品質待優化 → 1_320（黃燈）；沒有回應 → 1_330（打開電源）。返回都 → 1_300。從 1_220 Trouble shooting 進來時沿用上次選的狀態（預設優化中）。
+- **每個節點狀態只顯示對應的一頁燈號頁**：優化中 → 1_310（藍燈閃爍）；連線品質待優化 → 1_320（黃燈）；沒有回應 → 1_330（打開電源）。返回都 → 1_300。從 1_220 Trouble shooting 進來時一樣看「node 台數」選的狀態。
 - 燈號頁的 Next：沒網路時 → DEMO 判斷「Mobile 行動網路？」；從 1_220 Trouble shooting 進來（有網路）→ 1_230
 - Figma 原文「please enure」修正為「please ensure」
 
@@ -548,9 +549,8 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 |---|---|---|---|---|
 | 0 | `wan` | 1_120 按 Get Started | WAN 偵測結果？ | 1 正常 → `wan-detecting` 1_130；2 沒有偵測到 WAN、要不到 IP、US SKU → `modem-unplug` 1_033（WAN 流程，見 5.3b）；3 沒有偵測到 WAN → `wan-type` 1_125 |
 | 1 | `wanDetect` | 1_125 按 Auto Detect（Detecting... 轉約 1.8 秒後跳出） | Auto Detect：這次有偵測到 WAN 嗎？ | Yes → `setup-ssid` 1_140；No → 留在 1_125，跳出「連線無線路由器」提示，按確定關閉 |
-| 2 | `internet` | 1_200 跑完或按 Run in background | Internet Connected?（link internet = 2 & ping 通 internet） | Yes → 判斷 `prelink`；No → 判斷 `nodeCount` |
-| 3 | `prelink` | 接在 `internet` Yes 後面 | node Prelink 台數？ | 單台 → `internet-live` 1_210；單台／多台（>1 台未連回）→ `internet-live-mesh` 1_220 |
-| 3 | `nodeCount` | 接在 `internet` No 後面 | node 台數？ | 0 台 → 判斷 `mobile`；≥ 1 台 · 節點優化中（藍線）/ 連線品質待優化（黃線）/ 節點沒有回應（灰線）→ `node-status` 1_300 |
+| 2 | `internet` | 1_200 跑完或按 Run in background | Internet Connected?（link internet = 2 & ping 通 internet） | Yes、No 都接判斷 `nodeCount` |
+| 3 | `nodeCount` | 接在 `internet` 後面（Yes、No 都會問） | node 台數？ | 有網路：0 台 → `internet-live` 1_210；≥ 1 台 · 節點優化中（藍線）/ 連線品質待優化（黃線）/ 節點沒有回應（灰線）→ `internet-live-mesh` 1_220（Trouble shooting 看這個狀態）。沒網路：0 台 → 判斷 `mobile`；≥ 1 台 → `node-status` 1_300 |
 | 4 | `mobile` | 燈號頁 1_310／1_320／1_330 按 Next（沒網路），或 node 台數選 0 台 | Mobile 行動網路？ | Yes → `summary` 1_230（Next → 1_340）；No → `summary` 1_230（Finish → 1_360） |
 | 5 | `diagnosis` | 1_370 點「連線檢查」 | 網路診斷結果？ | 7 種情境（都正常／不穩／有錯誤／錯誤＋不穩／DNS 異常／Ping 不穩＋DNS 異常／Ping 異常＋DNS 異常），選完在 1_370 重新診斷 |
 
@@ -592,8 +592,8 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_180 | AiMesh 建立中 1/3 `mesh-1` | 建立 AiMesh 網路：路由器和節點開始連線 |
 | 1_190 | AiMesh 建立中 2/3 `mesh-2` | AiMesh 最佳化：節點自動加入網路 |
 | 1_200 | AiMesh 建立中 3/3 `mesh-3` | AiMesh 最佳化：可以改到背景執行，先開始上網 |
-| 1_210 | 完成：網路已連線 `internet-live` | Prelink 單台：網際網路已連線（有完成動畫），按 Next 看設定摘要 |
-| 1_220 | 網路已連線：繼續檢查節點 `internet-live-mesh` | 單台／多台（>1 台未連回）：網路已連線，接著檢查節點；Trouble shooting 看節點狀態 |
+| 1_210 | 完成：網路已連線 `internet-live` | 有網路、node 0 台：網際網路已連線（有完成動畫），按 Next 看設定摘要 |
+| 1_220 | 網路已連線：繼續檢查節點 `internet-live-mesh` | 有網路、node ≥ 1 台：網路已連線，接著檢查節點；Trouble shooting 看節點狀態 |
 | 1_230 | 設定摘要 `summary` | 列出剛設定好的 WiFi 名稱／密碼、登入帳號和 IoT 訪客網路；按鈕依分支接到不同頁 |
 | 1_280 | 首頁 `home` | 設定完成後進入 App 首頁，顯示路由器資訊和即時上傳／下載流量 |
 | 1_290 | AiMesh 拓撲 `aimesh-topology` | 多台：設定完成後進入 App 的 AiMesh 頁，顯示路由器和節點的連線 |
