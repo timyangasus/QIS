@@ -120,11 +120,13 @@
       });
       if (onChange) onChange();
     };
-    el.addEventListener('input', e => {
+    // el is the shared screen container, so the listener is removed when the page unmounts
+    const onInput = e => {
       const k = e.target.dataset.key;
       if (k) FORM[k] = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
       update();
-    });
+    };
+    el.addEventListener('input', onInput);
     el.querySelectorAll('.field-icon').forEach(btn => btn.addEventListener('click', () => {
       const input = btn.parentElement.querySelector('input');
       if (btn.dataset.action === 'clear') {
@@ -140,6 +142,7 @@
       }
     }));
     update();
+    return () => el.removeEventListener('input', onInput);
   }
 
   function setupHeader() {
@@ -184,7 +187,7 @@
 
   const esc = v => String(v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-  // 1_220 summary row icons: Wi-Fi with band label, user outline
+  // 1_230 summary row icons: Wi-Fi with band label, user outline
   const SUMMARY_ICON = {
     wifi: (band, color) => `<span class="summary-icon" style="color:${color}" aria-hidden="true">
       <svg viewBox="0 0 30 22" width="30" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M3 8a17 17 0 0 1 24 0"/><path d="M7.5 12.5a10.5 10.5 0 0 1 15 0"/><path d="M12 17a4 4 0 0 1 6 0"/></svg>
@@ -192,7 +195,7 @@
     user: `<span class="summary-icon" style="color:#1b74e4" aria-hidden="true"><svg viewBox="0 0 30 30" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2"><circle cx="15" cy="10" r="6"/><path d="M4 28c0-7 5-11 11-11s11 4 11 11z" stroke-linejoin="round"/></svg></span>`,
   };
 
-  // ── 1_230 home dashboard icons ──
+  // ── 1_280 home dashboard icons ──
   const HOME_ICON = {
     google: '<svg viewBox="0 0 24 24" width="26" height="26"><path d="M21.6 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.7 3-4.3 3-7.3z" fill="#4285f4"/><path d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22z" fill="#34a853"/><path d="M6.4 14a6 6 0 0 1 0-3.9V7.5H3.1a10 10 0 0 0 0 9z" fill="#fbbc05"/><path d="M12 6c1.5 0 2.8.5 3.8 1.5l2.9-2.9A10 10 0 0 0 3.1 7.5L6.4 10C7.2 7.8 9.4 6 12 6z" fill="#ea4335"/></svg>',
     info: '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10.5"/><circle cx="12.8" cy="7.3" r="1.1" fill="currentColor" stroke="none"/><path d="M10.6 10.6h2.4l-1.4 6.4h2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
@@ -293,6 +296,76 @@
     ? `${(kbps / 1000).toFixed(kbps >= 10000 ? 1 : 2)}<small>Mbps</small>`
     : `${kbps >= 100 ? kbps.toFixed(0) : kbps >= 10 ? kbps.toFixed(1) : kbps.toFixed(2)}<small>Kbps</small>`;
 
+  // ── App pages after setup (1_260–1_290, 1_360): shared top bar, router card, shortcuts, tab bar ──
+  const homeTop = () => `
+    <header class="home-top">
+      <button class="home-back" data-go="back" aria-label="返回">${ICON.back}</button>
+      <button class="home-avatar" data-go="account" data-label="帳號">${HOME_ICON.google}</button>
+      <h1 class="home-title">首頁</h1>
+      <div class="home-actions">
+        <button data-go="router-info" data-label="資訊" aria-label="資訊">${HOME_ICON.info}</button>
+        <button data-go="notifications" data-label="通知" aria-label="通知">${HOME_ICON.bell}</button>
+        <button data-go="opening" aria-label="新增裝置（重新開始 QIS 設定）">${HOME_ICON.plus}</button>
+      </div>
+    </header>`;
+
+  // connecting: the router is still coming online (狀態：正在連線…) instead of showing its LAN IP
+  const routerCard = (connecting = false) => `
+    <section class="router-card">
+      <button class="router-card-device" data-go="router-detail" data-label="ZenWiFi BT8">
+        <img src="assets/zenwifi-device.png" alt="" width="36" height="44">
+        <span>ZenWiFi BT8</span>
+      </button>
+      <button class="router-card-info" data-go="router-detail" data-label="${connecting ? '狀態' : '區域網路 IP'}">
+        <span class="rc-label">${connecting ? '狀態' : '區域網路 IP'} <i>${HOME_ICON.chevrons}</i></span>
+        <span class="rc-value">${connecting ? '正在連線… <span class="rc-spin" aria-hidden="true"></span>' : '192.168.50.1'}</span>
+        <span class="rc-label">無線網路名稱</span>
+        <span class="rc-value">${esc(FORM.ssid)}</span>
+      </button>
+      <button class="router-card-speed" data-go="speed-test" data-label="速度測試" aria-label="速度測試">${HOME_ICON.gauge}</button>
+    </section>`;
+
+  const homeShortcuts = on => `
+    <div class="home-shortcuts">
+      <button${on === 'internet' ? ' class="on"' : ''} data-go="internet-status" data-label="網際網路" aria-label="網際網路">${HOME_ICON.www}</button>
+      <button${on === 'aimesh' ? ' class="on"' : ''} data-go="aimesh" data-label="AiMesh" aria-label="AiMesh">${HOME_ICON.homeWifi}</button>
+      <button data-go="wifi" data-label="無線網路" aria-label="無線網路">${HOME_ICON.wifiRing}</button>
+    </div>`;
+
+  const homeTabs = () => `
+    <nav class="tab-bar">
+      <button class="tab on">${HOME_ICON.tabHome}<span>首頁</span></button>
+      <button class="tab" data-go="devices" data-label="裝置">${HOME_ICON.tabDevices}<span>裝置</span><b class="tab-badge">2</b></button>
+      <button class="tab" data-go="tips" data-label="提示">${HOME_ICON.tabTips}<span>提示</span></button>
+      <button class="tab" data-go="family" data-label="家庭">${HOME_ICON.tabFamily}<span>家庭</span></button>
+      <button class="tab" data-go="settings" data-label="設定">${HOME_ICON.tabSettings}<span>設定</span></button>
+    </nav>`;
+
+  // The app home right after setup (still connecting), dimmed behind the 1_260 / 1_270 sheets
+  const homeConnecting = () => `
+    <div class="app-behind" aria-hidden="true">
+      ${homeTop()}
+      <div class="home-body">
+        ${routerCard(true)}
+        <h2 class="home-welcome">歡迎使用</h2>
+      </div>
+    </div>`;
+
+  // 1_240 / 1_250 / 1_300 navbar: bold "System Setup" + ?
+  const systemSetupHeader = () => `
+    <header class="navbar navbar-guide">
+      <h1 class="navbar-title navbar-title-bold">System Setup</h1>
+      <button class="navbar-btn navbar-btn-right" data-go="help" data-label="說明" aria-label="說明">${ICON.helpOutline}</button>
+    </header>`;
+
+  const AIMESH_ICON = {
+    optimize: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 9a7.5 7.5 0 0 0-13.6-1.8M5 15a7.5 7.5 0 0 0 13.6 1.8"/><path d="M5 4v3.5h3.5M19 20v-3.5h-3.5"/><circle cx="12" cy="12" r="2"/></svg>',
+  };
+
+  // 1_340 Feedback card icon, 1_350 clear-field button
+  const FEEDBACK_ICON = '<svg viewBox="0 0 36 36" width="36" height="36" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"><path d="M4 5h28v21H14l-8 6v-6H4z"/><path d="M18 10v8" stroke-linecap="round"/><circle cx="18" cy="22" r="1.3" fill="#fff" stroke="none"/></svg>';
+  const FB_CLEAR = '<span class="fb-clear" aria-hidden="true"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="10" cy="10" r="8.5"/><path d="M7 7l6 6M13 7l-6 6" stroke-linecap="round"/></svg></span>';
+
 
   // The modem power-cycle pages are shared by two flows: right after 1_030 (setup), and when
   // 1_120 finds no WAN (wan), where each step is followed by a timed wait before continuing.
@@ -303,9 +376,20 @@
   let WAN_ALERT_PENDING = false;
 
   // After the 1_037 modem restart the flow always continues to 1_140; when the router still has
-  // no Internet (no WAN / no IP), the 1_210 "Internet is live" page is skipped after AiMesh setup
+  // no Internet (no WAN / no IP), the "Internet Connected?" check after AiMesh setup is a known No
   let WAN_OK = true;
-  const afterMesh = () => WAN_OK ? 'internet-live' : 'summary';
+
+  // After AiMesh (1_200): Internet Connected? → Yes: node Prelink count; No: node count → mobile data.
+  // INTERNET: answer to Internet Connected?; FINISH: which branch the 1_230 summary closes;
+  // NODE_STATE: which 1_300 node status is shown (node not responding / optimising)
+  let INTERNET = true;
+  let FINISH = 'single';
+  let NODE_STATE = 'optimising';
+  const meshDecision = () => WAN_OK ? 'internet' : 'nodeCount';
+  function afterMesh() {
+    if (!WAN_OK) INTERNET = false;
+    window.QIS_decide(meshDecision());
+  }
   function showWanAlert() {
     const alert = document.querySelector('.wan-type-alert');
     if (alert) return alert.classList.add('show');
@@ -1379,22 +1463,38 @@
             <span class="progress-fill" style="--from:${m.from}%;--to:${m.to}%"></span>
           </div>
           <p class="guide-desc">${m.desc}</p>
-          ${m.background ? `<button class="mesh-background" data-go="${afterMesh()}">Run in background</button>` : ''}
+          ${m.background ? '<button class="mesh-background">Run in background</button>' : ''}
         </div>
       `,
-      // Each step takes ~3s, then the next one picks up the bar where this one stopped
-      mount: () => {
-        const timer = setTimeout(() => location.replace(`#${i + 1 < all.length ? `mesh-${i + 2}` : afterMesh()}`), 1700);
+      // Each step takes ~3s, then the next one picks up the bar where this one stopped;
+      // the last one ends in the Internet Connected? check (or node count when there is no WAN)
+      mount: el => {
+        const last = i + 1 === all.length;
+        el.querySelector('.mesh-background')?.addEventListener('click', afterMesh);
+        const timer = setTimeout(() => last ? afterMesh() : location.replace(`#mesh-${i + 2}`), 1700);
         return () => clearTimeout(timer);
       },
     })),
-    {
-      id: 'internet-live',
-      back: 'setup-account',
-      code: '1_210',
-      name: '完成：網路已連線',
-      description: '設定完成：網際網路已連線（Internet Connection is Live!）',
-      figmaNode: '1867:2040',
+    // Internet is live: 單台 Prelink (1_210), or 單台／多台 with >1 node not back yet (1_220),
+    // which adds a note and a Trouble shooting link to the node status pages
+    ...[
+      {
+        id: 'internet-live', code: '1_210', figmaNode: '1867:2040',
+        name: '完成：網路已連線',
+        description: '網路已連線（單台）：Prelink 單台時，顯示 Internet Connection is Live!，按 Next 看設定摘要',
+      },
+      {
+        id: 'internet-live-mesh', code: '1_220', figmaNode: '0:377', mesh: true,
+        name: '網路已連線：繼續檢查節點',
+        description: '網路已連線（單台／多台，>1 台未連回）：提示接下來繼續檢查 AiMesh 節點；Next 看設定摘要，Trouble shooting 看節點連線狀態',
+      },
+    ].map(p => ({
+      id: p.id,
+      back: 'mesh-3',
+      code: p.code,
+      name: p.name,
+      description: p.description,
+      figmaNode: p.figmaNode,
       theme: 'light',
       render: () => `
         <header class="navbar navbar-guide">
@@ -1413,21 +1513,30 @@
             <span class="done-check"><svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="18" fill="#3bbf5a"/><path class="done-check-mark" d="M12 20.5l5.5 5.5L28.5 14" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           </div>
           <h2 class="done-title">Internet Connection is Live!</h2>
+          ${p.mesh ? '<p class="done-desc">Let’s keep checking your AiMesh node(s) status in following steps.</p>' : ''}
           <button class="pill-btn done-next" data-go="summary">Next</button>
+          ${p.mesh ? '<button class="guide-link done-trouble" data-go="node-status">Trouble shooting</button>' : ''}
         </div>
       `,
-    },
+    })),
     {
       id: 'summary',
-      get back() { return WAN_OK ? 'internet-live' : 'mesh-3'; },
-      code: '1_220',
+      get back() { return { single: 'internet-live', mesh: 'internet-live-mesh' }[FINISH] || 'mesh-3'; },
+      code: '1_230',
       name: '設定摘要',
-      description: '設定摘要：列出剛設定好的 WiFi 名稱／密碼、登入帳號和 IoT 訪客網路，按 Finish 完成',
+      description: '設定摘要：列出剛設定好的 WiFi 名稱／密碼、登入帳號和 IoT 訪客網路；依前面的分支接到 FW 更新、AiMesh 拓撲、尚未連網或首頁',
       figmaNode: '819:320',
       theme: 'light',
       render: () => {
         const row = (icon, lines) => `<li class="summary-row">${icon}<span>${lines.map(([k, v]) => `${k} : <b>${esc(v)}</b>`).join('<br>')}</span></li>`;
         const wifi = band => row(SUMMARY_ICON.wifi(band, '#1b74e4'), [['WiFi Name', band === '2G' ? FORM.ssid : `${FORM.ssid}_${band}`], ['WiFi Password', FORM.wifiPassword]]);
+        // Where Finish / Next goes depends on the branch that led here
+        const [label, target] = {
+          single: ['Finish', 'data-decide="fw"'],
+          mesh: ['Finish', 'data-go="aimesh-topology"'],
+          mobile: ['Next', 'data-go="no-internet"'],
+          offline: ['Finish', 'data-go="home-offline"'],
+        }[FINISH];
         return `
         <header class="navbar navbar-guide">
           <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
@@ -1436,6 +1545,7 @@
 
         <div class="summary-body">
           <img class="summary-device" src="assets/bt8-3pack.jpg" alt="ZenWiFi BT8 三入組" width="264" height="169">
+          ${FINISH === 'single' ? '' : '<p class="summary-done">Setup complete</p>'}
           <section class="summary-section">
             <h2>Summary</h2>
             <ul>
@@ -1449,45 +1559,113 @@
               ${row(SUMMARY_ICON.wifi('IOT', '#5ec43c'), [['WiFi Name', FORM.iotSsid || `${FORM.ssid}_IoT`], ['WiFi Password', FORM.iotPassword]])}
             </ul>
           </section>
-          <button class="btn-brand setup-next" data-go="home">${WAN_OK ? 'Finish' : 'Next'}</button>
+          <button class="btn-brand setup-next" ${target}>${label}</button>
         </div>
       `;
       },
     },
+    // Firmware update (FW 更新 = Yes): offer, then a timed update
+    {
+      id: 'fw-available',
+      back: 'summary',
+      code: '1_240',
+      name: '有新韌體',
+      description: 'FW 更新：有新版韌體，建議現在更新；Update 開始更新，Maybe Later 先跳過到啟用遠端連線',
+      figmaNode: '0:364',
+      theme: 'light',
+      render: () => `
+        ${systemSetupHeader()}
+        <div class="guide-body">
+          <img class="fw-device" src="assets/fw-router.jpg" alt="ZenWiFi 路由器" width="217" height="223">
+          <h2 class="guide-title fw-title">New Firmware Available</h2>
+          <p class="guide-desc fw-desc">We strongly recommend updating to the latest firmware now for a better and more secure experience, including the newest features and stability enhancements.</p>
+          <button class="pill-btn fw-update" data-go="fw-updating">Update</button>
+          <button class="guide-link fw-later" data-go="remote-access">Maybe Later</button>
+        </div>
+      `,
+    },
+    {
+      id: 'fw-updating',
+      back: 'fw-available',
+      code: '1_250',
+      name: '韌體更新中',
+      description: '韌體更新中：提醒路由器不要斷電、不要拔 WAN 線，更新完自動到啟用遠端連線',
+      figmaNode: '0:364',
+      theme: 'light',
+      render: () => `
+        ${systemSetupHeader()}
+        <div class="guide-body">
+          <img class="fw-device" src="assets/fw-router.jpg" alt="ZenWiFi 路由器" width="217" height="223">
+          <h2 class="guide-title guide-title-plain fw-title">Firmware Update</h2>
+          <div class="progress fw-progress" role="progressbar" aria-label="韌體更新"><span class="progress-fill"></span></div>
+          <p class="fw-note">Keep your router powered on and do not remove your WAN cable during the update process.</p>
+        </div>
+      `,
+      mount: () => {
+        const timer = setTimeout(() => location.replace('#remote-access'), 4200);
+        return () => clearTimeout(timer);
+      },
+    },
+    // Remote access: sheets over the app home while it is still connecting
+    {
+      id: 'remote-access',
+      back: 'summary',
+      code: '1_260',
+      name: '啟用遠端連線',
+      description: '啟用遠端連線：進入 App 首頁時跳出提示，啟用後可以從外面安全地管理路由器；略過直接到首頁',
+      figmaNode: '0:71',
+      theme: 'light',
+      render: () => `
+        ${homeConnecting()}
+        <div class="app-sheet-layer">
+          <div class="app-sheet remote-sheet" role="dialog" aria-labelledby="remote-title">
+            <span class="app-sheet-grabber"></span>
+            <img class="remote-icon" src="assets/remote-access-icon.jpg" alt="" width="134" height="129">
+            <h2 class="remote-title" id="remote-title">啟用遠端連線</h2>
+            <p class="remote-desc">透過安全加密通道遠端管理裝置，獲得更多軟體功能。</p>
+            <button class="btn-brand remote-enable" data-go="remote-wait">啟用</button>
+            <button class="remote-skip" data-go="home">略過</button>
+          </div>
+        </div>
+      `,
+    },
+    {
+      id: 'remote-wait',
+      back: 'remote-access',
+      code: '1_270',
+      name: '啟用遠端連線中',
+      description: '啟用遠端連線中：Wait a few seconds（實際約 1 分 10 秒，原型縮短），完成後到首頁',
+      figmaNode: '0:76',
+      theme: 'light',
+      render: () => `
+        ${homeConnecting()}
+        <div class="app-sheet-layer">
+          <div class="app-sheet remote-wait-sheet" role="dialog" aria-label="啟用遠端連線中">
+            <span class="app-sheet-grabber"></span>
+            <img class="remote-wait-icon" src="assets/remote-wait-icon.jpg" alt="" width="170" height="181">
+            <p class="remote-wait-text">Wait a few seconds...</p>
+            <div class="progress remote-wait-progress" role="progressbar" aria-label="啟用遠端連線"><span class="progress-fill"></span></div>
+          </div>
+        </div>
+      `,
+      mount: () => {
+        const timer = setTimeout(() => location.replace('#home'), 3600);
+        return () => clearTimeout(timer);
+      },
+    },
     {
       id: 'home',
-      back: 'summary',
-      code: '1_230',
+      back: 'remote-access',
+      code: '1_280',
       name: '首頁',
       description: '首頁：設定完成後進入 App 首頁，顯示路由器資訊和即時上傳／下載流量',
       figmaNode: '1728:569',
       theme: 'light',
       render: () => `
-        <header class="home-top">
-          <button class="home-back" data-go="back" aria-label="返回">${ICON.back}</button>
-          <button class="home-avatar" data-go="account" data-label="帳號">${HOME_ICON.google}</button>
-          <h1 class="home-title">首頁</h1>
-          <div class="home-actions">
-            <button data-go="router-info" data-label="資訊" aria-label="資訊">${HOME_ICON.info}</button>
-            <button data-go="notifications" data-label="通知" aria-label="通知">${HOME_ICON.bell}</button>
-            <button data-go="opening" aria-label="新增裝置（重新開始 QIS 設定）">${HOME_ICON.plus}</button>
-          </div>
-        </header>
+        ${homeTop()}
 
         <div class="home-body">
-          <section class="router-card">
-            <button class="router-card-device" data-go="router-detail" data-label="ZenWiFi BT8">
-              <img src="assets/zenwifi-device.png" alt="" width="36" height="44">
-              <span>ZenWiFi BT8</span>
-            </button>
-            <button class="router-card-info" data-go="router-detail" data-label="區域網路 IP">
-              <span class="rc-label">區域網路 IP <i>${HOME_ICON.chevrons}</i></span>
-              <span class="rc-value">192.168.50.1</span>
-              <span class="rc-label">無線網路名稱</span>
-              <span class="rc-value">${esc(FORM.ssid)}</span>
-            </button>
-            <button class="router-card-speed" data-go="speed-test" data-label="速度測試" aria-label="速度測試">${HOME_ICON.gauge}</button>
-          </section>
+          ${routerCard()}
 
           <h2 class="traffic-title">即時流量</h2>
           <canvas class="traffic-chart" width="416" height="253" aria-label="即時上傳和下載流量圖"></canvas>
@@ -1498,21 +1676,10 @@
           </div>
 
           <div class="page-dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
-
-          <div class="home-shortcuts">
-            <button class="on" data-go="internet-status" data-label="網際網路" aria-label="網際網路">${HOME_ICON.www}</button>
-            <button data-go="aimesh" data-label="AiMesh" aria-label="AiMesh">${HOME_ICON.homeWifi}</button>
-            <button data-go="wifi" data-label="無線網路" aria-label="無線網路">${HOME_ICON.wifiRing}</button>
-          </div>
+          ${homeShortcuts('internet')}
         </div>
 
-        <nav class="tab-bar">
-          <button class="tab on">${HOME_ICON.tabHome}<span>首頁</span></button>
-          <button class="tab" data-go="devices" data-label="裝置">${HOME_ICON.tabDevices}<span>裝置</span><b class="tab-badge">2</b></button>
-          <button class="tab" data-go="tips" data-label="提示">${HOME_ICON.tabTips}<span>提示</span></button>
-          <button class="tab" data-go="family" data-label="家庭">${HOME_ICON.tabFamily}<span>家庭</span></button>
-          <button class="tab" data-go="settings" data-label="設定">${HOME_ICON.tabSettings}<span>設定</span></button>
-        </nav>
+        ${homeTabs()}
       `,
       mount: el => {
         const downEl = el.querySelector('.rate-down');
@@ -1522,6 +1689,205 @@
           upEl.innerHTML = formatRate(u);
         });
       },
+    },
+    {
+      id: 'aimesh-topology',
+      back: 'summary',
+      code: '1_290',
+      name: 'AiMesh 拓撲',
+      description: 'AiMesh 拓撲：多台時設定完成後進入 App 的 AiMesh 頁，顯示路由器和節點的連線狀態',
+      figmaNode: '0:81',
+      theme: 'light',
+      render: () => `
+        ${homeTop()}
+
+        <div class="home-body">
+          ${routerCard()}
+          <h2 class="aimesh-title">AiMesh WiFi 系統</h2>
+          <img class="aimesh-topology" src="assets/aimesh-topology.jpg" alt="網際網路連到 ZenWiFi 路由器，再以 MLO 連到兩台節點" width="356" height="328">
+          <div class="aimesh-actions">
+            <button data-go="add-node" data-label="新增節點">${ICON.wifiSolid}新增節點</button>
+            <button data-go="aimesh-optimize" data-label="最佳化">${AIMESH_ICON.optimize}最佳化</button>
+          </div>
+          ${homeShortcuts('aimesh')}
+        </div>
+
+        ${homeTabs()}
+      `,
+    },
+    // ≥ 1 node: connection status, then three LED troubleshooting steps
+    {
+      id: 'node-status',
+      get back() { return INTERNET ? 'internet-live-mesh' : 'mesh-3'; },
+      code: '1_300',
+      name: 'AiMesh 節點連線狀態',
+      description: 'AiMesh 節點連線狀態：列出每台節點的狀況（已就緒／優化中／沒有回應），接著看燈號排除問題',
+      figmaNode: '0:182',
+      theme: 'light',
+      render: () => {
+        const off = NODE_STATE === 'offline';
+        return `
+        ${systemSetupHeader()}
+        <div class="guide-body">
+          <img class="node-status-illust" src="assets/node-status-${off ? 'offline' : 'optimising'}.jpg" alt="" width="370" height="317">
+          <h2 class="guide-title node-status-title">AiMesh Node(s) Connection Status</h2>
+          <ul class="node-status-list">
+            <li><span class="node-num">1</span>AiMesh Node is ready.</li>
+            <li><span class="node-num${off ? ' node-num-warn' : ''}">2</span>${off ? 'AiMesh Node is not responding. (No MAC address)' : 'AiMesh Node is optimising.'}</li>
+          </ul>
+          <button class="btn-brand setup-next" data-go="node-guide-1">Next</button>
+        </div>
+      `;
+      },
+    },
+    ...[
+      {
+        code: '1_310', figmaNode: '0:85', img: 'node-guide-white.jpg',
+        title: 'Stand by the blinking blue light turns white',
+        summary: '節點燈號 1/3：藍燈閃爍代表正在優化，完成後變白燈；一直閃藍燈就用網路線連接',
+        body: `
+          <p>The blinking blue light indicates connection optimization. Once it is complete, it will turn solid white.</p>
+          <p>The device supports MLO connection may take longer.</p>
+          <p>If the blinking blue persists, connect the AiMesh router and node using an ethernet cable.</p>`,
+      },
+      {
+        code: '1_320', figmaNode: '0:97', img: 'node-guide-yellow.jpg',
+        title: 'Improve connection quality when the light is yellow',
+        summary: '節點燈號 2/3：黃燈代表連線品質不佳，調整擺放位置',
+        body: `
+          <p>To improve the connection quality, please ensure:</p>
+          <p>1. Make sure your node is in an open area and on a flat hard surface.</p>
+          <p>2. Place AiMesh devices within 3 meters of each other.</p>
+          <p>3. Keep the node away from appliances and devices that use the 2.4GHz band to avoid interference.</p>`,
+      },
+      {
+        code: '1_330', figmaNode: '0:109', img: 'node-guide-power.jpg',
+        title: 'Power on the node if indicator remains off',
+        summary: '節點燈號 3/3：燈不亮就打開節點電源，綠燈啟動中、藍燈同步中',
+        body: `
+          <p>Turn on the node. It will automatically look for the AiMesh router, and the light will blink blue while connecting.</p>
+          <ul class="guide-legend node-guide-legend">
+            <li><span class="led-swatch-sm led-swatch-green"></span>AiMesh node is starting up.</li>
+            <li><span class="led-swatch-sm led-swatch-brand"></span>AiMesh node is syncing with the AiMesh router.</li>
+          </ul>`,
+      },
+    ].map((g, i, all) => ({
+      id: `node-guide-${i + 1}`,
+      back: i ? `node-guide-${i}` : 'node-status',
+      code: g.code,
+      name: `節點燈號排除 ${i + 1}/${all.length}`,
+      description: g.summary,
+      figmaNode: g.figmaNode,
+      theme: 'light',
+      render: () => {
+        // Last step: with Internet (Trouble shooting) back to the summary, without it the mobile data check
+        const next = i + 1 < all.length ? `data-go="node-guide-${i + 2}"` : INTERNET ? 'data-go="summary"' : 'data-decide="mobile"';
+        return `
+        <header class="navbar navbar-guide">
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
+          <h1 class="navbar-title">Setup Guide</h1>
+          <button class="navbar-btn navbar-btn-right" data-go="help" data-label="說明" aria-label="說明">${ICON.helpOutline}</button>
+        </header>
+        <div class="guide-body">
+          <div class="guide-illust node-guide-illust">
+            <img src="assets/${g.img}" alt="" width="439" height="334">
+          </div>
+          <h2 class="guide-title guide-title-plain node-guide-title">${g.title}</h2>
+          <div class="guide-desc node-guide-desc">${g.body}</div>
+          <button class="btn-brand setup-next" ${next}>Next</button>
+        </div>
+      `;
+      },
+    })),
+    // No Internet + mobile data: setup is done but the network is not online yet
+    {
+      id: 'no-internet',
+      back: 'summary',
+      code: '1_340',
+      name: '尚未連上網際網路',
+      description: '尚未連上網際網路：裝置設定已完成但環境還沒連上網，可以回報問題，或按完成設定進首頁',
+      figmaNode: '0:150',
+      theme: 'light',
+      render: () => `
+        <header class="navbar navbar-guide">
+          <h1 class="navbar-title navbar-title-bold">System Setup</h1>
+        </header>
+        <div class="welcome-body">
+          <img class="noinet-globe" src="assets/no-internet-globe.jpg" alt="" width="211" height="143">
+          <h2 class="noinet-title">裝置設定已完成</h2>
+          <p class="noinet-sub">您的環境目前尚未連上網際網路</p>
+          <button class="feedback-card" data-go="feedback" data-label="Feedback">
+            ${FEEDBACK_ICON}
+            <span><b>Feedback</b><small>提供問題資訊，協助我們了解您的連線狀況</small></span>
+          </button>
+          <button class="noinet-done" data-go="home-offline">完成設定</button>
+        </div>
+      `,
+    },
+    {
+      id: 'feedback',
+      back: 'no-internet',
+      code: '1_350',
+      name: '問題回報',
+      description: '問題回報：填寫地區、電子郵件和問題描述，按發送後到首頁',
+      figmaNode: '0:169',
+      theme: 'light',
+      render: () => `
+        <header class="navbar fb-navbar">
+          <button class="navbar-btn" data-go="back" aria-label="關閉">${ICON.close}</button>
+          <h1 class="navbar-title">問題回報</h1>
+          <button class="navbar-btn navbar-btn-right fb-send" data-go="home-offline">發送</button>
+        </header>
+        <div class="fb-body">
+          <p class="fb-label">您所在的地區</p>
+          <div class="fb-field">台灣${FB_CLEAR}</div>
+          <label class="fb-label" for="fb-email">您的電子郵件地址 (必要的)</label>
+          <div class="fb-field"><input id="fb-email" type="email" placeholder="電子郵件" autocomplete="off">${FB_CLEAR}</div>
+          <p class="fb-label">問題回報類型</p>
+          <button class="fb-field fb-select" data-go="feedback-type" data-label="問題回報類型">設定問題${ICON.chevron}</button>
+          <p class="fb-label">問題回報描述</p>
+          <button class="fb-field fb-select" data-go="feedback-topic" data-label="問題回報描述">網路設定精靈${ICON.chevron}</button>
+          <label class="fb-label" for="fb-comment">評論 / 建議</label>
+          <div class="fb-field fb-comment">
+            <textarea id="fb-comment" placeholder="在此輸入" maxlength="2000"></textarea>
+            <span class="fb-count">0/2000</span>
+          </div>
+          <button class="fb-field fb-select fb-attach" data-go="feedback-image" data-label="附加圖片">附加圖片${ICON.chevron}</button>
+        </div>
+      `,
+      mount: el => {
+        const text = el.querySelector('#fb-comment');
+        const count = el.querySelector('.fb-count');
+        text.addEventListener('input', () => { count.textContent = `${text.value.length}/2000`; });
+      },
+    },
+    {
+      id: 'home-offline',
+      back: 'no-internet',
+      code: '1_360',
+      name: '首頁：網路異常',
+      description: '首頁（尚未連網）：路由器還在連線中，下方橘色提示「網路連線可能異常」，可以進入詳細診斷',
+      figmaNode: '0:398',
+      theme: 'light',
+      render: () => `
+        ${homeTop()}
+
+        <div class="home-body">
+          ${routerCard(true)}
+          <h2 class="home-welcome">歡迎使用</h2>
+          <p class="home-model">ZenWiFi BT8</p>
+          <img class="home-offline-device" src="assets/home-offline-device.jpg" alt="ZenWiFi BT8" width="180" height="219">
+          <div class="page-dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
+          ${homeShortcuts()}
+        </div>
+
+        <div class="home-alert">
+          <span>網路連線可能異常</span>
+          <button data-go="diagnosis" data-label="詳細診斷">詳細診斷</button>
+        </div>
+
+        ${homeTabs()}
+      `,
     },
   ];
 
@@ -1553,6 +1919,53 @@
       options: [
         { label: 'Yes · 已偵測到 WAN、要到 IP', short: 'Yes', value: 'yes', to: 'setup-ssid', action: () => { WAN_OK = true; } },
         { label: 'No · 仍沒有偵測到 WAN、要不到 IP', short: 'No', value: 'no', to: 'setup-ssid', action: () => { WAN_OK = false; } },
+      ],
+    },
+    // After AiMesh (1_200). Picked again from the demo bar, each one also replays the step it decides
+    internet: {
+      index: 2,
+      label: 'Internet',
+      title: 'Internet Connected?（link internet = 2 & ping 通 internet）',
+      options: [
+        { label: 'Yes · 已連上網際網路', short: 'Yes', value: 'yes', action: () => { INTERNET = true; window.QIS_decide('prelink'); } },
+        { label: 'No · 沒有連上網際網路', short: 'No', value: 'no', action: () => { INTERNET = false; window.QIS_decide('nodeCount'); } },
+      ],
+    },
+    prelink: {
+      index: 3,
+      label: 'Prelink 台數',
+      title: 'node Prelink 台數？',
+      options: [
+        { label: '單台', short: '單台', value: 'single', to: 'internet-live', action: () => { FINISH = 'single'; } },
+        { label: '單台／多台（>1 台未連回）', short: '>1 台未連回', value: 'multi', to: 'internet-live-mesh', action: () => { FINISH = 'mesh'; } },
+      ],
+    },
+    nodeCount: {
+      index: 3,
+      label: '節點台數',
+      title: 'node 台數？',
+      options: [
+        { label: '0 台', short: '0 台', value: 'none', action: () => window.QIS_decide('mobile') },
+        { label: '≥ 1 台 · 節點沒有回應', short: '≥1 台 沒回應', value: 'offline', to: 'node-status', action: () => { NODE_STATE = 'offline'; } },
+        { label: '≥ 1 台 · 節點優化中', short: '≥1 台 優化中', value: 'optimising', to: 'node-status', action: () => { NODE_STATE = 'optimising'; } },
+      ],
+    },
+    fw: {
+      index: 4,
+      label: 'FW 更新',
+      title: 'FW 更新？（有沒有新版韌體）',
+      options: [
+        { label: 'Yes · 有新版韌體', short: 'Yes', value: 'yes', to: 'fw-available' },
+        { label: 'No · 已是最新版', short: 'No', value: 'no', to: 'remote-access' },
+      ],
+    },
+    mobile: {
+      index: 4,
+      label: '行動網路',
+      title: 'Mobile 行動網路？',
+      options: [
+        { label: 'Yes', short: 'Yes', value: 'yes', to: 'summary', action: () => { FINISH = 'mobile'; } },
+        { label: 'No', short: 'No', value: 'no', to: 'summary', action: () => { FINISH = 'offline'; } },
       ],
     },
   };

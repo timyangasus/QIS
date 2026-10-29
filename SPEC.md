@@ -184,7 +184,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 ### 5.3b 未偵測到 WAN：`1_034` / `1_037` 等待數據機 `modem-wait-off` / `modem-wait-start`
 - 來源：使用者提供的參考圖。版型沿用 Setup Guide（導覽列 ‹ 返回、Setup Guide、?）。
-- 流程：1_120 Get Started → DEMO 判斷 WAN 選 **2 沒有偵測到 WAN、要不到 IP、US SKU** → 1_033 拔電 → **1_034 等 3 分鐘** → 1_036 插回 → **1_037 等 3½ 分鐘** → 按 Continue 跳出 **DEMO 流程判斷：重啟後 WAN**（是否已偵測到 WAN、要到 IP？）。**Yes、No 都會進到 1_140**，接著照常走 1_150 → 1_160 → 1_170 → AiMesh 1_180–1_200；差別在最後：**Yes 有 1_210**（網路已連線），**No 沒有 1_210**（1_200 直接接 1_220 設定摘要，1_220 返回 → 1_200，1_220 的 Finish 按鈕改成 Next）。
+- 流程：1_120 Get Started → DEMO 判斷 WAN 選 **2 沒有偵測到 WAN、要不到 IP、US SKU** → 1_033 拔電 → **1_034 等 3 分鐘** → 1_036 插回 → **1_037 等 3½ 分鐘** → 按 Continue 跳出 **DEMO 流程判斷：重啟後 WAN**（是否已偵測到 WAN、要到 IP？）。**Yes、No 都會進到 1_140**，接著照常走 1_150 → 1_160 → 1_170 → AiMesh 1_180–1_200；差別在最後：**Yes** 在 1_200 之後照常跳出「Internet Connected?」判斷；**No** 等於確定沒連上網路，1_200 之後跳過這個判斷，直接問「node 台數」（見 5.13）。
 - 插圖區放一張淺灰圓角卡片：上方藍色小字（WAIT 3 MINUTES / WAIT AT LEAST 3½ MINUTES）、68 pt 藍色粗體倒數（3:00 / 3:30）、藍色進度條、灰色提示（Continue unlocks when the timer ends. / Blinking lights? Keep waiting.）、小數據機圖。
   - 1_034：燈全滅、插頭拔在旁邊，標籤 POWER OFF。
   - 1_037：電源線插著，燈號綠色閃爍，標籤 STARTING UP / LIGHTS MAY BLINK。
@@ -383,23 +383,52 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_190 | AiMesh Network optimization | The AiMesh node(s) are now automatically joining the network, no manual setup is needed. | 一台節點、窗戶、花瓶（`mesh-2.jpg` 21 KB） |
 | 1_200 | AiMesh Network optimization | We could run the optimization in the background so you can start browsing instantly. | 節點在櫃子上、沙發、立燈（`mesh-3.jpg` 23 KB） |
 
-- 1_200 下方有「Run in background」藍色底線連結（`#007bfe`）→ 直接跳到 1_210（WAN 流程判斷「重啟後 WAN」選 No 時 → 1_220，沒有 1_210）。
+- 1_200 下方有「Run in background」藍色底線連結（`#007bfe`），效果和等 1_200 自動跑完一樣：留在 1_200 並跳出 DEMO 判斷「Internet Connected?」（「重啟後 WAN」選 No 時直接跳「node 台數」），見 5.13。
 
-### 5.13 `1_210` 完成：網路已連線 `internet-live`
-- Figma node：`1867:2040`（Figma 是靜態圖，**這頁完全用程式自己畫，加上完成的動態效果**）
-- 導覽列：‹ 返回（沒有紀錄時 → 1_160）+「Setup Guide」
+### 5.13 1_200 之後的流程（Internet Connected?）
+- 來源：Figma `b6i9sXOWaZ4TQnSlif6iu7`（Untitled）Page 1 的流程圖；下面各頁的 Figma node 指這個檔案（1_210、1_230、1_280 沿用原本 QIS_Prelink 的頁面）。
+- 1_200 跑完（或按 Run in background）→ DEMO 判斷，全部判斷見 6.2：
+
+```
+1_200 ─ Internet Connected?（link internet = 2 & ping 通 internet）
+ ├ Yes ─ node Prelink 台數？
+ │   ├ 單台 ─ 1_210 → 1_230 Finish ─ FW 更新？
+ │   │                              ├ Yes ─ 1_240 → Update → 1_250 → 1_260
+ │   │                              │            └ Maybe Later ───────→ 1_260
+ │   │                              └ No ──────────────────────────────→ 1_260
+ │   │        1_260 啟用 → 1_270 → 1_280 首頁；略過 → 1_280
+ │   └ 單台／多台（>1 台未連回）─ 1_220 ─ Next → 1_230 Finish → 1_290 AiMesh 拓撲
+ │                                   └ Trouble shooting → 1_300 → 1_310–1_330 → 1_230
+ └ No ─ node 台數？
+     ├ ≥ 1 台（節點沒有回應／優化中）─ 1_300 → 1_310 → 1_320 → 1_330 ─┐
+     └ 0 台 ──────────────────────────────────────────────────────┤
+                                                Mobile 行動網路？ ┘
+                                                 ├ Yes ─ 1_230 Next → 1_340 ─ 完成設定 → 1_360
+                                                 │                         └ Feedback → 1_350 發送 → 1_360
+                                                 └ No ── 1_230 Finish → 1_360
+```
+
+- 「數據機重啟後」選 No（5.3b）時，Internet Connected? 直接當成 No，不會跳出來。
+- 1_230 設定摘要是同一頁，**按鈕和去向跟著分支變**：單台 Finish → FW 更新？；多台 Finish → 1_290；行動網路 Yes：Next → 1_340；行動網路 No：Finish → 1_360。單台以外標題列下方多一行「Setup complete」（照 Figma）。
+- 1_300 的節點狀態依「node 台數」選的是「節點沒有回應」或「節點優化中」顯示不同圖文；從 1_220 Trouble shooting 進來時沿用上次選的狀態（預設優化中）。
+- Figma 上的線狀態／燈號狀態說明（洋紅色註解）：綠線／白燈 = good connection（AiMesh Node is ready）；動態藍線／藍燈 = 節點正在優化（AiMesh Node is optimising）；黃線／黃燈 = 連線品質需要優化（weak，connection quality can be improved）；灰線 = 節點 offline（no response，沒有 MAC address）。
+
+### 5.13a `1_210` / `1_220` 網路已連線 `internet-live` / `internet-live-mesh`
+- Figma node：`1867:2040`（Figma 是靜態圖，**這頁完全用程式自己畫，加上完成的動態效果**）；1_220 對應新 Figma `0:377`，沿用 1_210 的畫面
+- 導覽列：‹ 返回（沒有紀錄時 → 1_200）+「Setup Guide」
+- **1_210（單台）**和 **1_220（單台／多台，>1 台未連回）**畫面相同；1_220 在標題下多一段「Let’s keep checking your AiMesh node(s) status in following steps.」（16 pt `#555`，置中），Next 下方多一個「Trouble shooting」藍色底線連結 → 1_300
 - 動畫順序：
   1. 0 秒：路由器（`zenwifi-device.png`）從下方彈出來，下面有一條層架
   2. 0.35 秒起：15 個彩色紙花（三角形、圓環、長條、圓點、齒輪、地球、星星）從路由器後面**往外炸開**，接著稍微往下飄並**淡出消失**（約 2 秒內全部消失，只出現一次）
   3. 0.5 秒起：路由器後方**一圈圈圓形藍色波紋**往外擴散、淡出，**一直重複**，表示持續在傳送訊號；最後畫面只剩路由器、勾勾和圓形波紋
   4. 1.1 秒：路由器右上角**綠色勾勾彈出**，0.35 秒後畫出勾號
   5. 1.3 秒：標題「Internet Connection is Live!」（22 pt semibold `#2f86e0`）淡入往上
-  6. 1.6 秒：白色膠囊按鈕 Next 淡入 → `summary` 1_220
+  6. 1.6 秒：白色膠囊按鈕 Next 淡入 → `summary` 1_230
 - 使用者有開「減少動態效果」時，直接顯示最後的畫面（不顯示紙花和波紋）。
 
-### 5.14 `1_220` 設定摘要 `summary`
+### 5.14 `1_230` 設定摘要 `summary`
 - Figma node：`819:320`
-- **淺色頁面**；導覽列：‹ 返回（→ 1_210）+「System Setup」
+- **淺色頁面**；導覽列：‹ 返回（單台 → 1_210；多台 → 1_220；沒網路 → 1_200）+「System Setup」
 - 由上而下：BT8 三入組圖（`bt8-3pack.jpg`，264 × 169）→ 分隔線 → **Summary** → 分隔線 → **Guest Network** → Finish
 
 | 區塊 | 圖示 | 內容（**帶入 1_140～1_160 填的值**） |
@@ -413,15 +442,16 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 - 文字 16 pt `#555`，每列兩行；區塊標題 17 pt `#222`；分隔線寬 386。
 - Figma 原稿的密碼都是 `12345678`，原型改成顯示實際填的值。
 - 5G / 6G 名稱照 Figma 加上後綴（即使沒勾 Separate WiFi network）；之後可以依勾選狀態決定要不要分開顯示。
-- **Finish** → `home` 1_230
+- 按鈕依分支變化（見 5.13）：單台 **Finish** → DEMO 判斷「FW 更新？」；多台 **Finish** → 1_290；行動網路 Yes **Next** → 1_340；行動網路 No **Finish** → 1_360
+- 單台以外，三入組圖下方多一行「Setup complete」（20 pt `--brand`）
 
-### 5.15 `1_230` 首頁 `home`
+### 5.15 `1_280` 首頁 `home`
 - Figma node：`1728:569`（原稿是 ASUS Router App 首頁截圖，**盡量照原畫面重做**）
 - 白底；沒有導覽列，改用自己的頂部列
 
 | 區塊 | 規格 |
 |---|---|
-| 頂部列 | 左：‹ 返回（→ 1_220，依返回規則加上）＋ 52 pt 圓形頭像（Google G，白邊＋陰影）＋「首頁」21 pt `#5b9be6`；右：白色膠囊（174 × 52，陰影）內有 ⓘ、🔔、＋（`#4a90e2`） |
+| 頂部列 | 左：‹ 返回（→ 1_260，依返回規則加上）＋ 52 pt 圓形頭像（Google G，白邊＋陰影）＋「首頁」21 pt `#5b9be6`；右：白色膠囊（174 × 52，陰影）內有 ⓘ、🔔、＋（`#4a90e2`） |
 | 路由器卡片 | 411 × 85，白底，藍色光暈陰影 `rgba(74,144,226,.35)`；左：裝置小圖＋「ZenWiFi BT8」；中：區域網路 IP »（灰）/ 192.168.50.1（藍）/ 無線網路名稱（灰）/ **SSID（帶入 1_140 的值）**；右：直線分隔＋灰色測速儀圖示 |
 | 即時流量 | 標題 21 pt `#2a62d6`；下方 416 × 253 的**即時流量圖** |
 | 下載 / 上傳 | 淺藍圓圈↓「下載」、綠色圓圈↑「上傳」；數值 21 pt `#555`，**跟著流量圖即時更新**（超過 1000 Kbps 自動換成 Mbps） |
@@ -438,6 +468,43 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 - 右上角 **＋（新增裝置）→ `opening` 1_010**，回到 QIS 第一頁重新設定（和實際 ASUS Router App 用「＋」新增路由器的習慣一致）。
 - 其他按鈕（頭像、ⓘ、🔔、卡片、測速、功能圖示、分頁列）目前都是「頁面尚未加入」。
+
+### 5.16 `1_240` / `1_250` 韌體更新 `fw-available` / `fw-updating`
+- Figma node：`0:364`；導覽列：粗體「System Setup」+ ?（沒有返回）
+- **1_240 New Firmware Available**：路由器圖（`fw-router.jpg`，217 × 223）→ 標題（含分隔線）→ 說明「We strongly recommend updating…」→ 白色膠囊 **Update** → 1_250；藍色底線 **Maybe Later** → 1_260
+- **1_250 Firmware Update**：同一張圖，標題下是進度條（280 pt，4 秒跑完）＋提醒「Keep your router powered on and do not remove your WAN cable during the update process.」；約 4 秒後自動到 1_260
+
+### 5.17 `1_260` / `1_270` 啟用遠端連線 `remote-access` / `remote-wait`
+- Figma node：`0:71`、`0:76`
+- 背景是剛設定好的 App 首頁（路由器卡片顯示「狀態：正在連線…」＋轉圈、「歡迎使用」），整頁加 40% 黑色遮罩（連狀態列一起），底部面板從下方滑上來（上方有灰色把手）
+- **1_260**：面板高 600；遠端連線圖示（`remote-access-icon.jpg`）、「啟用遠端連線」、「透過安全加密通道遠端管理裝置，獲得更多軟體功能。」、藍色 **啟用** → 1_270；**略過** → 1_280
+- **1_270**：面板幾乎全螢幕（上方留 76 pt）；路由器訊號圖示（`remote-wait-icon.jpg`）、「Wait a few seconds...」、進度條。Figma 標示實際約 **1 分 10 秒**，原型約 3.5 秒後自動到 1_280
+
+### 5.18 `1_290` AiMesh 拓撲 `aimesh-topology`
+- Figma node：`0:81`；多台流程按 1_230 Finish 進入
+- 頂部列、路由器卡片、功能圖示、底部分頁列沿用 1_280；中間是「AiMesh WiFi 系統」標題、拓撲圖（`aimesh-topology.jpg`：網際網路 → 主路由器 → 兩台節點，MLO 連線）、白色膠囊「新增節點｜最佳化」；功能圖示中 AiMesh 為選中
+- 拓撲圖是 Figma 的截圖，裝置名稱顯示 ZenWiFi BT6（原稿如此）
+
+### 5.19 `1_300`–`1_330` AiMesh 節點連線狀態與燈號排除 `node-status`、`node-guide-1`～`node-guide-3`
+- Figma node：`0:182`（沒有回應）、`0:252`（優化中）、`0:85`、`0:97`、`0:109`
+- **1_300**：導覽列粗體「System Setup」+ ?；三台節點連線圖（`node-status-offline.jpg` 灰線＋黃色 2／`node-status-optimising.jpg` 藍線）→「AiMesh Node(s) Connection Status」→ 編號清單：① AiMesh Node is ready.；② AiMesh Node is not responding. (No MAC address)（黃色圓圈）或 AiMesh Node is optimising. → Next → 1_310
+  - Figma 原文「is no respondse. (No mac adress)」修正拼字
+- **1_310–1_330**：版型同設定指南（‹ 返回、Setup Guide、?；插圖區 340 pt），標題 19 pt semibold `#2f86e0`、沒有分隔線；說明 15 pt `#666`
+
+| 頁碼 | 標題 | 插圖 |
+|---|---|---|
+| 1_310 | Stand by the blinking blue light turns white | 打勾的節點（`node-guide-white.jpg`） |
+| 1_320 | Improve connection quality when the light is yellow | 兩台節點黃線（`node-guide-yellow.jpg`） |
+| 1_330 | Power on the node if indicator remains off | 開電源的節點（`node-guide-power.jpg`），說明下方有綠色／藍色燈號圖例 |
+
+- 1_330 的 Next：沒網路時 → DEMO 判斷「Mobile 行動網路？」；從 1_220 Trouble shooting 進來（有網路）→ 1_230
+- Figma 原文「please enure」修正為「please ensure」
+
+### 5.20 `1_340`–`1_360` 尚未連上網際網路 `no-internet`、`feedback`、`home-offline`
+- Figma node：`0:150`、`0:169`、`0:398`
+- **1_340**：粗體「System Setup」；地球加驚嘆號圖（`no-internet-globe.jpg`）、「裝置設定已完成」（19 pt semibold `#1b74e4`）、「您的環境目前尚未連上網際網路」；最下方淺藍 **Feedback** 卡片（提供問題資訊，協助我們了解您的連線狀況）→ 1_350，深藍 **完成設定** → 1_360
+- **1_350 問題回報**：× 關閉（返回）、「問題回報」、發送 → 1_360；欄位：您所在的地區（台灣）、您的電子郵件地址（必要的）、問題回報類型（設定問題 ›）、問題回報描述（網路設定精靈 ›）、評論／建議（字數 0/2000，輸入時更新）、附加圖片 ›；淺灰底 `#efeff4`。選單類欄位目前是「頁面尚未加入」
+- **1_360**：1_280 的首頁版型，路由器卡片顯示「狀態：正在連線…」，中間「歡迎使用」「ZenWiFi BT8」和路由器圖（`home-offline-device.jpg`）；分頁列上方一條橘色 `#ff8a00`「網路連線可能異常」＋白框按鈕「詳細診斷」（尚未加入）
 
 ## 6. 原型實作
 
@@ -488,7 +555,12 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 |---|---|---|---|---|
 | 0 | `wan` | 1_120 按 Get Started | WAN 偵測結果？ | 1 正常 → `wan-detecting` 1_130；2 沒有偵測到 WAN、要不到 IP、US SKU → `modem-unplug` 1_033（WAN 流程，見 5.3b）；3 沒有偵測到 WAN → `wan-type` 1_125 |
 | 1 | `wanDetect` | 1_125 按 Auto Detect（Detecting... 轉約 1.8 秒後跳出） | Auto Detect：這次有偵測到 WAN 嗎？ | Yes → `setup-ssid` 1_140；No → 留在 1_125，跳出「連線無線路由器」提示，按確定關閉 |
-| 1 | `wanRestart` | 1_037 倒數結束按 Continue | 數據機重啟後：是否已偵測到 WAN、要到 IP？ | Yes → `setup-ssid` 1_140（之後有 1_210）；No → `setup-ssid` 1_140（之後沒有 1_210，1_200 → 1_220） |
+| 1 | `wanRestart` | 1_037 倒數結束按 Continue | 數據機重啟後：是否已偵測到 WAN、要到 IP？ | Yes → `setup-ssid` 1_140（1_200 之後問 Internet Connected?）；No → `setup-ssid` 1_140（1_200 之後直接問 node 台數） |
+| 2 | `internet` | 1_200 跑完或按 Run in background | Internet Connected?（link internet = 2 & ping 通 internet） | Yes → 判斷 `prelink`；No → 判斷 `nodeCount` |
+| 3 | `prelink` | 接在 `internet` Yes 後面 | node Prelink 台數？ | 單台 → `internet-live` 1_210；單台／多台（>1 台未連回）→ `internet-live-mesh` 1_220 |
+| 3 | `nodeCount` | 接在 `internet` No 後面（或重啟後 WAN 選 No 時 1_200 直接跳） | node 台數？ | 0 台 → 判斷 `mobile`；≥ 1 台 · 節點沒有回應 / 節點優化中 → `node-status` 1_300 |
+| 4 | `fw` | 1_230 按 Finish（單台） | FW 更新？ | Yes → `fw-available` 1_240；No → `remote-access` 1_260 |
+| 4 | `mobile` | 1_330 按 Next（沒網路），或 node 台數選 0 台 | Mobile 行動網路？ | Yes → `summary` 1_230（Next → 1_340）；No → `summary` 1_230（Finish → 1_360） |
 
 - 正式 App 會自動偵測，不會有這個面板；它只是讓展示時可以切換不同情況。
 
@@ -528,9 +600,22 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_180 | AiMesh 建立中 1/3 `mesh-1` | 建立 AiMesh 網路：路由器和節點開始連線 |
 | 1_190 | AiMesh 建立中 2/3 `mesh-2` | AiMesh 最佳化：節點自動加入網路 |
 | 1_200 | AiMesh 建立中 3/3 `mesh-3` | AiMesh 最佳化：可以改到背景執行，先開始上網 |
-| 1_210 | 完成：網路已連線 `internet-live` | 設定完成，網際網路已連線（有完成動畫）。數據機重啟後仍沒有 WAN／IP 時跳過這頁 |
-| 1_220 | 設定摘要 `summary` | 列出剛設定好的 WiFi 名稱／密碼、登入帳號和 IoT 訪客網路 |
-| 1_230 | 首頁 `home` | 設定完成後進入 App 首頁，顯示路由器資訊和即時上傳／下載流量 |
+| 1_210 | 完成：網路已連線 `internet-live` | Prelink 單台：網際網路已連線（有完成動畫），按 Next 看設定摘要 |
+| 1_220 | 網路已連線：繼續檢查節點 `internet-live-mesh` | 單台／多台（>1 台未連回）：網路已連線，接著檢查節點；Trouble shooting 看節點狀態 |
+| 1_230 | 設定摘要 `summary` | 列出剛設定好的 WiFi 名稱／密碼、登入帳號和 IoT 訪客網路；按鈕依分支接到不同頁 |
+| 1_240 | 有新韌體 `fw-available` | FW 更新：建議現在更新韌體，Update 或 Maybe Later |
+| 1_250 | 韌體更新中 `fw-updating` | 更新中，提醒不要斷電、不要拔 WAN 線（約 4 秒後自動跳下一頁） |
+| 1_260 | 啟用遠端連線 `remote-access` | 進入 App 首頁時詢問是否啟用遠端連線，或略過 |
+| 1_270 | 啟用遠端連線中 `remote-wait` | Wait a few seconds（實際約 1 分 10 秒，原型約 3.5 秒） |
+| 1_280 | 首頁 `home` | 設定完成後進入 App 首頁，顯示路由器資訊和即時上傳／下載流量 |
+| 1_290 | AiMesh 拓撲 `aimesh-topology` | 多台：設定完成後進入 App 的 AiMesh 頁，顯示路由器和節點的連線 |
+| 1_300 | AiMesh 節點連線狀態 `node-status` | 每台節點的狀況（已就緒／優化中／沒有回應） |
+| 1_310 | 節點燈號排除 1/3 `node-guide-1` | 藍燈閃爍代表正在優化，完成後變白燈 |
+| 1_320 | 節點燈號排除 2/3 `node-guide-2` | 黃燈代表連線品質不佳，調整擺放位置 |
+| 1_330 | 節點燈號排除 3/3 `node-guide-3` | 燈不亮就打開節點電源 |
+| 1_340 | 尚未連上網際網路 `no-internet` | 裝置設定已完成但還沒連上網，可以回報問題或完成設定 |
+| 1_350 | 問題回報 `feedback` | 填寫地區、電子郵件和問題描述，發送後到首頁 |
+| 1_360 | 首頁：網路異常 `home-offline` | 路由器還在連線中，顯示「網路連線可能異常」提示 |
 
 ## 7. 待辦
 

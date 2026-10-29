@@ -2667,3 +2667,425 @@ button {
   line-height: 21px;
   color: var(--guide-desc);
 }
+
+/* ── 1_220 網路已連線（多台）：說明 + Trouble shooting ── */
+.done-desc {
+  width: 340px;
+  margin-top: 18px;
+  font-size: 16px;
+  line-height: 1.35;
+  text-align: center;
+  color: #555;
+  animation: title-in .5s ease-out 1.4s both;
+}
+
+.done-desc ~ .pill-btn.done-next { margin-bottom: 0; }
+
+.guide-link.done-trouble {
+  margin: 20px 0 40px;
+  font-size: 16px;
+  animation: title-in .5s ease-out 1.6s both;
+}
+
+/* ── 1_230 設定摘要：非單台時多一行 Setup complete ── */
+.summary-done {
+  margin-top: 6px;
+  font-size: 20px;
+  color: var(--brand);
+}
+
+.summary-done + .summary-section { margin-top: 12px; }
+
+/* ── 1_240 / 1_250 韌體更新 ── */
+.fw-device { display: block; margin-top: 52px; }
+
+.guide-title.fw-title { margin-top: 54px; }
+
+.guide-desc.fw-desc {
+  width: 336px;
+  margin-top: 22px;
+  color: #555;
+}
+
+.pill-btn.fw-update {
+  width: 183px;
+  height: 50px;
+  margin-top: auto;
+  font-size: 17px;
+  color: var(--brand);
+}
+
+.guide-link.fw-later { margin: 22px 0 46px; }
+
+.progress.fw-progress { width: 280px; margin-top: 26px; }
+
+.fw-progress .progress-fill { animation-duration: 4s; }
+
+.fw-note {
+  width: 300px;
+  margin-top: 36px;
+  font-size: 16px;
+  line-height: 1.35;
+  text-align: center;
+  color: #444;
+}
+
+/* ── 1_260 / 1_270 啟用遠端連線（App 首頁上的底部面板） ── */
+.app-behind {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-welcome {
+  margin-top: 40px;
+  font-size: 24px;
+  font-weight: 400;
+  color: #5b9be6;
+}
+
+.home-model {
+  margin-top: 22px;
+  font-size: 18px;
+  color: #5b9be6;
+}
+
+.rc-spin {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  margin-left: 4px;
+  vertical-align: -2px;
+  border: 2px solid #d4d8de;
+  border-top-color: #8a9099;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.app-sheet-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 6; /* above the fake status bar so it dims too */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: rgba(0, 0, 0, .4);
+  animation: sheet-fade .25s ease-out both;
+}
+
+.app-sheet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: var(--safe-bottom);
+  border-radius: 14px 14px 0 0;
+  background: #fff;
+  animation: sheet-up .3s cubic-bezier(.2, .8, .2, 1) both;
+}
+
+@keyframes sheet-fade { from { opacity: 0; } }
+@keyframes sheet-up { from { transform: translateY(100%); } }
+
+.app-sheet-grabber {
+  width: 48px;
+  height: 5px;
+  margin-top: 10px;
+  border-radius: 3px;
+  background: #c7c7cc;
+}
+
+.remote-sheet { height: 600px; }
+
+.remote-icon { display: block; margin-top: 28px; }
+
+.remote-title {
+  margin-top: 16px;
+  font-size: 19px;
+  font-weight: 500;
+  color: #222;
+}
+
+.remote-desc {
+  width: 390px;
+  margin-top: 112px;
+  font-size: 15px;
+  text-align: center;
+  color: #333;
+}
+
+.btn-brand.remote-enable {
+  width: 249px;
+  height: 49px;
+  margin-bottom: 0;
+  font-size: 19px;
+}
+
+.remote-skip {
+  margin: 18px 0 22px;
+  font-size: 17px;
+  color: var(--brand);
+}
+
+.remote-wait-sheet { height: calc(100% - 76px); }
+
+.remote-wait-icon { display: block; margin-top: 190px; }
+
+.remote-wait-text {
+  margin-top: 110px;
+  font-size: 17px;
+  color: #222;
+}
+
+.progress.remote-wait-progress {
+  width: 350px;
+  height: 6px;
+  margin-top: 40px;
+  border-radius: 3px;
+}
+
+.remote-wait-progress .progress-fill { animation-duration: 3.4s; }
+
+/* ── 1_290 AiMesh 拓撲 ── */
+.aimesh-title {
+  margin-top: 36px;
+  font-size: 19px;
+  font-weight: 400;
+  color: #2a62d6;
+}
+
+.aimesh-topology {
+  display: block;
+  width: 325px;
+  height: auto;
+  margin-top: 20px;
+}
+
+.aimesh-actions {
+  margin-top: 28px;
+  height: 44px;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(74, 144, 226, .25);
+  color: #3a7be0;
+  font-size: 14px;
+}
+
+.aimesh-actions button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: inherit;
+}
+
+.aimesh-actions button + button {
+  margin-left: 16px;
+  padding-left: 16px;
+  border-left: 1.5px solid #3a7be0;
+}
+
+.aimesh-actions svg { width: 20px; height: 20px; }
+
+.aimesh-actions + .home-shortcuts { margin-top: 26px; }
+
+/* ── 1_300 AiMesh 節點連線狀態 ── */
+.node-status-illust { display: block; margin-top: 4px; }
+
+.guide-title.node-status-title {
+  margin-top: 6px;
+  padding-bottom: 18px;
+  font-size: 19px;
+  color: #2f86e0;
+}
+
+.node-status-list {
+  list-style: none;
+  width: 370px;
+  margin-top: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  font-size: 16px;
+  line-height: 1.35;
+  color: #222;
+}
+
+.node-status-list li { display: flex; align-items: flex-start; gap: 14px; }
+
+.node-num {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid #222;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 21px;
+  text-align: center;
+}
+
+.node-num-warn { border-color: #e5a800; background: #e5a800; }
+
+/* ── 1_310–1_330 節點燈號排除 ── */
+.guide-illust.node-guide-illust { height: 340px; }
+
+.guide-title.node-guide-title {
+  width: 370px;
+  font-size: 19px;
+  font-weight: 600;
+  color: #2f86e0;
+}
+
+.guide-desc.node-guide-desc {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: 15px;
+  line-height: 20px;
+  color: #666;
+}
+
+.guide-legend.node-guide-legend { width: auto; margin-top: 4px; font-size: 15px; }
+
+/* ── 1_340 尚未連上網際網路 ── */
+.noinet-globe { display: block; margin-top: 30px; }
+
+.noinet-title {
+  margin-top: 10px;
+  font-size: 19px;
+  font-weight: 600;
+  color: #1b74e4;
+}
+
+.noinet-sub {
+  margin-top: 18px;
+  font-size: 17px;
+  font-weight: 500;
+  color: #111;
+}
+
+.feedback-card {
+  width: 387px;
+  height: 82px;
+  margin-top: auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  border-radius: 4px;
+  background: #4fa0df;
+  color: #fff;
+  text-align: left;
+}
+
+.feedback-card svg { flex-shrink: 0; }
+
+.feedback-card span { display: flex; flex-direction: column; gap: 3px; }
+
+.feedback-card b { font-size: 18px; font-weight: 500; }
+
+.feedback-card small { font-size: 13px; opacity: .9; }
+
+.noinet-done {
+  width: 387px;
+  height: 56px;
+  margin: 14px 0 40px;
+  border-radius: 4px;
+  background: #0b568f;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* ── 1_350 問題回報 ── */
+.fb-navbar .navbar-btn { color: #4a90e2; }
+
+.navbar-btn.fb-send { width: auto; padding: 0 6px; font-size: 16px; }
+
+.fb-body {
+  padding: 4px 18px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.fb-label {
+  margin-top: 18px;
+  font-size: 14px;
+  color: #666;
+}
+
+.fb-field {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 8px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #efeff4;
+  font-size: 16px;
+  color: #222;
+  text-align: left;
+}
+
+.fb-field input,
+.fb-field textarea {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  outline: none;
+}
+
+.fb-field ::placeholder { color: #999; }
+
+.fb-clear { display: flex; color: #8e8e93; }
+
+.fb-select svg { flex-shrink: 0; width: 18px; height: 18px; color: #b0b0b5; }
+
+.fb-comment {
+  height: 180px;
+  padding: 12px 14px 8px;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.fb-comment textarea { resize: none; }
+
+.fb-count { align-self: flex-end; font-size: 13px; color: #999; }
+
+.fb-attach { margin-top: 24px; }
+
+/* ── 1_360 首頁（尚未連網） ── */
+.home-offline-device { display: block; margin-top: 40px; }
+
+.home-alert {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--safe-bottom) + 75px);
+  height: 44px;
+  padding: 0 16px 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ff8a00;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.home-alert button {
+  padding: 4px 26px;
+  border: 1.5px solid #fff;
+  border-radius: 16px;
+  color: #fff;
+  font-size: 15px;
+}
