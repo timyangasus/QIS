@@ -1869,8 +1869,16 @@
           </div>
           <button class="fb-field fb-select fb-attach" data-go="feedback-image" data-label="附加圖片">附加圖片${ICON.chevron}</button>
         </div>
+
+        <div class="wan-type-hud fb-loading show" role="status">
+          <span class="wan-type-spinner">${Array.from({ length: 12 }, (_, i) => `<i style="--i:${i}"></i>`).join('')}</span>
+          Loading...
+        </div>
       `,
       mount: el => {
+        // Arriving from 1_345 同意: same black spinner HUD as 1_125 Auto Detect for 2 s while the form loads
+        const loading = setTimeout(() => el.querySelector('.fb-loading').classList.remove('show'), 2000);
+
         const text = el.querySelector('#fb-comment');
         const count = el.querySelector('.fb-count');
         text.addEventListener('input', () => { count.textContent = `${text.value.length}/2000`; });
@@ -1897,7 +1905,7 @@
           email.focus();
         };
         el.addEventListener('click', onSend, true);
-        return () => el.removeEventListener('click', onSend, true);
+        return () => { clearTimeout(loading); el.removeEventListener('click', onSend, true); };
       },
     },
     {
