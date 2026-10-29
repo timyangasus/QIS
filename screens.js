@@ -341,9 +341,10 @@
       <button class="tab" data-go="settings" data-label="設定">${HOME_ICON.tabSettings}<span>設定</span></button>
     </nav>`;
 
-  // 1_300 navbar: bold "System Setup" + ?
+  // 1_300 navbar: ‹ back, bold "System Setup", ?
   const systemSetupHeader = () => `
     <header class="navbar navbar-guide">
+      <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
       <h1 class="navbar-title navbar-title-bold">System Setup</h1>
       <button class="navbar-btn navbar-btn-right" data-go="help" data-label="說明" aria-label="說明">${ICON.helpOutline}</button>
     </header>`;
@@ -1383,7 +1384,7 @@
     },
     {
       id: 'join-wifi',
-      back: 'setup-apply',
+      back: 'setup-account',
       code: '1_175',
       name: '加入新的 Wi-Fi',
       description: '加入新 Wi-Fi：設定套用後路由器換成新的 WiFi 名稱，系統詢問是否加入，按 Join 繼續建立 AiMesh',
@@ -1391,6 +1392,7 @@
       theme: 'light',
       render: () => `
         <header class="navbar navbar-guide">
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
           <h1 class="navbar-title navbar-title-bold">System Setup</h1>
         </header>
         <div class="welcome-body">
@@ -1711,6 +1713,7 @@
       theme: 'light',
       render: () => `
         <header class="navbar navbar-guide">
+          <button class="navbar-btn" data-go="back" aria-label="返回">${ICON.back}</button>
           <h1 class="navbar-title navbar-title-bold">System Setup</h1>
         </header>
         <div class="welcome-body">

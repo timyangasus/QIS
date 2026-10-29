@@ -367,7 +367,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 ### 5.11a `1_175` 加入新的 Wi-Fi `join-wifi`
 - Figma node：`1867:1018`（原稿是截圖）。
 - 1_170 套用設定後，路由器的 WiFi 換成 1_140 設定的名稱，手機要重新加入。
-- 導覽列只有標題 System Setup（粗體，沒有返回和 ?）；下方是三入組產品圖（同 1_120）。
+- 導覽列：‹ 返回（→ 1_160；原稿沒有，依返回規則加上。不回 1_170，因為 1_170 會自動跳回這頁）+ 標題 System Setup（粗體，沒有 ?）；下方是三入組產品圖（同 1_120）。返回鍵被提示的暗色遮罩蓋住，系統提示是強制回應，要先關掉提示才按得到。
 - 畫面變暗，跳出模擬的 iOS 系統提示（沿用 1_060 的 `.ios-alert`）：“ASUS Router” Wants to Join Wi-Fi Network “<1_140 的 SSID>”?（原稿的範例是 asus1234）
   - **Join** → 1_180 AiMesh 建立中
   - **Cancel** → 待提供
@@ -472,7 +472,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 ### 5.17 `1_300`–`1_330` AiMesh 節點連線狀態與燈號排除 `node-status`、`node-guide-1`～`node-guide-3`
 - Figma node：`0:182`（沒有回應）、`0:252`（優化中）、`0:85`、`0:97`、`0:109`
-- **1_300**：導覽列粗體「System Setup」+ ?；三台節點連線圖（`node-status-offline.jpg` 灰線＋黃色 2／`node-status-optimising.jpg` 藍線）→「AiMesh Node(s) Connection Status」→ 編號清單：① AiMesh Node is ready.；② AiMesh Node is not responding. (No MAC address)（黃色圓圈）或 AiMesh Node is optimising. → Next → 1_310
+- **1_300**：導覽列 ‹ 返回（有網路 → 1_220；沒網路 → 1_200；原稿沒有，依返回規則加上）+ 粗體「System Setup」+ ?；三台節點連線圖（`node-status-offline.jpg` 灰線＋黃色 2／`node-status-optimising.jpg` 藍線）→「AiMesh Node(s) Connection Status」→ 編號清單：① AiMesh Node is ready.；② AiMesh Node is not responding. (No MAC address)（黃色圓圈）或 AiMesh Node is optimising. → Next → 1_310
   - Figma 原文「is no respondse. (No mac adress)」修正拼字
 - **1_310–1_330**：版型同設定指南（‹ 返回、Setup Guide、?；插圖區 340 pt），標題 19 pt semibold `#2f86e0`、沒有分隔線；說明 15 pt `#666`
 
@@ -487,7 +487,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 
 ### 5.18 `1_340`–`1_360` 尚未連上網際網路 `no-internet`、`feedback`、`home-offline`
 - Figma node：`0:150`、`0:169`、`0:398`
-- **1_340**：粗體「System Setup」；地球加驚嘆號圖（`no-internet-globe.jpg`）、「裝置設定已完成」（19 pt semibold `#1b74e4`）、「您的環境目前尚未連上網際網路」；最下方淺藍 **Feedback** 卡片（提供問題資訊，協助我們了解您的連線狀況）→ 1_350，深藍 **完成設定** → 1_360
+- **1_340**：導覽列 ‹ 返回（→ 1_230；原稿沒有，依返回規則加上）+ 粗體「System Setup」；地球加驚嘆號圖（`no-internet-globe.jpg`）、「裝置設定已完成」（19 pt semibold `#1b74e4`）、「您的環境目前尚未連上網際網路」；最下方淺藍 **Feedback** 卡片（提供問題資訊，協助我們了解您的連線狀況）→ 1_350，深藍 **完成設定** → 1_360
 - **1_350 問題回報**：× 關閉（返回）、「問題回報」、發送 → 1_360；欄位：您所在的地區（台灣）、您的電子郵件地址（必要的）、問題回報類型（設定問題 ›）、問題回報描述（網路設定精靈 ›）、評論／建議（字數 0/2000，輸入時更新）、附加圖片 ›；淺灰底 `#efeff4`。選單類欄位目前是「頁面尚未加入」
 - **1_360**：1_280 的首頁版型，路由器卡片顯示「狀態：正在連線…」，中間「歡迎使用」「ZenWiFi BT8」和路由器圖（`home-offline-device.jpg`）；分頁列上方一條橘色 `#ff8a00`「網路連線可能異常」＋白框按鈕「詳細診斷」（尚未加入）
 
