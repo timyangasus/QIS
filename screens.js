@@ -666,7 +666,7 @@
         </div>
 
         <div class="opening-links">
-          <button class="text-link" data-go="feedback">問題回報</button>
+          <button class="text-link" data-go="feedback-consent">問題回報</button>
           <button class="text-link" data-go="login">帳號登入</button>
         </div>
       `,
@@ -1788,7 +1788,7 @@
           <img class="noinet-globe" src="assets/no-internet-globe.jpg" alt="" width="211" height="143">
           <h2 class="noinet-title">裝置設定已完成</h2>
           <p class="noinet-sub">您的環境目前尚未連上網際網路</p>
-          <button class="feedback-card" data-go="feedback" data-label="Feedback">
+          <button class="feedback-card" data-go="feedback-consent" data-label="Feedback">
             ${FEEDBACK_ICON}
             <span><b>Feedback</b><small>提供問題資訊，協助我們了解您的連線狀況</small></span>
           </button>
@@ -1796,9 +1796,48 @@
         </div>
       `,
     },
+    // Feedback needs the user's consent to send device info first; 拒絕 goes back, 同意 opens the form
+    {
+      id: 'feedback-consent',
+      back: 'no-internet',
+      code: '1_345',
+      name: '協助改善使用體驗',
+      description: '協助改善使用體驗：問題回報會附上裝置資訊，按同意才進 1_350 問題回報，拒絕回上一頁',
+      theme: 'light',
+      render: () => `
+        <div class="consent-body">
+          <h1 class="consent-title">協助改善使用體驗</h1>
+          <p>當您提交回饋時，系統將包含裝置資訊以協助我們診斷問題並提升使用體驗。點擊同意，即表示我同意華碩以下事項：</p>
+          <p><b class="consent-head">- 華碩隱私權聲明</b>: 我同意「<a class="consent-link">華碩隱私權保護政策</a>」並提供我的華碩路由器之型號、韌體版本、手機型號、OS與APP版本、MAC位址、IP地址、網際網路狀態、路由器系統資訊、提交此表單的時間—供華碩診斷及改善您的路由器問題與使用者經驗調查及分析，用來開發、評估華碩的新服務及新功能。</p>
+          <p><b class="consent-head">- 華碩歐盟數據法聲明（適用於歐盟產品）</b></p>
+          <p>根據《歐盟資料法》第 3(2) 條之規定，請參閱下列關於您資料（「產品資料」）的詳細資訊，此等資料是您使用此華碩產品（「連線產品」）時所產生，並受《歐盟資料法》規範：</p>
+          <ol class="consent-list">
+            <li>關於產品數據的類型、格式及估計容量的資訊：
+              <ol>
+                <li>連線產品會產生以下類型的產品數據：如上述華碩隱私權聲明第1段所提及的數據</li>
+                <li>產品數據可提供以下格式：json, txt</li>
+                <li>產品數據的估計容量：[10 MB]/ 每筆數據。</li>
+              </ol>
+            </li>
+            <li>關於連線產品是否能持續且即時產生產品數據的資訊：是</li>
+            <li>關於連線產品是否能在裝置或遠端伺服器儲存產品數據，以及 (如適用) 預計的儲存期限：
+              <ol>
+                <li>連線產品能在伺服器上儲存產品數據。</li>
+                <li>產品數據將儲存 2 年，之後自動刪除。</li>
+              </ol>
+            </li>
+            <li>關於使用者如何存取、取回或刪除產品數據的資訊，包括技術方式，以及使用條款與服務品質：使用者可透過華碩官方網站的「<a class="consent-link">個人資料客戶申請</a>」介面存取、取回或刪除產品數據。</li>
+          </ol>
+        </div>
+        <div class="consent-actions">
+          <button class="consent-btn" data-go="back">拒絕</button>
+          <button class="consent-btn" data-go="feedback" data-label="同意">同意</button>
+        </div>
+      `,
+    },
     {
       id: 'feedback',
-      back: 'no-internet',
+      back: 'feedback-consent',
       code: '1_350',
       name: '問題回報',
       description: '問題回報：填寫地區、電子郵件和問題描述，按發送後到首頁',

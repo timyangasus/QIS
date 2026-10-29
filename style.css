@@ -2880,6 +2880,61 @@ button {
   text-align: center;
 }
 
+/* ── 1_345 協助改善使用體驗（回報前的同意頁） ── */
+.screen-feedback-consent { display: flex; flex-direction: column; }
+
+.consent-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 28px 12px;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #222;
+}
+
+.consent-title {
+  margin-bottom: 22px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #4a90e2;
+}
+
+.consent-body > p { margin-bottom: 12px; }
+
+.consent-head { font-weight: 600; text-decoration: underline; }
+
+.consent-link { color: #1b74e4; text-decoration: underline; }
+
+.consent-list { padding-left: 18px; }
+
+.consent-list > li { margin-bottom: 12px; }
+
+.consent-list ol { margin-top: 10px; padding-left: 26px; list-style: none; counter-reset: sub; }
+
+.consent-list ol li { margin-bottom: 10px; counter-increment: sub; position: relative; }
+
+.consent-list ol li::before { content: '(' counter(sub) ')'; position: absolute; left: -26px; }
+
+.consent-actions {
+  flex-shrink: 0;
+  display: flex;
+  gap: 24px;
+  padding: 14px 22px 36px;
+}
+
+.consent-btn {
+  flex: 1;
+  height: 52px;
+  border-radius: 26px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 17px;
+  text-align: center;
+}
+
+.consent-btn:active { background: var(--brand-pressed); }
+
 /* ── 1_350 問題回報 ── */
 .fb-navbar .navbar-btn { color: #4a90e2; }
 
