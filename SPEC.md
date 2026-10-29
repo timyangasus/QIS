@@ -190,7 +190,7 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
   - 1_037：電源線插著，燈號綠色閃爍，標籤 STARTING UP / LIGHTS MAY BLINK。
 - 標題 Keep the modem unplugged. / Wait for the modem to start.
 - **Continue 一開始是灰色不能按，倒數到 0:00 才亮起**（倒數數字和進度條同時變綠）。
-- **真實時間倒數**：從 3:00／3:30 照真實時間倒數。Continue 倒數中是灰色，但為了 demo 灰色時也能直接按，不用等倒數結束；倒數結束變藍色。
+- **DEMO 倒數**：從 3:00／3:30 開始，前 10 秒照真實時間倒數，之後剩下的時間在 3 秒內跑完，方便展示倒數結束時 Continue 從灰色變藍色。Continue 倒數中是灰色，但為了 demo 灰色時也能直接按，不用等倒數結束；倒數結束變藍色。
 
 - **為什麼要做這一步（只在 WAN 流程顯示）**：從 1_120 判斷 2（沒有偵測到 WAN、要不到 IP、US SKU）進來時，使用者在 1_030 後可能已經重啟過一次數據機，為了避免「怎麼又要做」的疑問，1_033／1_034／1_036／1_037 的標題下方多一段 15 pt 灰字說明（`.modem-why`）。從 1_030 進來的設定流程不顯示。
   - 1_033 拔電：路由器從數據機拿不到網路（IP 位址）；美國常見的 cable modem 會綁住第一台連上的裝置，重啟數據機才能改用新的 ASUS 路由器。
@@ -564,9 +564,9 @@ Figma：[QIS_Prelink](https://www.figma.com/design/pejDijDlBnLq4IXmC5ub71/QIS_Pr
 | 1_020 | 選擇系列裝置 `series` | 選要設定的產品系列（無線路由器 / ZenWiFi / Lyra） |
 | 1_030 | 選擇 ZenWiFi 裝置 `series-zenwifi` | 從清單中點選要設定的 ZenWiFi 型號 |
 | 1_033 | 拔掉數據機電源 `modem-unplug` | 重新啟動數據機（1/2）：只拔數據機的電源線，等所有燈都熄滅，不要按 Reset |
-| 1_034 | 等待 3 分鐘（拔電）`modem-wait-off` | 未偵測到 WAN：數據機保持拔電 3 分鐘，Continue 倒數中是灰色、倒數結束變藍色，但為了 demo 灰色時也能按（真實時間倒數） |
+| 1_034 | 等待 3 分鐘（拔電）`modem-wait-off` | 未偵測到 WAN：數據機保持拔電 3 分鐘，Continue 倒數中是灰色、倒數結束變藍色，但為了 demo 灰色時也能按（前 10 秒正常、之後加速） |
 | 1_036 | 插回數據機電源 `modem-plug` | 重新啟動數據機（2/2）：把電源線插回數據機，燈號重新亮起後再繼續 |
-| 1_037 | 等待數據機啟動 3½ 分鐘 `modem-wait-start` | 未偵測到 WAN：插回電源後等 3½ 分鐘，Continue 倒數中是灰色、倒數結束變藍色，但為了 demo 灰色時也能按（真實時間倒數），按 Continue 到 1_140 |
+| 1_037 | 等待數據機啟動 3½ 分鐘 `modem-wait-start` | 未偵測到 WAN：插回電源後等 3½ 分鐘，Continue 倒數中是灰色、倒數結束變藍色，但為了 demo 灰色時也能按（前 10 秒正常、之後加速），按 Continue 到 1_140 |
 | 1_040 | 燈號顯示頁 `led-check` | 請使用者看路由器的燈，從呼吸綠燈變成恆亮藍燈才能開始設定 |
 | 1_050 | QR Code 找裝置 `qr-intro` | 說明路由器上的 QR Code 在哪裡，選擇用相機掃描或手動連 WiFi |
 | 1_051 | Setup Guide 1/5 `setup-guide` | 1_050 的 ? → Setup Guide：準備物品（數據機、路由器、電源線、網路線） |

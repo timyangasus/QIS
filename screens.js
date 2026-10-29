@@ -435,7 +435,10 @@
       </svg>`;
   }
 
-  // Wait page countdown. Demo runs the real minutes fast (a few seconds) so the flow stays quick.
+  // Wait page countdown. Demo: the first 10 s tick in real time, then the rest runs down in 3 s
+  // so the grey → blue Continue can be shown without waiting minutes
+  const REAL_SEC = 10;
+  const FAST_MS = 3000;
   function startCountdown(el, totalSec) {
     const timeEl = el.querySelector('.wait-time');
     const fill = el.querySelector('.wait-progress .progress-fill');
@@ -444,7 +447,9 @@
     const t0 = performance.now();
     let raf;
     const tick = now => {
-      const p = Math.min(1, (now - t0) / (totalSec * 1000));
+      const ms = now - t0;
+      const elapsed = ms < REAL_SEC * 1000 ? ms / 1000 : REAL_SEC + (totalSec - REAL_SEC) * (ms - REAL_SEC * 1000) / FAST_MS;
+      const p = Math.min(1, elapsed / totalSec);
       timeEl.textContent = fmt(Math.ceil(totalSec * (1 - p)));
       fill.style.width = `${Math.max(3, p * 100)}%`;
       if (p < 1) raf = requestAnimationFrame(tick);
