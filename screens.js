@@ -497,7 +497,7 @@
 
   // 1_033 / 1_036 modem power-cycle illustration, drawn in the Setup Guide style
   // 1_033 flat illustrations in the 1_080–1_110 guide style (no background circle); one per step in the list
-  // Each slide is its own <svg> with SMIL timed from 0, so showing a slide replays it via setCurrentTime(0)
+  // Each slide is its own <svg> with SMIL timed from 0; showing a slide swaps in a fresh copy so it replays from the start
   const UNPLUG_OUTLET = (x, y) => `
     <g transform="translate(${x} ${y})">
       <rect x="0" y="0" width="46" height="66" rx="9" fill="#f4f5f7" stroke="#d5d9de" stroke-width="2"/>
@@ -534,7 +534,8 @@
       </g>`;
   };
   const UNPLUG_FLOOR = '<rect x="26" y="300" width="370" height="8" rx="4" fill="#ececef"/>';
-  // 1_033 step 1: plug starts in the wall; the arrow fades in and nudges left twice, then the plug pulls out
+  // 1_033 step 1: plug starts in the wall; the arrow fades in and nudges left twice, then the plug pulls out.
+  // Then the same for the backup battery (⚡, not charge bars): arrow nudges, battery slides out of its bay and fades
   const PLUG_IN = 316, PLUG_OUT = 286;
   const plugCord = x => `M205 276 C 236 276 238 296 262 296 C 290 296 ${x - 14} 238 ${x} 238`;
   const UNPLUG_ILLUST = [
@@ -568,15 +569,21 @@
           <path d="M-26 -11 L-40 0 L-26 11" fill="none" stroke="#f5c84c" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
         </g>
       </g>
-      <g>
-        <rect x="46" y="240" width="56" height="28" rx="5" fill="#fff" stroke="#9aa2ac" stroke-width="2.5"/>
-        <rect x="102" y="248" width="5" height="12" rx="1.5" fill="#9aa2ac"/>
-        <rect x="51" y="245" width="16" height="18" rx="2" fill="#7fd36b"/>
-        <rect x="70" y="245" width="16" height="18" rx="2" fill="#7fd36b"/>
+      <g transform="translate(142 241)">
+        <animateTransform attributeName="transform" type="translate" from="142 241" to="58 241" begin="4.4s" dur=".6s" fill="freeze" calcMode="spline" keySplines=".4 0 .2 1" keyTimes="0;1"/>
+        <animate attributeName="opacity" from="1" to="0" begin="5s" dur=".4s" fill="freeze"/>
+        <rect x="0" y="0" width="38" height="24" rx="4" fill="#fff" stroke="#9aa2ac" stroke-width="2.5"/>
+        <rect x="38" y="7" width="4" height="10" rx="1.5" fill="#9aa2ac"/>
+        <path d="M21 3 L12 13.5 H18.5 L16 21 L26 10 H19.5 Z" fill="#f5c84c"/>
       </g>
-      <g transform="translate(118 216)">
-        <path d="M0 0 H-34" stroke="#f5c84c" stroke-width="7" stroke-linecap="round"/>
-        <path d="M-26 -11 L-40 0 L-26 11" fill="none" stroke="#f5c84c" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <g opacity="0">
+        <animate attributeName="opacity" from="0" to="1" begin="2.7s" dur=".3s" fill="freeze"/>
+        <animate attributeName="opacity" from="1" to="0" begin="4.2s" dur=".3s" fill="freeze"/>
+        <g transform="translate(122 214)">
+          <animateTransform attributeName="transform" type="translate" values="122 214;110 214;122 214;110 214;122 214" begin="3s" dur="1.1s" fill="freeze"/>
+          <path d="M0 0 H-34" stroke="#f5c84c" stroke-width="7" stroke-linecap="round"/>
+          <path d="M-26 -11 L-40 0 L-26 11" fill="none" stroke="#f5c84c" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
       </g>
     </svg>`,
     // 1_033 step 2: old router and extender on the modem; lights blink, plugs lift out of the strip, lights go out
@@ -895,16 +902,18 @@
         </div>
       `,
       // Picture carousel synced 1:1 with the numbered list: swipe the picture or tap a step;
-      // it also advances by itself every 5 s until the user touches it
+      // it also advances by itself every 6.5 s until the user touches it
       mount: el => {
         const track = el.querySelector('.unplug-track');
         const dots = [...el.querySelectorAll('.unplug-dots i')];
         const steps = [...el.querySelectorAll('.unplug-steps li')];
         let cur = 0;
-        const svgs = [...el.querySelectorAll('.unplug-slide svg')];
+        const slides = [...el.querySelectorAll('.unplug-slide')];
         const mark = i => {
           cur = i;
-          svgs[i].setCurrentTime(0); // replay this slide's unplug animation
+          // A fresh copy restarts SMIL everywhere (setCurrentTime alone doesn't reliably rewind in Safari)
+          const svg = slides[i].querySelector('svg');
+          svg.replaceWith(svg.cloneNode(true));
           dots.forEach((d, j) => d.classList.toggle('on', j === i));
           steps.forEach((s, j) => s.classList.toggle('on', j === i));
         };
@@ -916,7 +925,7 @@
           const i = Math.round(track.scrollLeft / track.clientWidth);
           if (i !== cur) mark(i);
         });
-        let auto = setInterval(() => show((cur + 1) % steps.length), 5000);
+        let auto = setInterval(() => show((cur + 1) % steps.length), 6500);
         const stopAuto = () => clearInterval(auto);
         track.addEventListener('pointerdown', stopAuto);
         steps.forEach((s, i) => s.addEventListener('click', () => { stopAuto(); show(i); }));
