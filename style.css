@@ -1358,7 +1358,7 @@ button {
   transition: background .2s;
 }
 
-.unplug-steps li.on { color: var(--guide-desc); }
+.unplug-steps li.on { color: #333; }
 
 .unplug-steps li.on::before { background: var(--brand); }
 

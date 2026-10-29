@@ -691,7 +691,7 @@
       <g opacity="0"><set attributeName="opacity" to="1" begin="1.9s" fill="freeze"/><rect x="169" y="264" width="10" height="12" rx="2" fill="#1f86d6"/></g>
     </svg>`,
     // 3. Power on both: arrows nudge up twice, plugs push into both power jacks with a spark,
-    // then the router LED and the modem lights come on one by one with a glow (modem keeps blinking)
+    // then the router LED and the modem lights come on one by one with a glow and keep blinking
     `<svg viewBox="0 0 422 340" width="422" height="340" aria-hidden="true">
       <defs><filter id="plugin-glow" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="4"/></filter></defs>
       ${UNPLUG_FLOOR}
@@ -703,10 +703,11 @@
       ${PLUGIN_POWER_PLUG(312, 275)}
       ${PLUGIN_SPARK(106, 254)}${PLUGIN_SPARK(312, 270)}
       <ellipse cx="126" cy="202" rx="26" ry="9" fill="#3aa0e0" opacity="0" filter="url(#plugin-glow)">
-        <animate attributeName="opacity" values="0;.9;.55" keyTimes="0;.5;1" begin="2.1s" dur=".6s" fill="freeze"/>
+        <animate attributeName="opacity" values="0;.95;.15;.95" dur="1s" begin="2.1s" repeatCount="indefinite"/>
       </ellipse>
       <rect x="110" y="199" width="32" height="6" rx="3" fill="#d0d4da">
         <set attributeName="fill" to="#3aa0e0" begin="2.1s" fill="freeze"/>
+        <animate attributeName="opacity" values="1;.35;1" dur="1s" begin="2.1s" repeatCount="indefinite"/>
       </rect>
       ${[0, 1, 2, 3].map(i => {
         const at = 2.3 + i * 0.25, y = 112 + i * 14;
