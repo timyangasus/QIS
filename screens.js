@@ -1590,7 +1590,9 @@
         </header>
 
         <div class="summary-body">
-          <img class="summary-device" src="assets/bt8-3pack.jpg" alt="ZenWiFi BT8 三入組" width="264" height="169">
+          ${FINISH === 'single'
+            ? '<img class="summary-device" src="assets/home-offline-device.jpg" alt="ZenWiFi BT8" width="139" height="169">'
+            : '<img class="summary-device" src="assets/bt8-3pack.jpg" alt="ZenWiFi BT8 三入組" width="264" height="169">'}
           ${FINISH === 'single' ? '' : '<p class="summary-done">Setup complete</p>'}
           <section class="summary-section">
             <h2>Summary</h2>
