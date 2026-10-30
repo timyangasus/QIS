@@ -613,6 +613,10 @@
   ];
 
   // 1_036 step pictures, same flat style as 1_033: ZenWiFi router on the left, modem on the right
+  // How long each slide stays before the list moves on: its animation's length plus a short beat
+  const UNPLUG_HOLDS = [6000, 3000];
+  const PLUGIN_HOLDS = [2400, 2600, 3800];
+
   const PLUGIN_ROUTER = (ledOn) => `
       <rect x="40" y="124" width="172" height="156" rx="20" fill="#fff" stroke="#d9dce1" stroke-width="2"/>
       <rect x="48" y="130" width="156" height="14" rx="7" fill="#f2f3f5"/>
@@ -950,13 +954,18 @@
     `;
   }
 
-  // Swipe the picture or tap a step/dot; it also advances by itself every `every` ms until the user touches it
-  function mountStepCarousel(el, every) {
+  // Swipe the picture or tap a step/dot; it also advances by itself until the user touches it.
+  // `holds` is how long each slide stays (ms), timed to its animation, counted from when it shows
+  function mountStepCarousel(el, holds) {
     const track = el.querySelector('.unplug-track');
     const dots = [...el.querySelectorAll('.unplug-dots i')];
     const steps = [...el.querySelectorAll('.unplug-steps li')];
     const slides = [...el.querySelectorAll('.unplug-slide')];
-    let cur = 0;
+    let cur = 0, auto = true, timer;
+    const schedule = () => {
+      clearTimeout(timer);
+      if (auto) timer = setTimeout(() => show((cur + 1) % steps.length), holds[cur]);
+    };
     const mark = i => {
       cur = i;
       // A fresh copy restarts SMIL everywhere (setCurrentTime alone doesn't reliably rewind in Safari)
@@ -964,6 +973,7 @@
       svg.replaceWith(svg.cloneNode(true));
       dots.forEach((d, j) => d.classList.toggle('on', j === i));
       steps.forEach((s, j) => s.classList.toggle('on', j === i));
+      schedule();
     };
     const show = i => {
       if (i === cur) return mark(i);
@@ -973,8 +983,8 @@
       const i = Math.round(track.scrollLeft / track.clientWidth);
       if (i !== cur) mark(i);
     });
-    const auto = setInterval(() => show((cur + 1) % steps.length), every);
-    const stopAuto = () => clearInterval(auto);
+    schedule();
+    const stopAuto = () => { auto = false; clearTimeout(timer); };
     track.addEventListener('pointerdown', stopAuto);
     steps.forEach((s, i) => s.addEventListener('click', () => { stopAuto(); show(i); }));
     dots.forEach((d, i) => d.addEventListener('click', () => { stopAuto(); show(i); }));
@@ -1191,7 +1201,7 @@
         ],
         next: 'modem-plug',
       }),
-      mount: el => MODEM_FLOW === 'wan' ? null : mountStepCarousel(el, 6500),
+      mount: el => MODEM_FLOW === 'wan' ? null : mountStepCarousel(el, UNPLUG_HOLDS),
     },
     {
       id: 'modem-plug',
@@ -1227,7 +1237,7 @@
         ],
         next: 'led-check',
       }),
-      mount: el => MODEM_FLOW === 'wan' ? null : mountStepCarousel(el, 5000),
+      mount: el => MODEM_FLOW === 'wan' ? null : mountStepCarousel(el, PLUGIN_HOLDS),
     },
     {
       id: 'modem-wait-off',
@@ -1378,7 +1388,7 @@
         next: 'setup-guide-3',
         help: false,
       }),
-      mount: el => mountStepCarousel(el, 6500),
+      mount: el => mountStepCarousel(el, UNPLUG_HOLDS),
     },
     {
       id: 'setup-guide-3',
@@ -1398,7 +1408,7 @@
         next: 'setup-guide-4',
         help: false,
       }),
-      mount: el => mountStepCarousel(el, 5000),
+      mount: el => mountStepCarousel(el, PLUGIN_HOLDS),
     },
     {
       id: 'setup-guide-4',
@@ -1418,7 +1428,7 @@
         label: 'Next',
         help: false,
       }),
-      mount: el => mountStepCarousel(el, 6000),
+      mount: el => mountStepCarousel(el, [6000, 6000]),
     },
     {
       id: 'setup-guide-5',
